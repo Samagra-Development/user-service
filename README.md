@@ -1,4 +1,5 @@
 [![Node.js CI](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml/badge.svg)](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml)
+![Coverage](./badges/coverage-global%20coverage.svg)
 
 ## Description
 
