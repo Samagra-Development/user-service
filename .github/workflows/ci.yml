@@ -27,7 +27,7 @@ jobs:
       - name: Tests
         run: yarn test:cov
       - name: Generating coverage badge
-        uses: actions/jest-badges-action@latest
+        uses: jpb06/jest-badges-action@v1.6.0
         with:
           branches: master
     
