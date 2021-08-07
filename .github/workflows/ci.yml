@@ -24,3 +24,10 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn test
+      - name: Tests
+        run: yarn test:cov
+      - name: Generating coverage badge
+        uses: actions/jest-badges-action@latest
+        with:
+          branches: master
+    
