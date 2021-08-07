@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
-        "nestjs"
+        "fusionauth",
+        "nestjs",
+        "prebuild"
     ]
 }
