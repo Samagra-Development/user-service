@@ -11,6 +11,8 @@
 $ yarn install
 ```
 
+_Note_: This project is built on VSCode and would be developed only with this IDE in mind. The [.vscode directory](./.vscode) will be kept updated with all the VSCode magic 🧙‍♂️.
+
 ## Running the app
 
 ```bash
