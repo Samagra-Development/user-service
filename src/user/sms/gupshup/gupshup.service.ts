@@ -7,6 +7,7 @@ import {
   SMSResponse,
   SMSResponseStatus,
   SMSType,
+  TrackResponse,
   TrackStatus,
 } from '../sms.interface';
 
@@ -60,8 +61,13 @@ export class GupshupService extends SmsService implements SMS {
     throw new Error('Method not implemented.');
   }
 
-  track(arg: any): Promise<TrackStatus> {
-    throw new Error('Method not implemented.');
+  track(data: SMSData): Promise<SMSResponse> {
+    if (!data) {
+      throw new Error('Data cannot be null');
+    }
+    this.data = data;
+    if (this.data.type === SMSType.otp) return this.verifyOTP(data);
+    else return this.doRequest();
   }
 
   doOTPRequest(data: SMSData): Promise<OTPResponse> {
@@ -106,9 +112,48 @@ export class GupshupService extends SmsService implements SMS {
       });
   }
 
-  verifyOTP(data: SMSData): Promise<OTPResponse> {
-    
-    return null;
+  verifyOTP(data: SMSData): Promise<TrackResponse> {
+    console.log({ data });
+    const options = {
+      searchParams: {
+        ...this.otpApiConstants,
+        ...this.auth,
+        method: this.otpAuthMethod,
+        msg: this.getOTPTemplate(),
+        phone_no: data.phone,
+        otp_code: data.params.otp,
+      },
+    };
+    const url = this.baseURL + '' + this.path;
+    const status: TrackResponse = {} as TrackResponse;
+    status.provider = SMSProvider.gupshup;
+    status.phone = data.phone;
+
+    return got
+      .get(url, options)
+      .then((response): OTPResponse => {
+        status.networkResponseCode = 200;
+        const r = this.parseResponse(response.body);
+        status.messageID = r.messageID;
+        status.error = r.error;
+        status.providerResponseCode = r.providerResponseCode;
+        status.providerSuccessResponse = r.providerSuccessResponse;
+        status.status = r.status;
+        return status;
+      })
+      .catch((e: Error): OTPResponse => {
+        const error: SMSError = {
+          errorText: `Uncaught Exception :: ${e.message}`,
+          errorCode: 'CUSTOM ERROR',
+        };
+        status.networkResponseCode = 200;
+        status.messageID = null;
+        status.error = error;
+        status.providerResponseCode = null;
+        status.providerSuccessResponse = null;
+        status.status = SMSResponseStatus.failure;
+        return status;
+      });
   }
 
   getOTPTemplate() {
@@ -116,6 +161,7 @@ export class GupshupService extends SmsService implements SMS {
   }
 
   parseResponse(response: string) {
+    console.log({ response });
     const responseData: string[] = response.split('|').map((s) => s.trim());
     try {
       if (responseData[0] === 'success') {
@@ -141,7 +187,7 @@ export class GupshupService extends SmsService implements SMS {
       }
     } catch (e) {
       const error: SMSError = {
-        errorText: `Gupshup response could not be parsed :: ${e.message}`,
+        errorText: `Gupshup response could not be parsed :: ${e.message}; Provider Response - ${response}`,
         errorCode: 'CUSTOM ERROR',
       };
       return {

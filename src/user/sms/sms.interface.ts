@@ -34,7 +34,7 @@ export type SMSData = {
 
 export interface SMS {
   send(data: SMSData): Promise<SMSResponse>;
-  track(data: any): Promise<TrackStatus>;
+  track(data: SMSData): Promise<SMSResponse>;
 }
 
 /**
@@ -56,5 +56,9 @@ export interface SMSResponse {
 }
 
 export interface OTPResponse extends SMSResponse {
+  test: string;
+}
+
+export interface TrackResponse extends SMSResponse {
   test: string;
 }

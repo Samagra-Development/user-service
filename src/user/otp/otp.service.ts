@@ -1,4 +1,9 @@
-import { SMSData, SMSType } from '../sms/sms.interface';
+import {
+  SMSData,
+  SMSResponse,
+  SMSType,
+  TrackStatus,
+} from '../sms/sms.interface';
 
 import { Injectable } from '@nestjs/common';
 import { SmsService } from '../sms/sms.service';
@@ -9,17 +14,25 @@ export class OtpService {
 
   constructor(private readonly smsService: SmsService) {}
 
-  verifyOTP(): boolean | PromiseLike<boolean> {
-    return Promise.resolve(true);
-  }
-
-  sendOTP(): boolean | PromiseLike<boolean> {
+  verifyOTP({ phone, otp }): Promise<SMSResponse> {
     const smsData: SMSData = {
-      phone: '919415787824',
+      phone,
       template: null,
       type: SMSType.otp,
       params: {
-        otp: OtpService.generateOtp(),
+        otp,
+        expiry: this.expiry,
+      },
+    };
+    return this.smsService.track(smsData);
+  }
+
+  sendOTP(phone): Promise<SMSResponse> {
+    const smsData: SMSData = {
+      phone,
+      template: null,
+      type: SMSType.otp,
+      params: {
         expiry: this.expiry,
       },
     };

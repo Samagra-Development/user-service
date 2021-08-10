@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
+import { SMS, SMSResponse, TrackStatus } from './sms/sms.interface';
 import { SmsService } from './sms/sms.service';
 
 @Controller('user')
@@ -20,14 +21,14 @@ export class UserController {
   }
 
   @Get('/sendOTP')
-  async sendOTP(): Promise<any> {
-    const status: boolean = await this.otpService.sendOTP();
+  async sendOTP(@Query('phone') phone): Promise<any> {
+    const status: SMSResponse = await this.otpService.sendOTP(phone);
     return { status };
   }
 
   @Get('/verifyOTP')
-  async verifyOTP(): Promise<any> {
-    const status: boolean = await this.otpService.verifyOTP();
+  async verifyOTP(@Query('phone') phone, @Query('otp') otp): Promise<any> {
+    const status: SMSResponse = await this.otpService.verifyOTP({ phone, otp });
     return { status };
   }
 }
