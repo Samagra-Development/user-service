@@ -8,7 +8,6 @@ import {
   SMSResponseStatus,
   SMSType,
   TrackResponse,
-  TrackStatus,
 } from '../sms.interface';
 
 import { Injectable } from '@nestjs/common';
