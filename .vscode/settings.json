@@ -5,6 +5,12 @@
         "fusionauth",
         "nestjs",
         "prebuild",
-        "samwad"
-    ]
+        "samwad",
+        "userid"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+        "source.fixAll.tslint": true,
+        "source.fixAll.stylelint": true
+      }
 }

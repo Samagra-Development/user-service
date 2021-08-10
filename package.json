@@ -18,15 +18,18 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:dev": "jest --watch --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@fusionauth/typescript-client": "^1.29.1",
     "@nestjs/common": "^8.0.0",
+    "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@prisma/client": "2.28.0",
+    "got": "^11.8.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
@@ -71,7 +74,8 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "coverageReporters": [
-      "json-summary"
+      "json-summary",
+      "text"
     ]
   }
 }
