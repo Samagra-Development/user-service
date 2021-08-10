@@ -1,12 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { GupshupService } from '../sms/gupshup/gupshup.service';
 import { OtpService } from './otp.service';
+
+const gupshupFactory = {
+  provide: GupshupService,
+  useFactory: () => {
+    return new GupshupService(
+      process.env.GUPSHUP_USERNAME,
+      process.env.GUPSHUP_PASSWORD,
+      process.env.GUPSHUP_BASEURL,
+    );
+  },
+  inject: [],
+};
+
+const otpServiceFactory = {
+  provide: OtpService,
+  useFactory: () => {
+    return new OtpService(gupshupFactory.useFactory());
+  },
+  inject: [],
+};
 
 describe('OtpService', () => {
   let service: OtpService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [OtpService],
+      providers: [otpServiceFactory],
     }).compile();
 
     service = module.get<OtpService>(OtpService);
