@@ -4,6 +4,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMS, SMSResponse, TrackStatus } from './sms/sms.interface';
 import { SmsService } from './sms/sms.service';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
@@ -11,6 +12,7 @@ export class UserController {
     private readonly fusionAuthService: FusionauthService,
     private readonly otpService: OtpService,
     private readonly smsService: SmsService,
+    private readonly userService: UserService,
   ) {}
 
   @Get('/verify')
@@ -29,6 +31,12 @@ export class UserController {
   @Get('/verifyOTP')
   async verifyOTP(@Query('phone') phone, @Query('otp') otp): Promise<any> {
     const status: SMSResponse = await this.otpService.verifyOTP({ phone, otp });
+    return { status };
+  }
+
+  @Get('/signup')
+  async signup(): Promise<any> {
+    const status: SignupResponse = await this.userService.signup();
     return { status };
   }
 }
