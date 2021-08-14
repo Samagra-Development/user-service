@@ -9,22 +9,23 @@ const ajv = new Ajv();
 ajv.addSchema(addressSchema, 'address');
 ajv.addSchema(educationSchema, 'education');
 
+const createCopy = (obj) => JSON.parse(JSON.stringify(obj));
+
 describe('JSON-Schema Address', () => {
+  const validate = ajv.compile(addressSchema);
+
   it('should parse address correctly', () => {
-    const validate = ajv.compile(addressSchema);
     const valid = validate(correctAddress);
     expect(valid).toBeTruthy();
   });
 
   it('should parse null/undefined address incorrectly', () => {
-    const validate = ajv.compile(addressSchema);
     expect(validate({})).toBeFalsy();
     expect(validate(undefined)).toBeFalsy();
   });
 
   it('should fail parsing address with missing fields', () => {
-    const validate = ajv.compile(addressSchema);
-    const correctAddressCopy = JSON.parse(JSON.stringify(correctAddress));
+    const correctAddressCopy = createCopy(correctAddress);
     delete correctAddressCopy.city;
     const valid = validate(correctAddressCopy);
     expect(validate.errors[0].params).toHaveProperty('missingProperty');
@@ -37,8 +38,7 @@ describe('JSON-Schema Education', () => {
   const validate = ajv.compile(educationSchema);
 
   it('should parse Education correctly', () => {
-    const valid = validate(correctEducation);
-    expect(valid).toBeTruthy();
+    expect(validate(correctEducation)).toBeTruthy();
   });
 
   it('should parse null/undefined Education incorrectly', () => {
@@ -47,7 +47,7 @@ describe('JSON-Schema Education', () => {
   });
 
   it('should fail parsing Education with missing fields in address - city', () => {
-    const correctEducationCopy = JSON.parse(JSON.stringify(correctEducation));
+    const correctEducationCopy = createCopy(correctEducation);
     delete correctEducationCopy.address.city;
     const valid = validate(correctEducationCopy);
     expect(validate.errors[0].params).toHaveProperty('missingProperty');
@@ -55,27 +55,3 @@ describe('JSON-Schema Education', () => {
     expect(valid).toBeFalsy();
   });
 });
-
-describe('JSON-Schema Education', () => {
-  const validate = ajv.compile(educationSchema);
-
-  it('should parse Education correctly', () => {
-    const valid = validate(correctEducation);
-    expect(valid).toBeTruthy();
-  });
-
-  it('should parse null/undefined Education incorrectly', () => {
-    expect(validate({})).toBeFalsy();
-    expect(validate(undefined)).toBeFalsy();
-  });
-
-  it('should fail parsing Education with missing fields in address - city', () => {
-    const correctEducationCopy = JSON.parse(JSON.stringify(correctEducation));
-    delete correctEducationCopy.address.city;
-    const valid = validate(correctEducationCopy);
-    expect(validate.errors[0].params).toHaveProperty('missingProperty');
-    expect(validate.errors[0].params.missingProperty).toEqual('city');
-    expect(valid).toBeFalsy();
-  });
-});
-
