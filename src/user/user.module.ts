@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { OtpService } from './otp/otp.service';
 import { SmsService } from './sms/sms.service';
 import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 const gupshupFactory = {
   provide: 'OtpService',
@@ -26,7 +27,7 @@ const otpServiceFactory = {
 };
 
 @Module({
-  providers: [FusionauthService, otpServiceFactory, SmsService],
+  providers: [FusionauthService, otpServiceFactory, SmsService, UserService],
   controllers: [UserController],
 })
 export class UserModule {}

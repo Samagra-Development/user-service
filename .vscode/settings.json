@@ -1,19 +1,32 @@
 {
-    "cSpell.words": [
-        "artiomtr",
-        "e",
-        "fusionauth",
-        "nestjs",
-        "prebuild",
-        "samwad",
-        "userid"
-    ],
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true,
-        "source.fixAll.tslint": true,
-        "source.fixAll.stylelint": true
-      },
-      "files.associations": {
-        ".env.sample": "dotenv",
-      }
+  "cSpell.words": [
+    "Bhola",
+    "Gupshup",
+    "Umang",
+    "artiomtr",
+    "e",
+    "fusionauth",
+    "nestjs",
+    "prebuild",
+    "prismix",
+    "samwad",
+    "signup",
+    "udise",
+    "userid"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.tslint": true,
+    "source.fixAll.stylelint": true
+  },
+  "files.associations": {
+    ".env.sample": "dotenv"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": false
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
