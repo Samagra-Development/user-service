@@ -8,7 +8,6 @@ import FusionAuthClient, {
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
-import { auth } from 'googleapis/build/src/apis/abusiveexperiencereport';
 
 @Injectable()
 export class FusionauthService {
