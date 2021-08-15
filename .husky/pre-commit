@@ -1,9 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-for ARG in "${@}"; do
-    if [ "${ARG}" = "-m" ]; then
-        echo "Hey! Don’t do that!" 1>&2
-        exit 1
-    fi
-done
+npm test
