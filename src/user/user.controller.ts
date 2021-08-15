@@ -1,9 +1,10 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMS, SMSResponse, TrackStatus } from './sms/sms.interface';
 import { SmsService } from './sms/sms.service';
+import { SignupResponse } from './user.interface';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -34,9 +35,9 @@ export class UserController {
     return { status };
   }
 
-  @Get('/signup')
-  async signup(): Promise<any> {
-    const status: SignupResponse = await this.userService.signup();
-    return { status };
+  @Post('/signup')
+  async signup(@Body() user: any): Promise<SignupResponse> {
+    const status: SignupResponse = await this.userService.signup(user);
+    return status;
   }
 }

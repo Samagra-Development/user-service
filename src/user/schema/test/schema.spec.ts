@@ -5,13 +5,12 @@ import { correctAddress, correctEducation } from './data';
 
 import Ajv from 'ajv';
 
-const ajv = new Ajv();
-ajv.addSchema(addressSchema, 'address');
-ajv.addSchema(educationSchema, 'education');
-
 const createCopy = (obj) => JSON.parse(JSON.stringify(obj));
 
 describe('JSON-Schema Address', () => {
+  const ajv = new Ajv();
+  ajv.addSchema(addressSchema, 'address');
+  ajv.addSchema(educationSchema, 'education');
   const validate = ajv.compile(addressSchema);
 
   it('should parse address correctly', () => {
@@ -35,6 +34,9 @@ describe('JSON-Schema Address', () => {
 });
 
 describe('JSON-Schema Education', () => {
+  const ajv = new Ajv();
+  ajv.addSchema(addressSchema, 'address');
+  ajv.addSchema(educationSchema, 'education');
   const validate = ajv.compile(educationSchema);
 
   it('should parse Education correctly', () => {

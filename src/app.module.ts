@@ -6,6 +6,7 @@ import { FusionauthService } from './user/fusionauth/fusionauth.service';
 import { GupshupService } from './user/sms/gupshup/gupshup.service';
 import { Module } from '@nestjs/common';
 import { OtpService } from './user/otp/otp.service';
+import { UserDBService } from './user/user-db/user-db.service';
 import { UserModule } from './user/user.module';
 
 const gupshupFactory = {
@@ -40,6 +41,7 @@ const otpServiceFactory = {
       provide: 'SmsService',
       useClass: CdacService,
     },
+    UserDBService,
   ],
 })
 export class AppModule {}
