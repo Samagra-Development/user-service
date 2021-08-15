@@ -1,6 +1,8 @@
 [![Node.js CI](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml)
 ![Coverage](./badges/coverage-global%20coverage.svg)
 
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) service for managing eSamwad Users.
