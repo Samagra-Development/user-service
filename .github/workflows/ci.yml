@@ -28,10 +28,10 @@ jobs:
       - name: Tests
         run: yarn test:cov
       
-      - name: Generating coverage badge
-        uses: jpb06/jest-badges-action@v1.6.0
-        with:
-          branches: master
+      # - name: Generating coverage badge
+      #   uses: jpb06/jest-badges-action@v1.6.0
+      #   with:
+      #     branches: master
       
       - name: Coveralls
         uses: coverallsapp/github-action@master

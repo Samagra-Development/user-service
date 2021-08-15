@@ -1,5 +1,5 @@
 [![Node.js CI](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml)
-![Coverage](./badges/coverage-global%20coverage.svg)
+[![Coverage Status](https://coveralls.io/repos/github/Samagra-Development/esamwad-user-service/badge.svg?branch=master)](https://coveralls.io/github/Samagra-Development/esamwad-user-service?branch=master)
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
