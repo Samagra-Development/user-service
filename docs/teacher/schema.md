@@ -77,7 +77,7 @@
     ],
     // Inside DB
     "userID": "",
-    "udise": "2020900401",
+    "school": 34871,
     "subjects": [
       { "name": "Hindi", "grade": 5 },
       { "name": "Hindi", "grade": 6 }
@@ -86,7 +86,7 @@
     "joiningData": "31-03-2000",
     "approved": false,
     "cadre": "TGT/Master",
-    "designation":
+    "designation": ""
   }
 }
 ```

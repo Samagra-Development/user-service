@@ -16,3 +16,7 @@ jobs:
                   threshold: 80
                   package-manager: yarn
                   test-script: yarn run test:cov
+            - name: SonarCloud Scan
+              uses: sonarsource/sonarcloud-github-action@master
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

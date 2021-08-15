@@ -762,6 +762,7 @@ model school {
   school_grade                                school_grade[]
   student                                     student[]
   subject_submission                          subject_submission[]
+  teacher                                     teacher[]
 
   @@index([location_id], name: "school_location_id_429307ea")
 }
@@ -1142,6 +1143,7 @@ model subject {
   student_subject                student_subject[]
   student_submission             student_submission[]
   subject_submission             subject_submission[]
+  teacher_subjects               teacher_subjects[]
 
   @@unique([name, grade_number], name: "subject_name_grade_number_a273f33e_uniq")
 }
@@ -1190,4 +1192,37 @@ model submission_summary {
   assessment    assessment? @relation(fields: [assessment_id], references: [id])
 
   @@index([assessment_id], name: "submission_summary_assessment_id_5985453c")
+}
+
+model teacher {
+  id               Int                @id @default(autoincrement())
+  created          DateTime?          @db.Timestamptz(6)
+  updated          DateTime?          @db.Timestamptz(6)
+  user_id          String             @db.Uuid
+  employment       String             @db.VarChar(17)
+  joining_date     DateTime           @db.Date
+  account_status   String             @db.VarChar(10)
+  cadre            String             @db.VarChar(30)
+  designation      String             @db.VarChar(50)
+  school_id        Int?
+  parent_id        Int?
+  teacher          teacher?           @relation("teacherToteacher_parent_id", fields: [parent_id], references: [id])
+  school           school?            @relation(fields: [school_id], references: [id])
+  other_teacher    teacher[]          @relation("teacherToteacher_parent_id")
+  teacher_subjects teacher_subjects[]
+
+  @@index([school_id], name: "server_teacher_school_id_81199ae6")
+  @@index([parent_id], name: "teacher_parent_id_2a1680a7")
+}
+
+model teacher_subjects {
+  id         Int     @id @default(autoincrement())
+  teacher_id Int
+  subject_id Int
+  subject    subject @relation(fields: [subject_id], references: [id])
+  teacher    teacher @relation(fields: [teacher_id], references: [id])
+
+  @@unique([teacher_id, subject_id], name: "server_teacher_subjects_teacher_id_subject_id_3e14a2f9_uniq")
+  @@index([subject_id], name: "server_teacher_subjects_subject_id_9fb2c7a9")
+  @@index([teacher_id], name: "server_teacher_subjects_teacher_id_bd301b11")
 }

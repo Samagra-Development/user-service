@@ -1,17 +1,17 @@
 import { UUID } from '@fusionauth/typescript-client';
 import { v4 as uuidv4 } from 'uuid';
 
-enum ResponseStatus {
+export enum ResponseStatus {
   success = 'Success',
   failure = 'Failure',
 }
 
-enum ResponseCode {
+export enum ResponseCode {
   OK = 'OK',
   FAILURE = 'FAILURE',
 }
 
-enum AccountStatus {
+export enum AccountStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   DENIED = 'DENIED',

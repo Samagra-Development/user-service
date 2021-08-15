@@ -214,7 +214,7 @@
             }
           ],
           "userID": "",
-          "udise": "2020900401",
+          "school": 12345,
           "subjects": [
             {
               "name": "Hindi",
@@ -233,7 +233,6 @@
         }
       ],
       "required": [
-        "id",
         "username",
         "password",
         "dateOfRetirement",
@@ -246,12 +245,10 @@
         "gender",
         "address",
         "education",
-        "userID",
-        "udise",
+        "school",
         "subjects",
         "employment",
         "joiningData",
-        "approved",
         "cadre",
         "designation"
       ],
@@ -459,13 +456,13 @@
           "default": "",
           "examples": [""]
         },
-        "udise": {
-          "$id": "#/properties/request/properties/udise",
-          "type": "string",
+        "school": {
+          "$id": "#/properties/request/properties/school",
+          "type": "integer",
           "title": "The udise schema",
           "description": "An explanation about the purpose of this instance.",
           "default": "",
-          "examples": ["2020900401"]
+          "examples": [12345]
         },
         "subjects": {
           "$id": "#/properties/request/properties/subjects",
@@ -476,12 +473,12 @@
           "examples": [
             [
               {
-                "name": "Hindi",
-                "grade": 5
+                "name": "Maths",
+                "grade_number": 5
               },
               {
-                "name": "Hindi",
-                "grade": 6
+                "name": "History",
+                "grade_number": 5
               }
             ]
           ],
@@ -497,11 +494,11 @@
                 "default": {},
                 "examples": [
                   {
-                    "name": "Hindi",
-                    "grade": 5
+                    "name": "Maths",
+                    "grade_number": 5
                   }
                 ],
-                "required": ["name", "grade"],
+                "required": ["name", "grade_number"],
                 "properties": {
                   "name": {
                     "$id": "#/properties/request/properties/subjects/items/anyOf/0/properties/name",
@@ -509,12 +506,12 @@
                     "title": "The name schema",
                     "description": "An explanation about the purpose of this instance.",
                     "default": "",
-                    "examples": ["Hindi"]
+                    "examples": ["Maths"]
                   },
-                  "grade": {
-                    "$id": "#/properties/request/properties/subjects/items/anyOf/0/properties/grade",
+                  "grade_number": {
+                    "$id": "#/properties/request/properties/subjects/items/anyOf/0/properties/grade_number",
                     "type": "integer",
-                    "title": "The grade schema",
+                    "title": "The grade_number schema",
                     "description": "An explanation about the purpose of this instance.",
                     "default": 0,
                     "examples": [5]
