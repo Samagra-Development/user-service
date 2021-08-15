@@ -41,6 +41,7 @@ export interface IGenericResponse {
 export interface SignupResult {
   responseMsg: string;
   accountStatus: AccountStatus;
+  data?: any;
 }
 
 export class SignupResponse implements IGenericResponse {

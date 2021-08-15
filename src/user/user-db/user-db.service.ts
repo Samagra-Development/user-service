@@ -8,7 +8,6 @@ export class UserDBService {
   teacherPartUrl = process.env.ES_TEACHER_PART;
 
   persist(dbObj: any): Promise<boolean> {
-    console.log(dbObj);
     return got
       .post(this.url + this.teacherPartUrl, { json: dbObj })
       .then((response: Response): boolean => {

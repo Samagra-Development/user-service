@@ -63,7 +63,6 @@ export class UserService {
 
       // Add teacher to DB
       const dbObj: any = this.getDBParams(user);
-      console.log({ dbObj });
       dbObj.user_id = statusFA;
 
       //TODO: Remove hacks
@@ -79,6 +78,9 @@ export class UserService {
         response.result = {
           responseMsg: 'User Saved Successfully',
           accountStatus: AccountStatus.PENDING,
+          data: {
+            userId: statusFA,
+          },
         };
       }
     } else {
