@@ -1,5 +1,6 @@
 [![Node.js CI](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Samagra-Development/esamwad-user-service/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Samagra-Development/esamwad-user-service/badge.svg?branch=master)](https://coveralls.io/github/Samagra-Development/esamwad-user-service?branch=master)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Samagra-Development_esamwad-user-service&metric=code_smells)](https://sonarcloud.io/dashboard?id=Samagra-Development_esamwad-user-service)
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
