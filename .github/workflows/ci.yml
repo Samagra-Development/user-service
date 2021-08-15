@@ -26,8 +26,7 @@ jobs:
       - run: yarn test
       - name: Tests
         run: yarn test:cov
-      - name: Generating coverage badge
-        uses: jpb06/jest-badges-action@v1.6.0
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
         with:
-          branches: master
-    
+          github-token: ${{ secrets.GITHUB_TOKEN }}

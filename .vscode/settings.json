@@ -12,7 +12,8 @@
     "samwad",
     "signup",
     "udise",
-    "userid"
+    "userid",
+    "uuidv"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true,
