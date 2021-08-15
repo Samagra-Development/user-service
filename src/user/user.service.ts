@@ -59,6 +59,7 @@ export class UserService {
     if (isValid) {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
+      authObj.school = user.request.school;
       const statusFA: UUID = await this.fusionAuthService.persist(authObj);
 
       // Add teacher to DB

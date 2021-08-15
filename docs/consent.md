@@ -88,19 +88,43 @@
 
 ---
 
+### Definition
+
+1. **User** — any person or entity who wishes to share data about them for availing a service.
+2. **Data Provider (DP)** — Any entity which has data about users in their system that can either be given to the user (whose data it is) or to another entity based on the consented request of the user.
+3. **Data Consumer (DC)** — Any entity which accesses data for providing a service to the user.
+4. **Consent Collector (CC)** — An entity that interacts with users and obtains consent from them for any intended access to data. This role may be played by the Data Consumer (in most cases) or the Data Provider or could be another service provider.
+
 ### Modules
 
+0. Consent Manager (alias Consent Collector)
+   - Store of all the consents at one place (first XML)
+   - APIs
+     - Create Consent Request - `/consent/create`
+     - Get Consent Request Status - `/consent/status`
+     - Get Consent Artifact - `/consent/:id`
+     - Accept Consent - `/consent/:id/accept`
+     - Deny Consent - `/consent/:id/deny`
+     - Revoke Consent - `/consent/:id/revoke`
 1. Notification Manager
    - Sends notifications
-   - Accepts
-2. Signature/Token Manager
+   - APIs - Internal
+     - Send Consent Notification - `/notification/consent/:id/send`. Sends notification to both
+2. Auth + Signature/Token Manager
    - Creates tokens and certificates
    - Deletes them once the job is done
    - Revokes tokens
+   - APIs [Not adding the digital identity APIs]
+     - Generate token for consent - `/token/consent/:id/generate`
+     - Revoke all tokens for consent - `/token/consent/:id/revoke`
 3. Data Manager
    - Manages how to interact with diverse data structures through interfaces
-   - Enforces the consent
+   - Enforcement of the consent happens on the API end (The person managing the API) - Example Hasura
 4. Logger
+
+### Notes
+
+1. Currently there is no way repeats can be handled using existing tokens.
 
 ---
 
