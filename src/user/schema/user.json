@@ -395,7 +395,7 @@
               {
                 "$id": "#/properties/request/properties/address/items/anyOf/0",
                 "type": "object",
-                "$ref": "file:src/user/schema/address.json"
+                "$ref": "address.json"
               }
             ]
           }
@@ -448,7 +448,7 @@
           ],
           "additionalItems": true,
           "items": {
-            "$ref": "file:src/user/schema/education.json"
+            "$ref": "education.json"
           }
         },
         "userID": {
