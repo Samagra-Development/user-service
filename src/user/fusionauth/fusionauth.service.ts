@@ -4,10 +4,14 @@ import FusionAuthClient, {
   UUID,
   UserRegistration,
   UserResponse,
+  LoginRequest,
+  LoginResponse,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
+import { response } from 'express';
+import { SignupResponse } from '../user.interface';
 
 @Injectable()
 export class FusionauthService {
@@ -77,6 +81,19 @@ export class FusionauthService {
           });
       });
   }
+
+  login(user: LoginRequest): PromiseLike<any> {
+    return this.fusionauthClient
+      .login(user)
+      .then((response: ClientResponse<LoginResponse>): any => {
+        return response.response;
+      });
+  }
+
+  update(user: any): Promise<SignupResponse> {
+    throw new Error('Method not implemented.');
+  }
+
   verifyUsernamePhoneCombination(): Promise<boolean> {
     return Promise.resolve(true);
   }

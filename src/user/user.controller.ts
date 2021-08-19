@@ -40,4 +40,16 @@ export class UserController {
     const status: SignupResponse = await this.userService.signup(user);
     return status;
   }
+
+  @Post('/login')
+  async login(@Body() user: any): Promise<SignupResponse> {
+    const status: SignupResponse = await this.userService.login(user);
+    return status;
+  }
+
+  @Post('/update')
+  async update(@Body() user: any): Promise<SignupResponse> {
+    const status: SignupResponse = await this.userService.update(user);
+    return status;
+  }
 }

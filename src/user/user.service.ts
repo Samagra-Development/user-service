@@ -56,6 +56,20 @@ export class UserService {
     const isValid = this.verifyUserObject(user);
     const response: SignupResponse = new SignupResponse().init(uuidv4());
 
+    const schoolValidity = await this.userDBService.getSchool(
+      user.request.school,
+    );
+
+    if (!schoolValidity.status) {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'SIGNUP_DB_FAIL';
+      response.params.errMsg = 'School does not exist';
+      response.params.status = ResponseStatus.failure;
+      return response;
+    } else {
+      user.request.school = schoolValidity.id;
+    }
+
     if (isValid) {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
@@ -98,6 +112,39 @@ export class UserService {
       }
     }
     return response;
+  }
+
+  update(user: any): PromiseLike<SignupResponse> {
+    return this.fusionAuthService
+      .update(user)
+      .then((s) => {
+        return this.userDBService
+          .update(user)
+          .then((s2) => s2)
+          .catch((e) => {
+            console.error(e);
+            //rollback
+            return null;
+          });
+      })
+      .catch((e) => {
+        console.error(e);
+        //rollback
+        return null;
+      });
+  }
+
+  login(user: any): PromiseLike<SignupResponse> {
+    console.log(this.fusionAuthService);
+    return this.fusionAuthService.login(user).then((fusionAuthUser) => {
+      console.log(fusionAuthUser.user.id);
+      return this.userDBService
+        .getUserById(fusionAuthUser.user.id)
+        .then((userDBResponse) => {
+          fusionAuthUser.user.schoolResponse = userDBResponse;
+          return fusionAuthUser;
+        });
+    });
   }
 
   getAuthParams(user: any) {
