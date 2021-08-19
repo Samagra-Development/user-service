@@ -133,3 +133,4 @@
 1. [Meity Doc](http://dla.gov.in/sites/default/files/pdf/MeitY-Consent-Tech-Framework%20v1.1.pdf) from which this is blatantly copied.
 2. [Digital Locker](http://dla.gov.in/sites/default/files/pdf/DigitalLockerTechnologyFramework%20v1.1.pdf)
 3. [Sample Flows](https://projecteka.github.io/content/sequencediagrams.html)
+4. https://app.diagrams.net/#G1IljJY-VUlNITYYP3iQppmodLbjMJsvLO
