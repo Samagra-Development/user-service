@@ -30,8 +30,15 @@ export class FusionauthService {
     );
   }
 
-  delete(userId: UUID): any {
-    return this.fusionauthClient.deleteUser(userId);
+  delete(userId: UUID): Promise<any> {
+    return this.fusionauthClient
+      .deleteUser(userId)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {

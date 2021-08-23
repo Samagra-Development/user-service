@@ -27,6 +27,7 @@ export interface ResponseParams {
   err: string;
   status: ResponseStatus;
   errMsg: string;
+  customMsg?: string;
 }
 
 export interface IGenericResponse {

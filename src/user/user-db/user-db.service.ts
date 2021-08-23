@@ -1,7 +1,6 @@
 import got, { Response } from 'got/dist/source';
 
 import { Injectable } from '@nestjs/common';
-import { SignupResponse } from '../user.interface';
 
 @Injectable()
 export class UserDBService {
@@ -19,6 +18,7 @@ export class UserDBService {
     return got
       .post(this.url + this.teacherPartUrl, { json: dbObj })
       .then((resp: Response): { status: boolean; errors: any } => {
+        console.log('Response body', resp.body);
         if (resp.statusCode === 201) {
           return {
             status: true,
@@ -32,7 +32,7 @@ export class UserDBService {
         }
       })
       .catch((e): { status: boolean; errors: string } => {
-        console.log(e.response.body);
+        console.log('Inside error', e.response.body);
         return {
           status: false,
           errors: e.response.body,

@@ -97,8 +97,9 @@ export class UserService {
         delete dbObj.approved;
         dbObj.joining_date = dbObj.joiningData;
         delete dbObj.joiningData;
-        const { status, errors }: { status: boolean; errors: any } =
-          await this.userDBService.persist(dbObj);
+        const d = await this.userDBService.persist(dbObj);
+        const status: boolean = d.status;
+        const errors: string = d.errors;
 
         if (status && statusFA === FAStatus.SUCCESS) {
           console.log('All good');
@@ -111,13 +112,14 @@ export class UserService {
             },
           };
         } else {
-          await this.fusionAuthService.delete(userId);
+          const deletedUser = await this.fusionAuthService.delete(userId);
           // Update response with correct status - ERROR.
           response.responseCode = ResponseCode.FAILURE;
           if (!status) {
             response.params.err = 'SIGNUP_DB_FAIL';
-            response.params.errMsg = errors;
+            response.params.errMsg = 'Something when wrong';
             response.params.status = ResponseStatus.failure;
+            response.params.customMsg = errors;
           } else {
             response.params.err = 'SIGNUP_FA_FAIL';
             response.params.errMsg = 'Could not save in FusionAuth';
@@ -130,8 +132,8 @@ export class UserService {
       response.params.err = 'INVALID_SCHEMA';
       response.params.errMsg =
         'Invalid Request :: ' + errors.map((err) => err.message).join(' \n ');
+      response.params.status = ResponseStatus.failure;
     }
-    response.params.status = ResponseStatus.failure;
     return response;
   }
 
