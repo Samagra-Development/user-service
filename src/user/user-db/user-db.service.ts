@@ -15,17 +15,31 @@ export class UserDBService {
     this.schoolPartUrl = process.env.ES_SCHOOL_PART;
   }
 
-  persist(dbObj: any): Promise<boolean> {
+  persist(dbObj: any): Promise<{ status: boolean; errors: any }> {
     return got
       .post(this.url + this.teacherPartUrl, { json: dbObj })
-      .then((response: Response): boolean => {
-        return response.statusCode === 201;
+      .then((resp: Response): { status: boolean; errors: any } => {
+        if (resp.statusCode === 201) {
+          return {
+            status: true,
+            errors: null,
+          };
+        } else {
+          return {
+            status: false,
+            errors: resp.body,
+          };
+        }
       })
-      .catch((e) => {
-        console.log(e);
-        return false;
+      .catch((e): { status: boolean; errors: string } => {
+        console.log(e.response.body);
+        return {
+          status: false,
+          errors: e.response.body,
+        };
       });
   }
+
   getUserById(id: string): Promise<any> {
     const url = this.url + this.teacherPartUrl + `?user_id=${id}`;
     return got.get(url).json();

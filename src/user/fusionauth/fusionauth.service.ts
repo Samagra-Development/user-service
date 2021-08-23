@@ -16,6 +16,7 @@ import { response } from 'express';
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
   USER_EXISTS = 'USER_EXISTS',
+  ERROR = 'ERROR',
 }
 
 @Injectable()
@@ -27,6 +28,10 @@ export class FusionauthService {
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
     );
+  }
+
+  delete(userId: UUID): any {
+    return this.fusionauthClient.deleteUser(userId);
   }
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
@@ -91,12 +96,15 @@ export class FusionauthService {
               };
             },
           )
-          .catch((e) => {
+          .catch((e): { statusFA: FAStatus; userId: UUID } => {
             console.log(
               `Could not fetch user with username ${authObj.username}`,
               JSON.stringify(e),
             );
-            return null;
+            return {
+              statusFA: FAStatus.ERROR,
+              userId: null,
+            };
           });
       });
   }

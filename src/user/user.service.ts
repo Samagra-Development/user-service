@@ -8,14 +8,13 @@ import {
   ResponseStatus,
   SignupResponse,
 } from './user.interface';
+import Ajv, { ErrorObject } from 'ajv';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
 import { LoginResponse, UUID } from '@fusionauth/typescript-client';
 
-import Ajv from 'ajv';
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
 import { UserDBService } from './user-db/user-db.service';
-import { response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 // ajv.addSchema(educationSchema, 'education');
@@ -47,15 +46,18 @@ export class UserService {
     this.ajv.addSchema(userSchema, 'user');
   }
 
-  verifyUserObject(userData: any): boolean {
+  verifyUserObject(userData: any): {
+    isValid: boolean;
+    errors: null | ErrorObject[];
+  } {
     const validate = this.ajv.compile(userSchema);
     const isValid = validate(userData);
-    return isValid;
+    return { isValid, errors: validate.errors };
   }
 
   async signup(user: any): Promise<SignupResponse> {
     // Verify user
-    const isValid = this.verifyUserObject(user);
+    const { isValid, errors } = this.verifyUserObject(user);
     const response: SignupResponse = new SignupResponse().init(uuidv4());
 
     const schoolValidity = await this.userDBService.getSchool(
@@ -95,7 +97,8 @@ export class UserService {
         delete dbObj.approved;
         dbObj.joining_date = dbObj.joiningData;
         delete dbObj.joiningData;
-        const status: boolean = await this.userDBService.persist(dbObj);
+        const { status, errors }: { status: boolean; errors: any } =
+          await this.userDBService.persist(dbObj);
 
         if (status && statusFA === FAStatus.SUCCESS) {
           console.log('All good');
@@ -108,11 +111,12 @@ export class UserService {
             },
           };
         } else {
+          await this.fusionAuthService.delete(userId);
           // Update response with correct status - ERROR.
           response.responseCode = ResponseCode.FAILURE;
           if (!status) {
             response.params.err = 'SIGNUP_DB_FAIL';
-            response.params.errMsg = 'Could not save in UserDB';
+            response.params.errMsg = errors;
             response.params.status = ResponseStatus.failure;
           } else {
             response.params.err = 'SIGNUP_FA_FAIL';
@@ -124,9 +128,10 @@ export class UserService {
     } else {
       response.responseCode = ResponseCode.FAILURE;
       response.params.err = 'INVALID_SCHEMA';
-      response.params.errMsg = 'Invalid Request';
-      response.params.status = ResponseStatus.failure;
+      response.params.errMsg =
+        'Invalid Request :: ' + errors.map((err) => err.message).join(' \n ');
     }
+    response.params.status = ResponseStatus.failure;
     return response;
   }
 
