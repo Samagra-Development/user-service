@@ -235,22 +235,18 @@
       "required": [
         "username",
         "password",
-        "dateOfRetirement",
         "phone",
         "phoneVerified",
         "role",
         "firstName",
         "lastName",
-        "avatar",
         "gender",
         "address",
         "education",
         "school",
         "subjects",
         "employment",
-        "joiningData",
-        "cadre",
-        "designation"
+        "cadre"
       ],
       "properties": {
         "id": {
