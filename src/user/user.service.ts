@@ -8,12 +8,14 @@ import {
   ResponseStatus,
   SignupResponse,
 } from './user.interface';
+import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
+import { LoginResponse, UUID } from '@fusionauth/typescript-client';
 
 import Ajv from 'ajv';
-import { FusionauthService } from './fusionauth/fusionauth.service';
+import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
-import { UUID } from '@fusionauth/typescript-client';
 import { UserDBService } from './user-db/user-db.service';
+import { response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 // ajv.addSchema(educationSchema, 'education');
@@ -74,29 +76,38 @@ export class UserService {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
       authObj.school = user.request.school;
-      const statusFA: UUID = await this.fusionAuthService.persist(authObj);
+      const { statusFA, userId }: { statusFA: FAStatus; userId: UUID } =
+        await this.fusionAuthService.persist(authObj);
 
-      // Add teacher to DB
-      const dbObj: any = this.getDBParams(user);
-      dbObj.user_id = statusFA;
+      if (statusFA === FAStatus.USER_EXISTS) {
+        response.responseCode = ResponseCode.FAILURE;
+        response.params.err = 'SIGNUP_FA_FAIL';
+        response.params.errMsg =
+          'Seems like a user with the same username exists. Please try to log in if you have already account approved or try to create an account with your phone number as the username.';
+        response.params.status = ResponseStatus.failure;
+      } else {
+        // Add teacher to DB
+        const dbObj: any = this.getDBParams(user);
+        dbObj.user_id = userId;
 
-      //TODO: Remove hacks
-      delete dbObj.userID;
-      delete dbObj.approved;
-      dbObj.joining_date = dbObj.joiningData;
-      delete dbObj.joiningData;
-      const status: boolean = await this.userDBService.persist(dbObj);
+        //TODO: Remove hacks
+        delete dbObj.userId;
+        delete dbObj.approved;
+        dbObj.joining_date = dbObj.joiningData;
+        delete dbObj.joiningData;
+        const status: boolean = await this.userDBService.persist(dbObj);
 
-      if (status && statusFA !== null) {
-        console.log('All good');
-        // Update response with correct status - SUCCESS.
-        response.result = {
-          responseMsg: 'User Saved Successfully',
-          accountStatus: AccountStatus.PENDING,
-          data: {
-            userId: statusFA,
-          },
-        };
+        if (status && statusFA === FAStatus.SUCCESS) {
+          console.log('All good');
+          // Update response with correct status - SUCCESS.
+          response.result = {
+            responseMsg: 'User Saved Successfully',
+            accountStatus: AccountStatus.PENDING,
+            data: {
+              userId: userId,
+            },
+          };
+        }
       }
     } else {
       // Update response with correct status - ERROR.
@@ -136,15 +147,57 @@ export class UserService {
 
   login(user: any): PromiseLike<SignupResponse> {
     console.log(this.fusionAuthService);
-    return this.fusionAuthService.login(user).then((fusionAuthUser) => {
-      console.log(fusionAuthUser.user.id);
-      return this.userDBService
-        .getUserById(fusionAuthUser.user.id)
-        .then((userDBResponse) => {
-          fusionAuthUser.user.schoolResponse = userDBResponse;
-          return fusionAuthUser;
-        });
-    });
+    return this.fusionAuthService
+      .login(user)
+      .then((response: ClientResponse<LoginResponse>) => {
+        const fusionAuthUser: LoginResponse = response.response;
+        console.log(fusionAuthUser.user.id);
+        return this.userDBService
+          .getUserById(fusionAuthUser.user.id)
+          .then((userDBResponse) => userDBResponse.results[0])
+          .then((userDBResponse): SignupResponse => {
+            const response: SignupResponse = new SignupResponse().init(
+              uuidv4(),
+            );
+            response.responseCode = ResponseCode.OK;
+            console.log(userDBResponse);
+            response.result = {
+              responseMsg: 'Successful Logged In',
+              accountStatus: AccountStatus[userDBResponse.account_status],
+              data: {
+                user: fusionAuthUser,
+                schoolResponse: userDBResponse,
+              },
+            };
+            return response;
+          })
+          .catch((e: ClientResponse<LoginResponse>): SignupResponse => {
+            console.log(e);
+            const response: SignupResponse = new SignupResponse().init(
+              uuidv4(),
+            );
+            response.responseCode = ResponseCode.FAILURE;
+            response.params.err = 'UNCAUGHT_EXCEPTION';
+            response.params.errMsg = 'Server Failure';
+            response.params.status = ResponseStatus.failure;
+            return response;
+          });
+      })
+      .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
+        const response: SignupResponse = new SignupResponse().init(uuidv4());
+        if (errorResponse.statusCode === 404) {
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'INVALID_USERNAME_PASSWORD';
+          response.params.errMsg = 'Invalid Username/Password';
+          response.params.status = ResponseStatus.failure;
+        } else {
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'UNCAUGHT_EXCEPTION';
+          response.params.errMsg = 'Server Failure';
+          response.params.status = ResponseStatus.failure;
+        }
+        return response;
+      });
   }
 
   getAuthParams(user: any) {

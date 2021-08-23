@@ -11,10 +11,14 @@ export enum ResponseCode {
   FAILURE = 'FAILURE',
 }
 
+/*
+    Pending
+*/
 export enum AccountStatus {
   PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  DENIED = 'DENIED',
+  ACTIVE = 'ACTIVE',
+  DEACTIVATED = 'DEACTIVATED',
+  REJECTED = 'REJECTED',
 }
 
 export interface ResponseParams {

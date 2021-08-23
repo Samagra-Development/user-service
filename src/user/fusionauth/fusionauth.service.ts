@@ -1,17 +1,22 @@
 import FusionAuthClient, {
+  LoginRequest,
+  LoginResponse,
   RegistrationRequest,
   RegistrationResponse,
   UUID,
   UserRegistration,
   UserResponse,
-  LoginRequest,
-  LoginResponse,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
-import { response } from 'express';
 import { SignupResponse } from '../user.interface';
+import { response } from 'express';
+
+export enum FAStatus {
+  SUCCESS = 'SUCCESS',
+  USER_EXISTS = 'USER_EXISTS',
+}
 
 @Injectable()
 export class FusionauthService {
@@ -24,7 +29,7 @@ export class FusionauthService {
     );
   }
 
-  persist(authObj: any): Promise<UUID> {
+  persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
     console.log(authObj);
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
@@ -59,19 +64,33 @@ export class FusionauthService {
 
     return this.fusionauthClient
       .register(undefined, userRequest)
-      .then((response: ClientResponse<RegistrationResponse>): UUID => {
-        console.log({ response });
-        return response.response.user.id;
-      })
-      .catch((e): Promise<UUID> => {
+      .then(
+        (
+          response: ClientResponse<RegistrationResponse>,
+        ): { statusFA: FAStatus; userId: UUID } => {
+          console.log({ response });
+          return {
+            statusFA: FAStatus.SUCCESS,
+            userId: response.response.user.id,
+          };
+        },
+      )
+      .catch((e): Promise<{ statusFA: FAStatus; userId: UUID }> => {
         console.log('Could not create a user', JSON.stringify(e));
         console.log('Trying to fetch an existing user');
         return this.fusionauthClient
           .retrieveUserByUsername(authObj.username)
-          .then((response: ClientResponse<UserResponse>): UUID => {
-            console.log('Found user');
-            return response.response.user.id;
-          })
+          .then(
+            (
+              response: ClientResponse<UserResponse>,
+            ): { statusFA: FAStatus; userId: UUID } => {
+              console.log('Found user');
+              return {
+                statusFA: FAStatus.USER_EXISTS,
+                userId: response.response.user.id,
+              };
+            },
+          )
           .catch((e) => {
             console.log(
               `Could not fetch user with username ${authObj.username}`,
@@ -82,11 +101,14 @@ export class FusionauthService {
       });
   }
 
-  login(user: LoginRequest): PromiseLike<any> {
+  login(user: LoginRequest): Promise<ClientResponse<LoginResponse>> {
     return this.fusionauthClient
       .login(user)
       .then((response: ClientResponse<LoginResponse>): any => {
-        return response.response;
+        return response;
+      })
+      .catch((e) => {
+        throw e;
       });
   }
 
