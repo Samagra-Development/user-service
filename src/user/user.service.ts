@@ -107,20 +107,25 @@ export class UserService {
               userId: userId,
             },
           };
+        } else {
+          // Update response with correct status - ERROR.
+          response.responseCode = ResponseCode.FAILURE;
+          if (!status) {
+            response.params.err = 'SIGNUP_DB_FAIL';
+            response.params.errMsg = 'Could not save in UserDB';
+            response.params.status = ResponseStatus.failure;
+          } else {
+            response.params.err = 'SIGNUP_FA_FAIL';
+            response.params.errMsg = 'Could not save in FusionAuth';
+            response.params.status = ResponseStatus.failure;
+          }
         }
       }
     } else {
-      // Update response with correct status - ERROR.
       response.responseCode = ResponseCode.FAILURE;
-      if (!status) {
-        response.params.err = 'SIGNUP_DB_FAIL';
-        response.params.errMsg = 'Could not save in UserDB';
-        response.params.status = ResponseStatus.failure;
-      } else {
-        response.params.err = 'SIGNUP_FA_FAIL';
-        response.params.errMsg = 'Could not save in FusionAuth';
-        response.params.status = ResponseStatus.failure;
-      }
+      response.params.err = 'INVALID_SCHEMA';
+      response.params.errMsg = 'Invalid Request';
+      response.params.status = ResponseStatus.failure;
     }
     return response;
   }

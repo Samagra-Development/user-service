@@ -5,9 +5,9 @@ import { SignupResponse } from '../user.interface';
 
 @Injectable()
 export class UserDBService {
-  url;
-  teacherPartUrl;
-  schoolPartUrl;
+  url: string;
+  teacherPartUrl: string;
+  schoolPartUrl: string;
 
   constructor() {
     this.url = process.env.ESAMWAD_BACKEND_BASE_URL;
