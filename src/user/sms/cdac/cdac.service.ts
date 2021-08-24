@@ -17,15 +17,15 @@ export class CdacService extends SmsService implements SMS {
   }
 
   convertFromUnicodeToText = (message) => {
-    let finalmessage = '';
+    let finalMessage = '';
     console.log(message);
     for (let i = 0; i < message.length; i++) {
       const ch = message.charCodeAt(i);
       const j = ch;
       const sss = '&#' + j + ';';
-      finalmessage = finalmessage + sss;
+      finalMessage = finalMessage + sss;
     }
-    return finalmessage;
+    return finalMessage;
   };
 
   sendSingleSMS = async (params) => {
