@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
@@ -47,7 +47,7 @@ export class UserController {
     return status;
   }
 
-  @Post('/update')
+  @Patch('/update')
   async update(@Body() user: any): Promise<SignupResponse> {
     const status: SignupResponse = await this.userService.update(user);
     return status;

@@ -5,6 +5,7 @@ import FusionAuthClient, {
   RegistrationResponse,
   UUID,
   UserRegistration,
+  UserRequest,
   UserResponse,
 } from '@fusionauth/typescript-client';
 
@@ -72,8 +73,6 @@ export class FusionauthService {
       registration: currentRegistration,
     };
 
-    console.log(userRequest);
-
     return this.fusionauthClient
       .register(undefined, userRequest)
       .then(
@@ -127,8 +126,59 @@ export class FusionauthService {
       });
   }
 
-  update(user: any): Promise<SignupResponse> {
-    throw new Error('Method not implemented.');
+  update(
+    userID: UUID,
+    authObj: any,
+  ): Promise<{ statusFA: FAStatus; userId: UUID }> {
+    console.log(authObj);
+    const registrations: Array<UserRegistration> = [];
+    const currentRegistration: UserRegistration = {
+      username: authObj.username,
+      applicationId: process.env.FUSIONAUTH_APPLICATION_ID,
+      roles: authObj.role,
+    };
+    registrations.push(currentRegistration);
+    const userRequest: UserRequest = {
+      user: {
+        active: true,
+        data: {
+          school: authObj.school,
+          education: authObj.education,
+          address: authObj.address,
+          gender: authObj.gender,
+          dateOfRetirement: authObj.dateOfRetirement,
+          phoneVerified: false,
+        },
+        email: authObj.email,
+        firstName: authObj.firstName,
+        lastName: authObj.lastName,
+        username: authObj.username,
+        password: authObj.password,
+        imageUrl: authObj.avatar,
+        mobilePhone: authObj.phone,
+      },
+    };
+
+    return this.fusionauthClient
+      .patchUser(userID, userRequest)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { statusFA: FAStatus; userId: UUID } => {
+          console.log({ response });
+          return {
+            statusFA: FAStatus.SUCCESS,
+            userId: response.response.user.id,
+          };
+        },
+      )
+      .catch((e): { statusFA: FAStatus; userId: UUID } => {
+        console.log('Unable to update user', JSON.stringify(e));
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+        };
+      });
   }
 
   verifyUsernamePhoneCombination(): Promise<boolean> {

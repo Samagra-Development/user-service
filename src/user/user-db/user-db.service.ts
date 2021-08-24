@@ -45,8 +45,33 @@ export class UserDBService {
     return got.get(url).json();
   }
 
-  update(user: any): Promise<any> | any {
-    return Promise.resolve({});
+  async update(dbObj: any): Promise<{ status: boolean; errors: any }> {
+    const teacherId = await this.getUserById(dbObj.user_id)
+      .then((userDBResponse) => userDBResponse.results[0])
+      .then((result) => result.id);
+    return got
+      .patch(this.url + this.teacherPartUrl + `${teacherId}/`, { json: dbObj })
+      .then((resp: Response): { status: boolean; errors: any } => {
+        console.log('Response body', resp.body);
+        if (resp.statusCode === 200) {
+          return {
+            status: true,
+            errors: null,
+          };
+        } else {
+          return {
+            status: false,
+            errors: resp.body,
+          };
+        }
+      })
+      .catch((e): { status: boolean; errors: string } => {
+        console.log('Inside error', e.response.body);
+        return {
+          status: false,
+          errors: e.response.body,
+        };
+      });
   }
 
   getSchool(udise: string): Promise<any> {

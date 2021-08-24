@@ -137,27 +137,82 @@ export class UserService {
     return response;
   }
 
-  update(user: any): PromiseLike<SignupResponse> {
-    return this.fusionAuthService
-      .update(user)
-      .then((s) => {
-        return this.userDBService
-          .update(user)
-          .then((s2) => s2)
-          .catch((e) => {
-            console.error(e);
-            //rollback
-            return null;
-          });
-      })
-      .catch((e) => {
-        console.error(e);
-        //rollback
-        return null;
-      });
+  async update(user: any): Promise<SignupResponse> {
+    // Verify user
+    const { isValid, errors } = this.verifyUserObject(user);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+
+    const userID = user.request.userID;
+
+    const schoolValidity = await this.userDBService.getSchool(
+      user.request.school,
+    );
+
+    if (!schoolValidity.status) {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'UPDATE_DB_FAIL';
+      response.params.errMsg = 'School does not exist';
+      response.params.status = ResponseStatus.failure;
+      return response;
+    } else {
+      user.request.school = schoolValidity.id;
+    }
+
+    if (isValid) {
+      // Add teacher to FusionAuth
+      const authObj = this.getAuthParams(user);
+      authObj.school = user.request.school;
+      const { statusFA, userId }: { statusFA: FAStatus; userId: UUID } =
+        await this.fusionAuthService.update(userID, authObj);
+
+      // Add teacher to DB
+      const dbObj: any = this.getDBParams(user);
+      dbObj.user_id = userId;
+
+      //TODO: Remove hacks
+      delete dbObj.userId;
+      delete dbObj.approved;
+      dbObj.joining_date = dbObj.joiningData;
+      delete dbObj.joiningData;
+      const d = await this.userDBService.update(dbObj);
+      const status: boolean = d.status;
+      const errors: string = d.errors;
+
+      if (status && statusFA === FAStatus.SUCCESS) {
+        console.log('All good');
+        // Update response with correct status - SUCCESS.
+        response.result = {
+          responseMsg: 'User Saved Successfully',
+          accountStatus: AccountStatus.PENDING,
+          data: {
+            userId: userId,
+          },
+        };
+      } else {
+        // Update response with correct status - ERROR.
+        response.responseCode = ResponseCode.FAILURE;
+        if (!status) {
+          response.params.err = 'SIGNUP_DB_FAIL';
+          response.params.errMsg = 'Something when wrong';
+          response.params.status = ResponseStatus.failure;
+          response.params.customMsg = errors;
+        } else {
+          response.params.err = 'SIGNUP_FA_FAIL';
+          response.params.errMsg = 'Could not save in FusionAuth';
+          response.params.status = ResponseStatus.failure;
+        }
+      }
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'INVALID_SCHEMA';
+      response.params.errMsg =
+        'Invalid Request :: ' + errors.map((err) => err.message).join(' \n ');
+      response.params.status = ResponseStatus.failure;
+    }
+    return response;
   }
 
-  login(user: any): PromiseLike<SignupResponse> {
+  async login(user: any): Promise<SignupResponse> {
     console.log(this.fusionAuthService);
     return this.fusionAuthService
       .login(user)
