@@ -4,3 +4,4 @@ node_modules
 dist
 converage/lcov-report
 badges
+templates.json
