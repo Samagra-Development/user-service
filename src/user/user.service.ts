@@ -10,7 +10,7 @@ import {
 } from './user.interface';
 import Ajv, { ErrorObject } from 'ajv';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
-import { LoginResponse, UUID } from '@fusionauth/typescript-client';
+import { LoginResponse, UUID, User } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
@@ -128,6 +128,7 @@ export class UserService {
         }
       }
     } else {
+      console.log(errors);
       response.responseCode = ResponseCode.FAILURE;
       response.params.err = 'INVALID_SCHEMA';
       response.params.errMsg =
@@ -162,7 +163,11 @@ export class UserService {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
       authObj.school = user.request.school;
-      const { statusFA, userId }: { statusFA: FAStatus; userId: UUID } =
+      const {
+        statusFA,
+        userId,
+        fusionAuthUser,
+      }: { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } =
         await this.fusionAuthService.update(userID, authObj);
 
       // Add teacher to DB
@@ -177,15 +182,17 @@ export class UserService {
       const d = await this.userDBService.update(dbObj);
       const status: boolean = d.status;
       const errors: string = d.errors;
+      const userDBResponse: any = d.userDB;
 
       if (status && statusFA === FAStatus.SUCCESS) {
         console.log('All good');
         // Update response with correct status - SUCCESS.
         response.result = {
-          responseMsg: 'User Saved Successfully',
-          accountStatus: AccountStatus.PENDING,
+          responseMsg: 'User Updated Successfully',
+          accountStatus: AccountStatus[userDBResponse.account_status],
           data: {
-            userId: userId,
+            user: fusionAuthUser,
+            schoolResponse: JSON.parse(userDBResponse),
           },
         };
       } else {
@@ -203,6 +210,7 @@ export class UserService {
         }
       }
     } else {
+      console.log(errors);
       response.responseCode = ResponseCode.FAILURE;
       response.params.err = 'INVALID_SCHEMA';
       response.params.errMsg =
@@ -223,11 +231,11 @@ export class UserService {
           .getUserById(fusionAuthUser.user.id)
           .then((userDBResponse) => userDBResponse.results[0])
           .then((userDBResponse): SignupResponse => {
+            console.log(userDBResponse);
             const response: SignupResponse = new SignupResponse().init(
               uuidv4(),
             );
             response.responseCode = ResponseCode.OK;
-            console.log(userDBResponse);
             response.result = {
               responseMsg: 'Successful Logged In',
               accountStatus: AccountStatus[userDBResponse.account_status],

@@ -234,7 +234,6 @@
       ],
       "required": [
         "username",
-        "password",
         "phone",
         "phoneVerified",
         "role",
@@ -528,7 +527,7 @@
         },
         "joiningData": {
           "$id": "#/properties/request/properties/joiningData",
-          "type": "string",
+          "type": ["string", "null"],
           "title": "The joiningData schema",
           "description": "An explanation about the purpose of this instance.",
           "default": "",

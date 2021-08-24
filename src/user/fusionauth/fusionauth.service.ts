@@ -4,6 +4,7 @@ import FusionAuthClient, {
   RegistrationRequest,
   RegistrationResponse,
   UUID,
+  User,
   UserRegistration,
   UserRequest,
   UserResponse,
@@ -129,7 +130,7 @@ export class FusionauthService {
   update(
     userID: UUID,
     authObj: any,
-  ): Promise<{ statusFA: FAStatus; userId: UUID }> {
+  ): Promise<{ statusFA: FAStatus; userId: UUID; fusionAuthUser: User }> {
     console.log(authObj);
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
@@ -164,21 +165,25 @@ export class FusionauthService {
       .then(
         (
           response: ClientResponse<UserResponse>,
-        ): { statusFA: FAStatus; userId: UUID } => {
+        ): { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } => {
           console.log({ response });
           return {
             statusFA: FAStatus.SUCCESS,
             userId: response.response.user.id,
+            fusionAuthUser: response.response.user,
           };
         },
       )
-      .catch((e): { statusFA: FAStatus; userId: UUID } => {
-        console.log('Unable to update user', JSON.stringify(e));
-        return {
-          statusFA: FAStatus.ERROR,
-          userId: null,
-        };
-      });
+      .catch(
+        (e): { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } => {
+          console.log('Unable to update user', JSON.stringify(e));
+          return {
+            statusFA: FAStatus.ERROR,
+            userId: null,
+            fusionAuthUser: null,
+          };
+        },
+      );
   }
 
   verifyUsernamePhoneCombination(): Promise<boolean> {
