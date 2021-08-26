@@ -60,6 +60,7 @@ export class UserService {
     const { isValid, errors } = this.verifyUserObject(user);
     const response: SignupResponse = new SignupResponse().init(uuidv4());
 
+    const udise: string = user.request.school + '';
     const schoolValidity = await this.userDBService.getSchool(
       user.request.school,
     );
@@ -78,6 +79,7 @@ export class UserService {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
       authObj.school = user.request.school;
+      authObj.udise = udise;
       const { statusFA, userId }: { statusFA: FAStatus; userId: UUID } =
         await this.fusionAuthService.persist(authObj);
 
@@ -96,6 +98,8 @@ export class UserService {
         delete dbObj.userId;
         delete dbObj.approved;
         dbObj.joining_date = dbObj.joiningData;
+        dbObj.role =
+          user.request.role.indexOf('Principal') > -1 ? 'PRINCIPAL' : 'TEACHER';
         delete dbObj.joiningData;
         const d = await this.userDBService.persist(dbObj);
         const status: boolean = d.status;
@@ -142,7 +146,9 @@ export class UserService {
     // Verify user
     const { isValid, errors } = this.verifyUserObject(user);
     const response: SignupResponse = new SignupResponse().init(uuidv4());
+    const udise: string = user.request.school + '';
 
+    delete user.request.password;
     const userID = user.request.userID;
 
     const schoolValidity = await this.userDBService.getSchool(
@@ -163,6 +169,7 @@ export class UserService {
       // Add teacher to FusionAuth
       const authObj = this.getAuthParams(user);
       authObj.school = user.request.school;
+      authObj.udise = udise;
       const {
         statusFA,
         userId,
@@ -171,7 +178,10 @@ export class UserService {
         await this.fusionAuthService.update(userID, authObj);
 
       // Add teacher to DB
+
       const dbObj: any = this.getDBParams(user);
+      dbObj.role =
+        user.request.role.indexOf('Principal') > -1 ? 'PRINCIPAL' : 'TEACHER';
       dbObj.user_id = userId;
 
       //TODO: Remove hacks
@@ -191,7 +201,9 @@ export class UserService {
           responseMsg: 'User Updated Successfully',
           accountStatus: AccountStatus[userDBResponse.account_status],
           data: {
-            user: fusionAuthUser,
+            user: {
+              user: fusionAuthUser,
+            },
             schoolResponse: JSON.parse(userDBResponse),
           },
         };
@@ -226,6 +238,10 @@ export class UserService {
       .login(user)
       .then((response: ClientResponse<LoginResponse>) => {
         const fusionAuthUser: LoginResponse = response.response;
+        console.log(fusionAuthUser.user.registrations[0].roles);
+        if (this.isOldSchoolUser(fusionAuthUser)) {
+          fusionAuthUser.user.data.udise = fusionAuthUser.user.fullName;
+        }
         console.log(fusionAuthUser.user.id);
         return this.userDBService
           .getUserById(fusionAuthUser.user.id)
@@ -238,7 +254,7 @@ export class UserService {
             response.responseCode = ResponseCode.OK;
             response.result = {
               responseMsg: 'Successful Logged In',
-              accountStatus: AccountStatus[userDBResponse.account_status],
+              accountStatus: AccountStatus[userDBResponse?.account_status],
               data: {
                 user: fusionAuthUser,
                 schoolResponse: userDBResponse,
@@ -273,6 +289,13 @@ export class UserService {
         }
         return response;
       });
+  }
+
+  private isOldSchoolUser(fusionAuthUser: LoginResponse) {
+    return (
+      fusionAuthUser.user.registrations[0].roles.indexOf('school') > -1 &&
+      fusionAuthUser.user.registrations[0].roles.length === 1
+    );
   }
 
   getAuthParams(user: any) {
