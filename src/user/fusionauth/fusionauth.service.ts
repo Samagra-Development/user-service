@@ -132,7 +132,6 @@ export class FusionauthService {
     userID: UUID,
     authObj: any,
   ): Promise<{ statusFA: FAStatus; userId: UUID; fusionAuthUser: User }> {
-    console.log(authObj);
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
       username: authObj.username,
@@ -155,6 +154,7 @@ export class FusionauthService {
         email: authObj.email,
         firstName: authObj.firstName,
         lastName: authObj.lastName,
+        fullName: authObj.fullName,
         username: authObj.username,
         password: authObj.password,
         imageUrl: authObj.avatar,

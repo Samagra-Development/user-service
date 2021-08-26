@@ -177,48 +177,60 @@ export class UserService {
       }: { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } =
         await this.fusionAuthService.update(userID, authObj);
 
-      // Add teacher to DB
-
-      const dbObj: any = this.getDBParams(user);
-      dbObj.role =
-        user.request.role.indexOf('Principal') > -1 ? 'PRINCIPAL' : 'TEACHER';
-      dbObj.user_id = userId;
-
-      //TODO: Remove hacks
-      delete dbObj.userId;
-      delete dbObj.approved;
-      dbObj.joining_date = dbObj.joiningData;
-      delete dbObj.joiningData;
-      const d = await this.userDBService.update(dbObj);
-      const status: boolean = d.status;
-      const errors: string = d.errors;
-      const userDBResponse: any = d.userDB;
-
-      if (status && statusFA === FAStatus.SUCCESS) {
-        console.log('All good');
-        // Update response with correct status - SUCCESS.
+      if (this.isOldSchoolUser(fusionAuthUser)) {
         response.result = {
           responseMsg: 'User Updated Successfully',
-          accountStatus: AccountStatus[userDBResponse.account_status],
+          accountStatus: null,
           data: {
             user: {
               user: fusionAuthUser,
             },
-            schoolResponse: JSON.parse(userDBResponse),
+            schoolResponse: null,
           },
         };
       } else {
-        // Update response with correct status - ERROR.
-        response.responseCode = ResponseCode.FAILURE;
-        if (!status) {
-          response.params.err = 'SIGNUP_DB_FAIL';
-          response.params.errMsg = 'Something when wrong';
-          response.params.status = ResponseStatus.failure;
-          response.params.customMsg = errors;
+        // Add teacher to DB
+        const dbObj: any = this.getDBParams(user);
+        dbObj.role =
+          user.request.role.indexOf('Principal') > -1 ? 'PRINCIPAL' : 'TEACHER';
+        dbObj.user_id = userId;
+
+        //TODO: Remove hacks
+        delete dbObj.userId;
+        delete dbObj.approved;
+        dbObj.joining_date = dbObj.joiningData;
+        delete dbObj.joiningData;
+        const d = await this.userDBService.update(dbObj);
+        const status: boolean = d.status;
+        const errors: string = d.errors;
+        const userDBResponse: any = d.userDB;
+
+        if (status && statusFA === FAStatus.SUCCESS) {
+          console.log('All good');
+          // Update response with correct status - SUCCESS.
+          response.result = {
+            responseMsg: 'User Updated Successfully',
+            accountStatus: AccountStatus[userDBResponse.account_status],
+            data: {
+              user: {
+                user: fusionAuthUser,
+              },
+              schoolResponse: JSON.parse(userDBResponse),
+            },
+          };
         } else {
-          response.params.err = 'SIGNUP_FA_FAIL';
-          response.params.errMsg = 'Could not save in FusionAuth';
-          response.params.status = ResponseStatus.failure;
+          // Update response with correct status - ERROR.
+          response.responseCode = ResponseCode.FAILURE;
+          if (!status) {
+            response.params.err = 'SIGNUP_DB_FAIL';
+            response.params.errMsg = 'Something when wrong';
+            response.params.status = ResponseStatus.failure;
+            response.params.customMsg = errors;
+          } else {
+            response.params.err = 'SIGNUP_FA_FAIL';
+            response.params.errMsg = 'Could not save in FusionAuth';
+            response.params.status = ResponseStatus.failure;
+          }
         }
       }
     } else {
@@ -236,43 +248,55 @@ export class UserService {
     console.log(this.fusionAuthService);
     return this.fusionAuthService
       .login(user)
-      .then((response: ClientResponse<LoginResponse>) => {
-        const fusionAuthUser: LoginResponse = response.response;
+      .then((resp: ClientResponse<LoginResponse>) => {
+        const fusionAuthUser: LoginResponse = resp.response;
         console.log(fusionAuthUser.user.registrations[0].roles);
-        if (this.isOldSchoolUser(fusionAuthUser)) {
+        if (this.isOldSchoolUser(fusionAuthUser.user)) {
           fusionAuthUser.user.data.udise = fusionAuthUser.user.fullName;
+          const response: SignupResponse = new SignupResponse().init(uuidv4());
+          response.responseCode = ResponseCode.OK;
+          response.result = {
+            responseMsg: 'Successful Logged In',
+            accountStatus: null,
+            data: {
+              user: fusionAuthUser,
+              schoolResponse: null,
+            },
+          };
+          return response;
+        } else {
+          console.log(fusionAuthUser.user.id);
+          return this.userDBService
+            .getUserById(fusionAuthUser.user.id)
+            .then((userDBResponse) => userDBResponse.results[0])
+            .then((userDBResponse): SignupResponse => {
+              console.log(userDBResponse);
+              const response: SignupResponse = new SignupResponse().init(
+                uuidv4(),
+              );
+              response.responseCode = ResponseCode.OK;
+              response.result = {
+                responseMsg: 'Successful Logged In',
+                accountStatus: AccountStatus[userDBResponse?.account_status],
+                data: {
+                  user: fusionAuthUser,
+                  schoolResponse: userDBResponse,
+                },
+              };
+              return response;
+            })
+            .catch((e: ClientResponse<LoginResponse>): SignupResponse => {
+              console.log(e);
+              const response: SignupResponse = new SignupResponse().init(
+                uuidv4(),
+              );
+              response.responseCode = ResponseCode.FAILURE;
+              response.params.err = 'UNCAUGHT_EXCEPTION';
+              response.params.errMsg = 'Server Failure';
+              response.params.status = ResponseStatus.failure;
+              return response;
+            });
         }
-        console.log(fusionAuthUser.user.id);
-        return this.userDBService
-          .getUserById(fusionAuthUser.user.id)
-          .then((userDBResponse) => userDBResponse.results[0])
-          .then((userDBResponse): SignupResponse => {
-            console.log(userDBResponse);
-            const response: SignupResponse = new SignupResponse().init(
-              uuidv4(),
-            );
-            response.responseCode = ResponseCode.OK;
-            response.result = {
-              responseMsg: 'Successful Logged In',
-              accountStatus: AccountStatus[userDBResponse?.account_status],
-              data: {
-                user: fusionAuthUser,
-                schoolResponse: userDBResponse,
-              },
-            };
-            return response;
-          })
-          .catch((e: ClientResponse<LoginResponse>): SignupResponse => {
-            console.log(e);
-            const response: SignupResponse = new SignupResponse().init(
-              uuidv4(),
-            );
-            response.responseCode = ResponseCode.FAILURE;
-            response.params.err = 'UNCAUGHT_EXCEPTION';
-            response.params.errMsg = 'Server Failure';
-            response.params.status = ResponseStatus.failure;
-            return response;
-          });
       })
       .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
         const response: SignupResponse = new SignupResponse().init(uuidv4());
@@ -291,10 +315,10 @@ export class UserService {
       });
   }
 
-  private isOldSchoolUser(fusionAuthUser: LoginResponse) {
+  private isOldSchoolUser(fusionAuthUser: User) {
     return (
-      fusionAuthUser.user.registrations[0].roles.indexOf('school') > -1 &&
-      fusionAuthUser.user.registrations[0].roles.length === 1
+      fusionAuthUser.registrations[0].roles.indexOf('school') > -1 &&
+      fusionAuthUser.registrations[0].roles.length === 1
     );
   }
 
