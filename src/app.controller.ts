@@ -11,8 +11,10 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post()
-  getHello2(): string {
-    return this.appService.getHello();
+  @Get('/health')
+  getHealth(): any {
+    return {
+      status: 'healthy',
+    };
   }
 }
