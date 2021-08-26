@@ -12,8 +12,6 @@ import FusionAuthClient, {
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
-import { SignupResponse } from '../user.interface';
-import { response } from 'express';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',

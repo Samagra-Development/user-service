@@ -2,7 +2,7 @@ import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
-import { SMS, SMSResponse, TrackStatus } from './sms/sms.interface';
+import { SMSResponse } from './sms/sms.interface';
 import { SmsService } from './sms/sms.service';
 import { SignupResponse } from './user.interface';
 import { UserService } from './user.service';
