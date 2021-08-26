@@ -1,3 +1,6 @@
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CdacService } from './user/sms/cdac/cdac.service';
@@ -30,7 +33,14 @@ const otpServiceFactory = {
 };
 
 @Module({
-  imports: [ConfigModule.forRoot(), UserModule],
+  imports: [
+    ConfigModule.forRoot(),
+    UserModule,
+    ThrottlerModule.forRoot({
+      ttl: parseInt(process.env.RATE_LIMIT_TTL), //Seconds
+      limit: parseInt(process.env.RATE_LIMIT), //Number of requests per TTL from a single IP
+    }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
@@ -42,6 +52,10 @@ const otpServiceFactory = {
       useClass: CdacService,
     },
     UserDBService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
