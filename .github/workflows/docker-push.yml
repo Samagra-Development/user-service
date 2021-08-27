@@ -28,9 +28,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: |
-            samagragovernance/esamwad-user-service:latest
-            samagragovernance/esamwad-user-service:${{ env.RELEASE_VERSION }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/esamwad-user-service:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
