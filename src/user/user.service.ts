@@ -251,6 +251,7 @@ export class UserService {
         const fusionAuthUser: LoginResponse = resp.response;
         console.log(fusionAuthUser.user.registrations[0].roles);
         if (this.isOldSchoolUser(fusionAuthUser.user)) {
+          fusionAuthUser.user.data = {};
           fusionAuthUser.user.data.udise = fusionAuthUser.user.fullName;
           const response: SignupResponse = new SignupResponse().init(uuidv4());
           response.responseCode = ResponseCode.OK;
@@ -313,6 +314,7 @@ export class UserService {
         }
       })
       .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
+        console.log(errorResponse);
         const response: SignupResponse = new SignupResponse().init(uuidv4());
         if (errorResponse.statusCode === 404) {
           response.responseCode = ResponseCode.FAILURE;
@@ -331,8 +333,10 @@ export class UserService {
 
   private isOldSchoolUser(fusionAuthUser: User) {
     return (
-      fusionAuthUser.registrations[0].roles.indexOf('school') > -1 &&
-      fusionAuthUser.registrations[0].roles.length === 1
+      fusionAuthUser.registrations[0].roles === undefined ||
+      (fusionAuthUser.registrations.length > 0 &&
+        fusionAuthUser.registrations[0].roles?.length === 1 &&
+        fusionAuthUser.registrations[0].roles.indexOf('school') > -1)
     );
   }
 
