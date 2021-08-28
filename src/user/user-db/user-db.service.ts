@@ -80,7 +80,7 @@ export class UserDBService {
   }
 
   getSchool(udise: string): Promise<any> {
-    const url = this.url + this.schoolPartUrl + `?udise=${udise}`;
+    const url = this.url + this.schoolPartUrl + `?search=${udise}`;
     return got
       .get(url)
       .then((response: Response): any => {
