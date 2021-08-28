@@ -274,11 +274,17 @@ export class UserService {
                 uuidv4(),
               );
               if (userDBResponse.account_status !== 'ACTIVE') {
-                response.responseCode = ResponseCode.FAILURE;
-                response.params.err = 'INVALID_ACCOUNT_STATUS';
-                response.params.errMsg =
-                  'Your account is currently no in ACTIVE state.';
-                response.params.status = ResponseStatus.failure;
+                delete fusionAuthUser.refreshToken;
+                delete fusionAuthUser.token;
+                response.responseCode = ResponseCode.OK;
+                response.result = {
+                  responseMsg: 'Successful Logged In',
+                  accountStatus: AccountStatus[userDBResponse?.account_status],
+                  data: {
+                    user: fusionAuthUser,
+                    schoolResponse: userDBResponse,
+                  },
+                };
               } else {
                 response.responseCode = ResponseCode.OK;
                 response.result = {
