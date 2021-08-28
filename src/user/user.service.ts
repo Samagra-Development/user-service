@@ -247,12 +247,15 @@ export class UserService {
   async login(user: any): Promise<SignupResponse> {
     return this.fusionAuthService
       .login(user)
-      .then((resp: ClientResponse<LoginResponse>) => {
+      .then(async (resp: ClientResponse<LoginResponse>) => {
         const fusionAuthUser: LoginResponse = resp.response;
         console.log(fusionAuthUser.user.registrations[0].roles);
         if (this.isOldSchoolUser(fusionAuthUser.user)) {
           fusionAuthUser.user.data = {};
-          fusionAuthUser.user.data.udise = fusionAuthUser.user.fullName;
+          const udise = fusionAuthUser.user.username;
+          fusionAuthUser.user.data.udise = udise;
+          const schoolId = await this.userDBService.getSchool(udise);
+          fusionAuthUser.user.data.school = schoolId.id;
           const response: SignupResponse = new SignupResponse().init(uuidv4());
           response.responseCode = ResponseCode.OK;
           response.result = {
