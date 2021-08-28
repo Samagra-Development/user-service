@@ -245,7 +245,6 @@ export class UserService {
   }
 
   async login(user: any): Promise<SignupResponse> {
-    console.log(this.fusionAuthService);
     return this.fusionAuthService
       .login(user)
       .then((resp: ClientResponse<LoginResponse>) => {
@@ -274,15 +273,24 @@ export class UserService {
               const response: SignupResponse = new SignupResponse().init(
                 uuidv4(),
               );
-              response.responseCode = ResponseCode.OK;
-              response.result = {
-                responseMsg: 'Successful Logged In',
-                accountStatus: AccountStatus[userDBResponse?.account_status],
-                data: {
-                  user: fusionAuthUser,
-                  schoolResponse: userDBResponse,
-                },
-              };
+              if (userDBResponse.account_status !== 'ACTIVE') {
+                response.responseCode = ResponseCode.FAILURE;
+                response.params.err = 'INVALID_ACCOUNT_STATUS';
+                response.params.errMsg =
+                  'Your account is currently no in ACTIVE state.';
+                response.params.status = ResponseStatus.failure;
+              } else {
+                response.responseCode = ResponseCode.OK;
+                response.result = {
+                  responseMsg: 'Successful Logged In',
+                  accountStatus: AccountStatus[userDBResponse?.account_status],
+                  data: {
+                    user: fusionAuthUser,
+                    schoolResponse: userDBResponse,
+                  },
+                };
+              }
+
               return response;
             })
             .catch((e: ClientResponse<LoginResponse>): SignupResponse => {
