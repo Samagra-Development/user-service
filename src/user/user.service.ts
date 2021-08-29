@@ -248,14 +248,22 @@ export class UserService {
     return this.fusionAuthService
       .login(user)
       .then(async (resp: ClientResponse<LoginResponse>) => {
-        const fusionAuthUser: LoginResponse = resp.response;
-        console.log(fusionAuthUser.user.registrations[0].roles);
+        let fusionAuthUser: LoginResponse = resp.response;
         if (this.isOldSchoolUser(fusionAuthUser.user)) {
+          //updateUserData with school and udise
           fusionAuthUser.user.data = {};
           const udise = fusionAuthUser.user.username;
           fusionAuthUser.user.data.udise = udise;
           const schoolId = await this.userDBService.getSchool(udise);
           fusionAuthUser.user.data.school = schoolId.id;
+          await this.fusionAuthService.update(
+            fusionAuthUser.user.id,
+            fusionAuthUser.user,
+            true,
+          );
+
+          //login again to get new JWT
+          fusionAuthUser = (await this.fusionAuthService.login(user)).response;
           const response: SignupResponse = new SignupResponse().init(uuidv4());
           response.responseCode = ResponseCode.OK;
           response.result = {
