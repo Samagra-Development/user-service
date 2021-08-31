@@ -12,8 +12,11 @@ import Ajv, { ErrorObject } from 'ajv';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
 import { LoginResponse, UUID, User } from '@fusionauth/typescript-client';
 
+import { ChangePasswordDTO } from './dto/changePassword.dto';
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
+import { OtpService } from './otp/otp.service';
+import { SMSResponseStatus } from './sms/sms.interface';
 import { UserDBService } from './user-db/user-db.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -39,6 +42,7 @@ export class UserService {
   constructor(
     private readonly userDBService: UserDBService,
     private readonly fusionAuthService: FusionauthService,
+    private readonly otpService: OtpService,
   ) {
     this.ajv = new Ajv({ strict: false });
     this.ajv.addSchema(addressSchema, 'address');
@@ -340,6 +344,89 @@ export class UserService {
         }
         return response;
       });
+  }
+
+  async changePassword(data: ChangePasswordDTO): Promise<SignupResponse> {
+    // Verify OTP
+    const {
+      statusFA,
+      userId,
+      user,
+    }: { statusFA: FAStatus; userId: UUID; user: User } =
+      await this.fusionAuthService.getUser(data.username);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    if (statusFA === FAStatus.USER_EXISTS) {
+      const verifyOTPResult = await this.otpService.verifyOTP({
+        phone: user.mobilePhone,
+        otp: data.OTP,
+      });
+
+      if (verifyOTPResult.status === SMSResponseStatus.success) {
+        const result = await this.fusionAuthService.updatePassword(
+          userId,
+          data.password,
+        );
+
+        if (result.statusFA == FAStatus.SUCCESS) {
+          response.result = {
+            responseMsg: 'Password updated successfully',
+          };
+          response.responseCode = ResponseCode.OK;
+          response.params.status = ResponseStatus.success;
+        } else {
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'UNCAUGHT_EXCEPTION';
+          response.params.errMsg = 'Server Error';
+          response.params.status = ResponseStatus.failure;
+        }
+      } else {
+        response.responseCode = ResponseCode.FAILURE;
+        response.params.err = 'INVALID_OTP_USERNAME_PAIR';
+        response.params.errMsg = 'OTP and Username did not match.';
+        response.params.status = ResponseStatus.failure;
+      }
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'INVALID_USERNAME';
+      response.params.errMsg = 'No user with this Username exists';
+      response.params.status = ResponseStatus.failure;
+    }
+    return response;
+  }
+
+  async changePasswordOTP(username: string): Promise<SignupResponse> {
+    // Get Phone No from username
+    const {
+      statusFA,
+      userId,
+      user,
+    }: { statusFA: FAStatus; userId: UUID; user: User } =
+      await this.fusionAuthService.getUser(username);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    // If phone number is valid => Send OTP
+    if (statusFA === FAStatus.USER_EXISTS) {
+      const re = /^[6-9]{1}[0-9]{9}$/;
+      if (re.test(user.mobilePhone)) {
+        const result = await this.otpService.sendOTP(user.mobilePhone);
+        response.result = {
+          data: result,
+          responseMsg: `OTP has been sent to ${user.mobilePhone}.`,
+        };
+        response.responseCode = ResponseCode.OK;
+        response.params.status = ResponseStatus.success;
+      } else {
+        response.responseCode = ResponseCode.FAILURE;
+        response.params.err = 'INVALID_PHONE_NUMBER';
+        response.params.errMsg = 'Invalid Phone number';
+        response.params.status = ResponseStatus.failure;
+      }
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'INVALID_USERNAME';
+      response.params.errMsg = 'No user with this Username exists';
+      response.params.status = ResponseStatus.failure;
+    }
+    return response;
   }
 
   private isOldSchoolUser(fusionAuthUser: User) {

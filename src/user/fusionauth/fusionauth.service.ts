@@ -15,6 +15,7 @@ import FusionAuthClient, {
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Injectable } from '@nestjs/common';
+import { response } from 'express';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -31,6 +32,61 @@ export class FusionauthService {
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
     );
+  }
+
+  getUser(
+    username: string,
+  ): Promise<{ statusFA: FAStatus; userId: UUID; user: User }> {
+    return this.fusionauthClient
+      .retrieveUserByUsername(username)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { statusFA: FAStatus; userId: UUID; user: User } => {
+          console.log('Found user');
+          return {
+            statusFA: FAStatus.USER_EXISTS,
+            userId: response.response.user.id,
+            user: response.response.user,
+          };
+        },
+      )
+      .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
+        console.log(
+          `Could not fetch user with username ${username}`,
+          JSON.stringify(e),
+        );
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+          user: null,
+        };
+      });
+  }
+
+  updatePassword(
+    userId: UUID,
+    password: string,
+  ): Promise<{ statusFA: FAStatus; userId: UUID }> {
+    return this.fusionauthClient
+      .patchUser(userId, {
+        user: {
+          password: password,
+        },
+      })
+      .then((response) => {
+        return {
+          statusFA: FAStatus.SUCCESS,
+          userId: response.response.user.id,
+        };
+      })
+      .catch((response) => {
+        console.log(JSON.stringify(response));
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+        };
+      });
   }
 
   delete(userId: UUID): Promise<any> {

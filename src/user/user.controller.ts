@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import { ChangePasswordDTO } from './dto/changePassword.dto';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
@@ -50,6 +51,22 @@ export class UserController {
   @Patch('/update')
   async update(@Body() user: any): Promise<SignupResponse> {
     const status: SignupResponse = await this.userService.update(user);
+    return status;
+  }
+
+  @Post('/changePassword/sendOTP')
+  async changePasswordOTP(@Body() data: any): Promise<SignupResponse> {
+    const status: SignupResponse = await this.userService.changePasswordOTP(
+      data.username,
+    );
+    return status;
+  }
+
+  @Patch('/changePassword/update')
+  async changePassword(
+    @Body() data: ChangePasswordDTO,
+  ): Promise<SignupResponse> {
+    const status: SignupResponse = await this.userService.changePassword(data);
     return status;
   }
 }

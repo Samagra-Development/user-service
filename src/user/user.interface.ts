@@ -44,8 +44,8 @@ export interface IGenericResponse {
 }
 
 export interface SignupResult {
-  responseMsg: string;
-  accountStatus: AccountStatus;
+  responseMsg?: string;
+  accountStatus?: AccountStatus;
   data?: any;
 }
 
