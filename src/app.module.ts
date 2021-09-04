@@ -11,6 +11,7 @@ import { Module } from '@nestjs/common';
 import { OtpService } from './user/otp/otp.service';
 import { UserDBService } from './user/user-db/user-db.service';
 import { UserModule } from './user/user.module';
+import got from 'got/dist/source';
 
 const gupshupFactory = {
   provide: 'GupshupService',
@@ -19,6 +20,7 @@ const gupshupFactory = {
       process.env.GUPSHUP_USERNAME,
       process.env.GUPSHUP_PASSWORD,
       process.env.GUPSHUP_BASEURL,
+      got,
     );
   },
   inject: [],

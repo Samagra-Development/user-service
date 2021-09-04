@@ -17,6 +17,7 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
+    "test:watch-cov": "jest --watch --coverage --runInBand",
     "test:cov": "jest --coverage --runInBand",
     "test:dev": "jest --watch --coverage --runInBand",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
