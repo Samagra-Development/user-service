@@ -117,6 +117,7 @@ describe('Gupshup service Error Response', () => {
     }).compile();
     service = module.get<GupshupService>(GupshupService);
   });
+
   it('Error Response', async () => {
     const resp1 = await service
       .send({
