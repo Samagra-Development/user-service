@@ -26,6 +26,9 @@ $ yarn start
 # watch mode
 $ yarn start:dev
 
+# debug mode
+$ yarn start:debug
+
 # production mode
 $ yarn start:prod
 ```
@@ -41,6 +44,9 @@ $ yarn test:e2e
 
 # test coverage
 $ yarn test:cov
+
+# test a single file
+$ yarn run test:watch ./src/user/sms/gupshup/gupshup.service.spec.ts
 ```
 
 ## Stay in touch
