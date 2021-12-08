@@ -285,35 +285,53 @@ export class UserService {
             .getUserById(fusionAuthUser.user.id)
             .then((userDBResponse) => userDBResponse.results[0])
             .then((userDBResponse): SignupResponse => {
-              console.log(userDBResponse);
-              const response: SignupResponse = new SignupResponse().init(
-                uuidv4(),
-              );
-              if (userDBResponse.account_status !== 'ACTIVE') {
-                delete fusionAuthUser.refreshToken;
-                delete fusionAuthUser.token;
+              if (!userDBResponse) {
+                //Admin User
+                const response: SignupResponse = new SignupResponse().init(
+                  uuidv4(),
+                );
+                console.log({ fusionAuthUser });
                 response.responseCode = ResponseCode.OK;
                 response.result = {
                   responseMsg: 'Successful Logged In',
-                  accountStatus: AccountStatus[userDBResponse?.account_status],
+                  accountStatus: AccountStatus.ACTIVE,
                   data: {
                     user: fusionAuthUser,
-                    schoolResponse: userDBResponse,
                   },
                 };
+                return response;
               } else {
-                response.responseCode = ResponseCode.OK;
-                response.result = {
-                  responseMsg: 'Successful Logged In',
-                  accountStatus: AccountStatus[userDBResponse?.account_status],
-                  data: {
-                    user: fusionAuthUser,
-                    schoolResponse: userDBResponse,
-                  },
-                };
+                console.log(userDBResponse);
+                const response: SignupResponse = new SignupResponse().init(
+                  uuidv4(),
+                );
+                if (userDBResponse.account_status !== 'ACTIVE') {
+                  delete fusionAuthUser.refreshToken;
+                  delete fusionAuthUser.token;
+                  response.responseCode = ResponseCode.OK;
+                  response.result = {
+                    responseMsg: 'Successful Logged In',
+                    accountStatus:
+                      AccountStatus[userDBResponse?.account_status],
+                    data: {
+                      user: fusionAuthUser,
+                      schoolResponse: userDBResponse,
+                    },
+                  };
+                } else {
+                  response.responseCode = ResponseCode.OK;
+                  response.result = {
+                    responseMsg: 'Successful Logged In',
+                    accountStatus:
+                      AccountStatus[userDBResponse?.account_status],
+                    data: {
+                      user: fusionAuthUser,
+                      schoolResponse: userDBResponse,
+                    },
+                  };
+                }
+                return response;
               }
-
-              return response;
             })
             .catch((e: ClientResponse<LoginResponse>): SignupResponse => {
               console.log(e);
