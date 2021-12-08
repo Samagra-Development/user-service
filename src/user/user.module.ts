@@ -4,8 +4,9 @@ import { Module } from '@nestjs/common';
 import { OtpService } from './otp/otp.service';
 import { SmsService } from './sms/sms.service';
 import { UserController } from './user.controller';
-import { UserDBService } from 'src/user/user-db/user-db.service';
 import { UserService } from './user.service';
+import got from 'got/dist/source';
+import { UserDBService } from './user-db/user-db.service';
 
 const gupshupFactory = {
   provide: 'OtpService',
@@ -14,6 +15,7 @@ const gupshupFactory = {
       process.env.GUPSHUP_USERNAME,
       process.env.GUPSHUP_PASSWORD,
       process.env.GUPSHUP_BASEURL,
+      got,
     );
   },
   inject: [],

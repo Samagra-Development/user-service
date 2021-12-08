@@ -5,6 +5,7 @@ import { GupshupService } from './sms/gupshup/gupshup.service';
 import { OtpService } from './otp/otp.service';
 import { UserDBService } from './user-db/user-db.service';
 import { UserService } from './user.service';
+import got from 'got/dist/source';
 
 describe('UserService', () => {
   let service: UserService;
@@ -19,6 +20,7 @@ describe('UserService', () => {
         process.env.GUPSHUP_USERNAME,
         process.env.GUPSHUP_PASSWORD,
         process.env.GUPSHUP_BASEURL,
+        got,
       );
     },
     inject: [],

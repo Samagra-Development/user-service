@@ -3,6 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GupshupService } from '../sms/gupshup/gupshup.service';
 import { OtpService } from './otp.service';
 
+import got, { Got } from 'got/dist/source';
+
 const gupshupFactory = {
   provide: GupshupService,
   useFactory: () => {
@@ -10,6 +12,7 @@ const gupshupFactory = {
       process.env.GUPSHUP_USERNAME,
       process.env.GUPSHUP_PASSWORD,
       process.env.GUPSHUP_BASEURL,
+      got,
     );
   },
   inject: [],

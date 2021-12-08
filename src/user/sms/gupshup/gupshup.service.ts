@@ -12,7 +12,7 @@ import {
 
 import { Injectable } from '@nestjs/common';
 import { SmsService } from '../sms.service';
-import got from 'got/dist/source';
+import { Got } from 'got/dist/source';
 
 @Injectable()
 export class GupshupService extends SmsService implements SMS {
@@ -36,15 +36,18 @@ export class GupshupService extends SmsService implements SMS {
     password: '',
   };
 
+  httpClient: Got;
+
   baseURL: string;
   path = '';
   data: SMSData;
 
-  constructor(username: string, password: string, baseURL: string) {
+  constructor(username: string, password: string, baseURL: string, got: Got) {
     super();
     this.auth.userid = username;
     this.auth.password = password;
     this.baseURL = baseURL;
+    this.httpClient = got;
   }
 
   send(data: SMSData): Promise<SMSResponse> {
@@ -69,7 +72,7 @@ export class GupshupService extends SmsService implements SMS {
     else return this.doRequest();
   }
 
-  doOTPRequest(data: SMSData): Promise<OTPResponse> {
+  private doOTPRequest(data: SMSData): Promise<OTPResponse> {
     const options = {
       searchParams: {
         ...this.otpApiConstants,
@@ -84,7 +87,7 @@ export class GupshupService extends SmsService implements SMS {
     status.provider = SMSProvider.gupshup;
     status.phone = data.phone;
 
-    return got
+    return this.httpClient
       .get(url, options)
       .then((response): OTPResponse => {
         status.networkResponseCode = 200;
@@ -128,7 +131,7 @@ export class GupshupService extends SmsService implements SMS {
     status.provider = SMSProvider.gupshup;
     status.phone = data.phone;
 
-    return got
+    return this.httpClient
       .get(url, options)
       .then((response): OTPResponse => {
         status.networkResponseCode = 200;
@@ -160,9 +163,9 @@ export class GupshupService extends SmsService implements SMS {
   }
 
   parseResponse(response: string) {
-    console.log({ response });
-    const responseData: string[] = response.split('|').map((s) => s.trim());
+    // console.log({ response });
     try {
+      const responseData: string[] = response.split('|').map((s) => s.trim());
       if (responseData[0] === 'success') {
         return {
           providerResponseCode: null,
