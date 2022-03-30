@@ -165,7 +165,7 @@ describe('Gupshup service Success With Incorrect response', () => {
       providerResponseCode: null,
       error: {
         errorText:
-          "Gupshup response could not be parsed :: Cannot read properties of undefined (reading 'split'); Provider Response - undefined",
+        "Gupshup response could not be parsed :: Cannot read property 'split' of undefined; Provider Response - undefined",
         errorCode: 'CUSTOM ERROR',
       },
       status: SMSResponseStatus.failure,

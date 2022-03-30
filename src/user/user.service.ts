@@ -8,7 +8,7 @@ const AES = require("crypto-js/aes");
 CryptoJS.lib.WordArray.words;
 
 const encodedBase64Key = process.env.ENCRYPTION_KEY;
-const parsedBase64Key = CryptoJS.enc.Base64.parse(encodedBase64Key);
+const parsedBase64Key = ((encodedBase64Key === undefined) ? "bla" : CryptoJS.enc.Base64.parse(encodedBase64Key));
 
 import {
   AccountStatus,
