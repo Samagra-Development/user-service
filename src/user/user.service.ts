@@ -1,6 +1,14 @@
 import * as addressSchema from './schema/address.json';
 import * as educationSchema from './schema/education.json';
 import * as userSchema from './schema/user.json';
+const env = require("dotenv").config();
+const CryptoJS = require("crypto-js");
+const AES = require("crypto-js/aes");
+
+CryptoJS.lib.WordArray.words;
+
+const encodedBase64Key = process.env.ENCRYPTION_KEY;
+const parsedBase64Key = CryptoJS.enc.Base64.parse(encodedBase64Key);
 
 import {
   AccountStatus,
@@ -252,7 +260,24 @@ export class UserService {
     return this.fusionAuthService
       .login(user)
       .then(async (resp: ClientResponse<LoginResponse>) => {
-        let fusionAuthUser: LoginResponse = resp.response;
+        let fusionAuthUser: any = resp.response;
+        if (fusionAuthUser.user === undefined) {
+          console.log("Here")
+          fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
+        }
+        if (fusionAuthUser.user.data.accountName === undefined) {
+          if (fusionAuthUser.user.fullName == undefined) {
+            if (fusionAuthUser.user.firstName === undefined){
+              fusionAuthUser['user']['data']['accountName'] = this.decrypt(user.loginId)
+            }
+            else {
+              fusionAuthUser['user']['data']['accountName'] = fusionAuthUser.user.firstName
+            }
+          }
+          else{
+            fusionAuthUser['user']['data']['accountName'] = fusionAuthUser.user.fullName
+          }
+        }
         if (this.isOldSchoolUser(fusionAuthUser.user)) {
           //updateUserData with school and udise
           fusionAuthUser.user.data = {};
@@ -268,6 +293,10 @@ export class UserService {
 
           //login again to get new JWT
           fusionAuthUser = (await this.fusionAuthService.login(user)).response;
+          if (fusionAuthUser.user === undefined) {
+            console.log("Here")
+            fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
+          }
           const response: SignupResponse = new SignupResponse().init(uuidv4());
           response.responseCode = ResponseCode.OK;
           response.result = {
@@ -280,7 +309,6 @@ export class UserService {
           };
           return response;
         } else {
-          console.log(fusionAuthUser.user.id);
           return this.userDBService
             .getUserById(fusionAuthUser.user.id)
             .then((userDBResponse) => userDBResponse.results[0])
@@ -290,7 +318,6 @@ export class UserService {
                 const response: SignupResponse = new SignupResponse().init(
                   uuidv4(),
                 );
-                console.log({ fusionAuthUser });
                 response.responseCode = ResponseCode.OK;
                 response.result = {
                   responseMsg: 'Successful Logged In',
@@ -301,7 +328,6 @@ export class UserService {
                 };
                 return response;
               } else {
-                console.log(userDBResponse);
                 const response: SignupResponse = new SignupResponse().init(
                   uuidv4(),
                 );
@@ -471,4 +497,19 @@ export class UserService {
     }
     return userCopy;
   }
+
+  encrypt(plainString: any): any {
+    const encryptedString = AES.encrypt(plainString, parsedBase64Key, {
+      mode: CryptoJS.mode.ECB,
+    }).toString();
+    return encryptedString;
+  };
+
+  decrypt(encryptedString: any): any {
+    const plainString = AES.decrypt(encryptedString, parsedBase64Key, {
+      mode: CryptoJS.mode.ECB,
+    }).toString(CryptoJS.enc.Utf8);
+    return plainString;
+  };
+
 }

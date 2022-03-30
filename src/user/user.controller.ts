@@ -16,7 +16,7 @@ export class UserController {
     private readonly smsService: SmsService,
     private readonly userService: UserService,
   ) {}
-
+  
   @Get('/verify')
   async verifyUsernamePhoneCombination(): Promise<any> {
     const status: boolean =
@@ -44,6 +44,10 @@ export class UserController {
 
   @Post('/login')
   async login(@Body() user: any): Promise<SignupResponse> {
+    if(user.applicationId === process.env.FUSIONAUTH_APPLICATION_ID){
+      user.loginId = this.userService.encrypt(user.loginId)
+      user.password = this.userService.encrypt(user.password)
+    }
     const status: SignupResponse = await this.userService.login(user);
     return status;
   }

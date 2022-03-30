@@ -102,10 +102,18 @@ export class FusionauthService {
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
     console.log(authObj);
+    var resp;
+    var resp1;
+    const responses: Array<{ statusFA: FAStatus; userId: UUID }> = [];
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
       username: authObj.username,
       applicationId: process.env.FUSIONAUTH_APPLICATION_ID,
+      roles: authObj.role,
+    };
+    const currentRegistration_samarth_hp: UserRegistration = {
+      username: authObj.username,
+      applicationId: process.env.FUSIONAUTH_SAMARTH_HP_APPLICATION_ID,
       roles: authObj.role,
     };
     registrations.push(currentRegistration);
@@ -131,14 +139,43 @@ export class FusionauthService {
       },
       registration: currentRegistration,
     };
-
-    return this.fusionauthClient
+    const userRequest_samarth_hp: RegistrationRequest = {
+      registration: currentRegistration_samarth_hp,
+    };
+    resp = this.fusionauthClient
       .register(undefined, userRequest)
       .then(
         (
           response: ClientResponse<RegistrationResponse>,
         ): { statusFA: FAStatus; userId: UUID } => {
-          console.log({ response });
+          this.fusionauthClient
+            .register(response.response.user.id, userRequest_samarth_hp)
+            .then(
+            (
+              res: ClientResponse<RegistrationResponse>,
+            ): any => {
+                console.log({ res });
+              },
+            )
+            .catch((e): Promise<{ statusFA: FAStatus; userId: UUID }> => {
+              console.log('Could not create a user in', JSON.stringify(e));
+              console.log('Trying to fetch an existing user in');
+              return this.fusionauthClient
+                .retrieveUserByUsername(authObj.username)
+                .then(
+                  (
+                    response: ClientResponse<UserResponse>,
+                  ): any => {
+                    console.log('Found user in');
+                  },
+                )
+                .catch((e): any => {
+                  console.log(
+                    `Could not fetch user with username in ${authObj.username}`,
+                    JSON.stringify(e),
+                  );
+                });
+          });
           return {
             statusFA: FAStatus.SUCCESS,
             userId: response.response.user.id,
@@ -171,10 +208,12 @@ export class FusionauthService {
               userId: null,
             };
           });
-      });
+    });
+  return resp;
   }
 
   login(user: LoginRequest): Promise<ClientResponse<LoginResponse>> {
+    console.log(user)
     return this.fusionauthClient
       .login(user)
       .then((response: ClientResponse<LoginResponse>): any => {
@@ -211,6 +250,8 @@ export class FusionauthService {
             dateOfRetirement: authObj.dateOfRetirement,
             phoneVerified: false,
             udise: authObj.udise,
+            phone: authObj.phone,
+            accountName: authObj.firstName,
           },
           email: authObj.email,
           firstName: authObj.firstName,
