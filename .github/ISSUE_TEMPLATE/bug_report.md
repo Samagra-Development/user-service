@@ -1,7 +1,10 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+title: ''
 labels: bug
+assignees: ''
+
 ---
 
 <!-- Before filling this issue, please read the wiki (https://github.com/Samagra-Development/uci-pwa/wiki)

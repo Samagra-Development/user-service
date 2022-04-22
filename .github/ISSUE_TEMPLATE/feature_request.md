@@ -1,3 +1,12 @@
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 <!-- Please refer to CONTRIBUTING.md (https://github.com/Samagra-Development/uci-pwa/blob/main/CONTRIBUTING.md)
 before creating the pull request to make sure you follow all the standards. -->
 
