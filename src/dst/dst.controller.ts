@@ -16,7 +16,8 @@ export class DstController {
       @UseGuards(AuthGuard('basic'))
       async sendOTP(@Query('phone') phone): Promise<any> {
         const status: SMSResponse = await this.otpService.sendOTP(phone);
-        return { status };
+        const resp: SignupResponse = await this.dstService.transformOtpResponse(status);
+        return { resp };
       }
     
       @Get('/verifyOTP')

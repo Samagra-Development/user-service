@@ -1,11 +1,11 @@
 import { User } from '@fusionauth/typescript-client';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { ResponseCode, ResponseStatus, SignupResponse } from './dst.interface';
+import { AccountStatus, ResponseCode, ResponseStatus, SignupResponse } from './dst.interface';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
 import { firstValueFrom, map } from 'rxjs';
-import { SMSData, SMSResponseStatus, SMSType } from './sms/sms.interface';
+import { SMSData, SMSResponse, SMSResponseStatus, SMSType } from './sms/sms.interface';
 import { SmsService } from 'src/user/sms/sms.service';
 import { UsersResponse } from 'src/user/user.interface';
 
@@ -153,6 +153,28 @@ export class DstService {
       response.params.errMsg = 'OTP incorrect';
       response.params.status = ResponseStatus.failure;
     }
+    return response;
+  }
+
+  async transformOtpResponse(status: SMSResponse): Promise<SignupResponse> {
+      console.log({status});
+      
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.responseCode = ResponseCode.OK;
+    response.params.status = status.status === SMSResponseStatus.failure? ResponseStatus.failure:ResponseStatus.success;
+    response.params.errMsg = status.error==null?'':status.error.errorText;
+    response.params.err = status.error==null?'':status.error.errorCode;;
+    const result = {
+        responseMsg: status.status,
+        accountStatus: null,
+        data: {
+            phone: status.phone,
+            networkResponseCode: status.networkResponseCode,
+            providerResponseCode: status.providerResponseCode,
+            provider: status.provider
+        }
+    }
+    response.result = result;
     return response;
   }
 }
