@@ -15,6 +15,7 @@ import {
   ResponseCode,
   ResponseStatus,
   SignupResponse,
+  UsersResponse,
 } from './user.interface';
 import Ajv, { ErrorObject } from 'ajv';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
@@ -511,5 +512,5 @@ export class UserService {
     }).toString(CryptoJS.enc.Utf8);
     return plainString;
   };
-
+  
 }

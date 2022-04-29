@@ -1,3 +1,5 @@
+import { SearchResponse } from '@fusionauth/typescript-client';
+import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 
@@ -5,7 +7,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { SmsService } from './sms/sms.service';
-import { SignupResponse } from './user.interface';
+import { SignupResponse, UsersResponse } from './user.interface';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -73,4 +75,5 @@ export class UserController {
     const status: SignupResponse = await this.userService.changePassword(data);
     return status;
   }
+
 }

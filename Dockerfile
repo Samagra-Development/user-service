@@ -1,4 +1,3 @@
-
 FROM node:12 AS builder
 
 # Create app directory

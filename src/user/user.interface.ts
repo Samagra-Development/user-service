@@ -1,4 +1,4 @@
-import { UUID } from '@fusionauth/typescript-client';
+import { User, UUID } from '@fusionauth/typescript-client';
 import { v4 as uuidv4 } from 'uuid';
 
 export enum ResponseStatus {
@@ -49,6 +49,11 @@ export interface SignupResult {
   data?: any;
 }
 
+export interface UsersResult {
+  total?: number;
+  users?: Array<User>;
+}
+
 export class SignupResponse implements IGenericResponse {
   id: string;
   ver: string;
@@ -58,6 +63,37 @@ export class SignupResponse implements IGenericResponse {
   result: SignupResult;
 
   init(msgId: UUID): SignupResponse {
+    this.responseCode = ResponseCode.OK;
+    this.params = {
+      responseMsgId: uuidv4(),
+      msgId: msgId,
+      err: '',
+      status: ResponseStatus.success,
+      errMsg: '',
+    };
+    this.ts = new Date();
+    this.id = uuidv4();
+    this.result = null;
+    return this;
+  }
+
+  getSuccess() {
+    throw new Error('Method not implemented.');
+  }
+  getFailure() {
+    throw new Error('Method not implemented.');
+  }
+}
+
+export class UsersResponse implements IGenericResponse {
+  id: string;
+  ver: string;
+  ts: Date;
+  params: ResponseParams;
+  responseCode: ResponseCode;
+  result: UsersResult;
+
+  init(msgId: UUID): UsersResponse {
     this.responseCode = ResponseCode.OK;
     this.params = {
       responseMsgId: uuidv4(),
