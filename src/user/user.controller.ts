@@ -1,12 +1,12 @@
 import { SearchResponse } from '@fusionauth/typescript-client';
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
-import { SmsService } from './sms/sms.service';
 import { SignupResponse, UsersResponse } from './user.interface';
 import { UserService } from './user.service';
 
@@ -15,7 +15,6 @@ export class UserController {
   constructor(
     private readonly fusionAuthService: FusionauthService,
     private readonly otpService: OtpService,
-    private readonly smsService: SmsService,
     private readonly userService: UserService,
   ) {}
   

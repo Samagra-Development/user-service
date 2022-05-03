@@ -177,4 +177,85 @@ export class DstService {
     response.result = result;
     return response;
   }
+
+  async loginTrainee({ username, dob }): Promise<SignupResponse> {
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    let password = uuidv4();
+    const data = {
+      registration: {
+        applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
+        preferredLanguages: ['en'],
+        roles: ['trainee'],
+        timezone: 'Asia/Kolkata',
+        username: username,
+        usernameStatus: 'ACTIVE',
+      },
+      user: {
+        birthDate: dob,
+        preferredLanguages: ['en'],
+        timezone: 'Asia/Kolkata',
+        usernameStatus: 'ACTIVE',
+        username: username,
+        password: password,
+      },
+    };
+    const user = await this.createUser(data).catch((e) => {
+      console.log(e.response.data);
+      return e.response.data.fieldErrors['user.username']['code'];
+    });
+    if (typeof user === "string") {
+        console.log("HERE");
+        console.log(response.params.err);
+        
+      if (user === '[duplicate]user.username') {
+        password = uuidv4();
+        const passwordStatus = await this.updatePassword({
+          loginId: username,
+          password: password,
+        }).catch((e) => {
+          console.log(e.response.data);
+          return false;
+        });
+        if (passwordStatus) {
+          return this.login({
+            loginId: username,
+            password: password,
+            applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
+          });
+        } else {
+          response.params.err = 'INVALID_LOGIN';
+          response.params.errMsg =
+            'Error Logging In. Please try again later.';
+          response.params.status = ResponseStatus.failure;
+        }
+          } else {
+        response.params.err = 'INVALID_REGISTRATION';
+        response.params.errMsg = 'Error Logging In. Please try again later.';
+        response.params.status = ResponseStatus.failure;
+      }
+    } else {
+      password = uuidv4();
+      const passwordStatus = await this.updatePassword({
+        loginId: username,
+        password: password,
+      }).catch((e) => {
+        console.log(e.response.data);
+        response.params.err = 'ERROR_PASSWORD_RESET';
+        response.params.errMsg = 'Error Logging In. Please try again later.';
+        response.params.status = ResponseStatus.failure;
+      });
+      if (passwordStatus) {
+        return this.login({
+          loginId: username,
+          password: password,
+          applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
+        });
+      } else {
+        response.params.err = 'INVALID_LOGIN';
+        response.params.errMsg = 'Error Logging In. Please try again later.';
+        response.params.status = ResponseStatus.failure;
+      }
+    }
+  return response;
+  }
 }

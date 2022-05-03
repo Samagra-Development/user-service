@@ -30,7 +30,7 @@ const otpServiceFactory = {
 };
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [HttpModule],
   controllers: [DstController],
   providers: [
     DstService,
