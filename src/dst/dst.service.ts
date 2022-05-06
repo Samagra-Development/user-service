@@ -73,7 +73,6 @@ export class DstService {
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     if (status === SMSResponseStatus.success || status === SMSResponseStatus.failure) {
       const url = process.env.FUSIONAUTH_OLD_BASE_URL + '/api/user';
-      console.log({ url: url });
       console.log('HERE');
       const { statusFA, userId, user }: { statusFA: FAStatus; userId: UUID; user: User } = await this.fusionAuthService.getUser(phone);
       console.log('here 2');
