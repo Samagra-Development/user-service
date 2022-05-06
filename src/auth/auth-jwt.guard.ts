@@ -38,6 +38,6 @@ import {
   
     handleRequest(err, user, info) {
         console.log({handleRequest: info, error: err, user: user})
-      return user;
+        return user;
     }
   }

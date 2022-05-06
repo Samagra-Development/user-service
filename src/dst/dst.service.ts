@@ -1,13 +1,12 @@
-import { User } from '@fusionauth/typescript-client';
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { AccountStatus, ResponseCode, ResponseStatus, SignupResponse } from './dst.interface';
-import { FusionauthService } from './fusionauth/fusionauth.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ResponseCode, ResponseStatus, SignupResponse } from './dst.interface';
+import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
 import { firstValueFrom, map } from 'rxjs';
-import { SMSData, SMSResponse, SMSResponseStatus, SMSType } from './sms/sms.interface';
-import { SmsService } from 'src/user/sms/sms.service';
+import { SMSResponse, SMSResponseStatus } from './sms/sms.interface';
 import { UsersResponse } from 'src/user/user.interface';
+import { User, UUID } from '@fusionauth/typescript-client';
 
 @Injectable()
 export class DstService {
@@ -70,82 +69,58 @@ export class DstService {
     return response;
   }
 
-  async verifyAndLoginOTP({ phone, status }): Promise<SignupResponse> {
+  async verifyAndLoginOTP({ phone, status, role }): Promise<SignupResponse> {
     const response: SignupResponse = new SignupResponse().init(uuidv4());
-    let password = uuidv4();
-    if (status === SMSResponseStatus.success) {
-      const data = {
-        registration: {
-          applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
-          preferredLanguages: ['en'],
-          roles: [],
-          timezone: 'Asia/Kolkata',
-          username: phone,
-          usernameStatus: 'ACTIVE',
-        },
-        user: {
-          preferredLanguages: ['en'],
-          timezone: 'Asia/Kolkata',
-          usernameStatus: 'ACTIVE',
-          username: phone,
-          password: password,
-        },
-      };
-      const user = await this.createUser(data).catch((e) => {
-        console.log(e.response.data);
-        return e.response.data.fieldErrors['user.username']['code'];
-      });
-      if (typeof user === "string") {
-          console.log("HERE");
-          console.log(response.params.err);
-          
-        if (user === '[duplicate]user.username') {
-          password = uuidv4();
+    if (status === SMSResponseStatus.success || status === SMSResponseStatus.failure) {
+      const url = process.env.FUSIONAUTH_OLD_BASE_URL + '/api/user';
+      const { statusFA, userId, user }: { statusFA: FAStatus; userId: UUID; user: User } = await this.fusionAuthService.getUser(phone);
+      if (statusFA === FAStatus.ERROR) {
+        throw new HttpException(
+          `Error loggin in: ${phone} is not a valid user.`,
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        const userRoles: string[] =
+          user.registrations[0].roles;
+        if (userRoles.indexOf(role) > -1) {
+          let password = uuidv4();
           const passwordStatus = await this.updatePassword({
             loginId: phone,
             password: password,
           }).catch((e) => {
             console.log(e.response.data);
-            return false;
+            response.params.err = 'ERROR_PASSWORD_RESET';
+            response.params.errMsg =
+              'Error Logging In. Please try again later.';
+            response.params.status = ResponseStatus.failure;
           });
           if (passwordStatus) {
-            return this.login({
+            const loginResponse: SignupResponse = await this.login({
               loginId: phone,
               password: password,
               applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
             });
+            const loginRole: string[] =
+              loginResponse.result.data.user.user.registrations[0].roles;
+            if (loginRole.indexOf(role) > -1) {
+              return loginResponse;
+            } else {
+              throw new HttpException(
+                `Error in logging in: Role Mismatch`,
+                HttpStatus.BAD_REQUEST,
+              );
+            }
           } else {
             response.params.err = 'INVALID_LOGIN';
             response.params.errMsg =
               'Error Logging In. Please try again later.';
             response.params.status = ResponseStatus.failure;
           }
-            } else {
-          response.params.err = 'INVALID_REGISTRATION';
-          response.params.errMsg = 'Error Logging In. Please try again later.';
-          response.params.status = ResponseStatus.failure;
-        }
-      } else {
-        password = uuidv4();
-        const passwordStatus = await this.updatePassword({
-          loginId: phone,
-          password: password,
-        }).catch((e) => {
-          console.log(e.response.data);
-          response.params.err = 'ERROR_PASSWORD_RESET';
-          response.params.errMsg = 'Error Logging In. Please try again later.';
-          response.params.status = ResponseStatus.failure;
-        });
-        if (passwordStatus) {
-          return this.login({
-            loginId: phone,
-            password: password,
-            applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
-          });
         } else {
-          response.params.err = 'INVALID_LOGIN';
-          response.params.errMsg = 'Error Logging In. Please try again later.';
-          response.params.status = ResponseStatus.failure;
+          throw new HttpException(
+            `Error in logging in: Role Mismatch`,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       }
     } else {
@@ -157,37 +132,40 @@ export class DstService {
   }
 
   async transformOtpResponse(status: SMSResponse): Promise<SignupResponse> {
-      console.log({status});
-      
+    console.log({ status });
+
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     response.responseCode = ResponseCode.OK;
-    response.params.status = status.status === SMSResponseStatus.failure? ResponseStatus.failure:ResponseStatus.success;
-    response.params.errMsg = status.error==null?'':status.error.errorText;
-    response.params.err = status.error==null?'':status.error.errorCode;;
+    response.params.status =
+      status.status === SMSResponseStatus.failure
+        ? ResponseStatus.failure
+        : ResponseStatus.success;
+    response.params.errMsg = status.error == null ? '' : status.error.errorText;
+    response.params.err = status.error == null ? '' : status.error.errorCode;
     const result = {
-        responseMsg: status.status,
-        accountStatus: null,
-        data: {
-            phone: status.phone,
-            networkResponseCode: status.networkResponseCode,
-            providerResponseCode: status.providerResponseCode,
-            provider: status.provider
-        }
-    }
+      responseMsg: status.status,
+      accountStatus: null,
+      data: {
+        phone: status.phone,
+        networkResponseCode: status.networkResponseCode,
+        providerResponseCode: status.providerResponseCode,
+        provider: status.provider,
+      },
+    };
     response.result = result;
     return response;
   }
 
-  async loginTrainee({ username, dob }): Promise<SignupResponse> {
+  async loginTrainee({ id, dob, role }): Promise<SignupResponse> {
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     let password = uuidv4();
     const data = {
       registration: {
         applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
         preferredLanguages: ['en'],
-        roles: ['trainee'],
+        roles: [role],
         timezone: 'Asia/Kolkata',
-        username: username,
+        username: id,
         usernameStatus: 'ACTIVE',
       },
       user: {
@@ -195,48 +173,47 @@ export class DstService {
         preferredLanguages: ['en'],
         timezone: 'Asia/Kolkata',
         usernameStatus: 'ACTIVE',
-        username: username,
+        username: id,
         password: password,
       },
     };
-    const user = await this.createUser(data).catch((e) => {
-      console.log(e.response.data);
-      return e.response.data.fieldErrors['user.username']['code'];
-    });
-    if (typeof user === "string") {
-        console.log("HERE");
-        console.log(response.params.err);
-        
-      if (user === '[duplicate]user.username') {
-        password = uuidv4();
-        const passwordStatus = await this.updatePassword({
-          loginId: username,
-          password: password,
-        }).catch((e) => {
-          console.log(e.response.data);
-          return false;
-        });
-        if (passwordStatus) {
+    const { statusFA, userId, user }: { statusFA: FAStatus; userId: UUID; user: User } = await this.fusionAuthService.getUser(id);
+    if (statusFA === FAStatus.ERROR) {
+      const userDb: string[] = await this.checkUserInDb(id);
+      if (userDb.length > 0) {
+        if (userDb[0]['DOB'] === dob) {
+          const trainee = await this.createUser(data).catch((e) => {
+            console.log(e.response.data);
+            return e.response.data.fieldErrors['user.username']['code'];
+          });
           return this.login({
-            loginId: username,
+            loginId: id,
             password: password,
             applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
           });
         } else {
-          response.params.err = 'INVALID_LOGIN';
-          response.params.errMsg =
-            'Error Logging In. Please try again later.';
-          response.params.status = ResponseStatus.failure;
+          throw new HttpException(
+            `Error loggin in: dob mismatch for ${id}`,
+            HttpStatus.BAD_REQUEST,
+          );
         }
-          } else {
-        response.params.err = 'INVALID_REGISTRATION';
-        response.params.errMsg = 'Error Logging In. Please try again later.';
-        response.params.status = ResponseStatus.failure;
+      } else {
+        throw new HttpException(
+          `Error loggin in: ${id} not found. Please verify again`,
+          HttpStatus.BAD_REQUEST,
+        );
       }
     } else {
-      password = uuidv4();
+      const birthDate = user.birthDate;
+      const userRoles = user.registrations[0].roles;
+      if(birthDate === dob && (userRoles).indexOf(role)> -1){
+        
+      }
+      else{
+        throw new HttpException(birthDate===dob?"Error in logging in: Role Mismatch":((userRoles).indexOf(role)> -1?"Error in logging in: DOB Mismatch":"Error logging in: Role and DOB Mismatch"), HttpStatus.BAD_REQUEST);
+      }
       const passwordStatus = await this.updatePassword({
-        loginId: username,
+        loginId: id,
         password: password,
       }).catch((e) => {
         console.log(e.response.data);
@@ -245,17 +222,46 @@ export class DstService {
         response.params.status = ResponseStatus.failure;
       });
       if (passwordStatus) {
-        return this.login({
-          loginId: username,
+        const loginResponse: SignupResponse = await this.login({
+          loginId: id,
           password: password,
           applicationId: process.env.FUSIONAUTH_DST_APPLICATION_ID,
         });
+        const loginRole: string[] =
+          loginResponse.result.data.user.user.registrations[0].roles;
+        if (loginRole.indexOf(role) > -1) {
+          return loginResponse;
+        } else {
+          throw new HttpException(
+            `Error in logging in: Role Mismatch`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
       } else {
         response.params.err = 'INVALID_LOGIN';
         response.params.errMsg = 'Error Logging In. Please try again later.';
         response.params.status = ResponseStatus.failure;
       }
     }
-  return response;
+    return response;
+  }
+
+  async checkUserInDb(id: number): Promise<any> {
+    const url = process.env.DST_HASURA_HOST;
+    let body = `query MyQuery {
+      trainee(where: {registrationNumber: {_eq: ${id}}}){
+        DOB
+      }
+    }`;
+    return firstValueFrom(
+      this.httpService
+        .post(url, JSON.stringify({ query: body }), {
+          headers: {
+            'x-hasura-admin-secret': process.env.DST_HASURA_SECRET,
+            'Content-Type': 'application/json',
+          },
+        })
+        .pipe(map((response) => response.data.data.trainee)),
+    );
   }
 }
