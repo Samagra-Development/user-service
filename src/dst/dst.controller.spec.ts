@@ -21,9 +21,9 @@ describe('DstController', () => {
       provide: 'OtpService',
       useFactory: () => {
         return new GupshupService(
-          process.env.GUPSHUP_USERNAME,
-          process.env.GUPSHUP_PASSWORD,
-          process.env.GUPSHUP_BASEURL,
+          "testUsername",
+          "testPassword",
+          "testBaseUrl",
           got,
         );
       },
@@ -59,6 +59,9 @@ describe('DstController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+    // expect(controller.sendOTP("")).toBeDefined();
+    // expect(controller.loginOrRegister("", "", "", "", "")).toBeDefined();
   });
+  
 });
 

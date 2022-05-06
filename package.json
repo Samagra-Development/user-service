@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@fusionauth/typescript-client": "^1.29.1",
+    "@golevelup/ts-jest": "^0.3.3",
     "@nestjs/axios": "^0.0.7",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.0.1",
