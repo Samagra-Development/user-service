@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ResponseCode, ResponseStatus, UsersResponse } from './admin.interface';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
-import { map } from 'rxjs';
+import { catchError, map } from 'rxjs';
 
 @Injectable()
 export class AdminService {
@@ -63,6 +63,9 @@ export class AdminService {
             'Content-Type': 'application/json'
         }}).pipe(
         map(response => response.status===200?{msg: "Password changed successfully"}:{msg:"Password cannot be changed"}),
+        catchError(e=>{
+          return e.data;
+        })
         );
     }
 
@@ -73,6 +76,9 @@ export class AdminService {
             'Content-Type': 'application/json'
         }}).pipe(
         map(response => response.data),
+        catchError(e=>{
+          return e.data;
+        })
         );
     }
 
@@ -83,6 +89,9 @@ export class AdminService {
             'Content-Type': 'application/json'
         }}).pipe(
         map(response => response.data),
+        catchError(e=>{
+          return e.data;
+        })
         );
     }
 }
