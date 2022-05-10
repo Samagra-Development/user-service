@@ -36,7 +36,7 @@ export class DstController {
       //   return { resp };
       // }
 
-      @Throttle(10, 86400)
+      @Throttle(parseInt(process.env.DST_API_LIMIT), parseInt(process.env.DST_API_TTL))
       @Get('/:role/loginOrRegister')
       async loginOrRegister(@Param('role') role: string, @Query('id') id, @Query('phone') phone, @Query('otp') otp, @Query('dob') dob): Promise<any> {
         let resp: SignupResponse;
