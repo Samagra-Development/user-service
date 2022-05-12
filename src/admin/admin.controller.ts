@@ -1,7 +1,8 @@
+import { User } from '@fusionauth/typescript-client';
 import { Body, Controller, Request, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth-jwt.guard';
-import { UsersResponse } from './admin.interface';
+import { SignupResponse, UsersResponse } from './admin.interface';
 import { AdminService } from './admin.service';
 import { Roles } from './roles.decorator';
 
@@ -22,24 +23,24 @@ export class AdminController {
     @Post('/changePassword')
     @Roles('Admin')
     @UseGuards(JwtAuthGuard)
-    async updatePassword(@Body() data: any): Promise<UsersResponse> {
-        const status: UsersResponse = await this.adminService.updatePassword(data);
+    async updatePassword(@Body() data: {loginId: string, password: string}): Promise<SignupResponse> {
+        const status: SignupResponse = await this.adminService.updatePassword(data);
         return status;
     }
 
     @Post('/createUser')
     @Roles('Admin')
     @UseGuards(JwtAuthGuard)
-    async createUser(@Body() data: any): Promise<UsersResponse> {
-        const users: UsersResponse = await this.adminService.createUser(data);
+    async createUser(@Body() data: User): Promise<SignupResponse> {
+        const users: SignupResponse = await this.adminService.createUser(data);
         return users;
     }
 
     @Patch('/updateUser/:userId')
     @Roles('Admin')
     @UseGuards(JwtAuthGuard)
-    async updateUser(@Param('userId') userId: string, @Body() data: any): Promise<UsersResponse> {
-        const user: UsersResponse = await this.adminService.updateUser(userId, data);
+    async updateUser(@Param('userId') userId: string, @Body() data: User): Promise<SignupResponse> {
+        const user: SignupResponse = await this.adminService.updateUser(userId, data);
         return user;
     }
 

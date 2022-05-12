@@ -11,11 +11,15 @@ import FusionAuthClient, {
   UserRegistration,
   UserRequest,
   UserResponse,
+  ChangePasswordResponse,
+  Error,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { response } from 'express';
+import { catchError, map } from 'rxjs';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -27,7 +31,7 @@ export enum FAStatus {
 export class FusionauthService {
   fusionauthClient: FusionAuthClient;
 
-  constructor() {
+  constructor(private readonly httpService: HttpService) {
     this.fusionauthClient = new FusionAuthClient(
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
@@ -67,13 +71,12 @@ export class FusionauthService {
   getUsers(
     applicationId: string,
     startRow: number,
-    numberOfResults: number
-  ): Promise<{ total: number, users: Array<User> }> {
+    numberOfResults: number,
+  ): Promise<{ total: number; users: Array<User> }> {
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query:
-          `{"bool":{"must":[{"nested":{"path":"registrations","query":{"bool":{"must":[{"match":{"registrations.applicationId":"${applicationId}"}}]}}}}]}}`,
+        query: `{"bool":{"must":[{"nested":{"path":"registrations","query":{"bool":{"must":[{"match":{"registrations.applicationId":"${applicationId}"}}]}}}}]}}`,
         sortFields: [
           {
             missing: 'username',
@@ -89,7 +92,7 @@ export class FusionauthService {
       .then(
         (
           response: ClientResponse<SearchResponse>,
-        ): { total: number, users: Array<User> } => {
+        ): { total: number; users: Array<User> } => {
           console.log('Found users');
           return {
             total: response.response.total,
@@ -97,7 +100,7 @@ export class FusionauthService {
           };
         },
       )
-      .catch((e): { total: number, users: Array<User> } => {
+      .catch((e): { total: number; users: Array<User> } => {
         console.log(
           `Could not fetch users for applicationId ${applicationId}`,
           JSON.stringify(e),
@@ -112,13 +115,12 @@ export class FusionauthService {
   getUsersByString(
     queryString: string,
     startRow: number,
-    numberOfResults: number
-  ): Promise<{ total: number, users: Array<User> }> {
+    numberOfResults: number,
+  ): Promise<{ total: number; users: Array<User> }> {
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query:
-          `{"bool":{"must":[{"bool":{"must":[[{"nested":{"path":"registrations","query":{"bool":{"should":[{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_APPLICATION_ID}"}},{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID}"}}]}}}}]]}},{"query_string":{"query":"${queryString}"}}]}}`,
+        query: `{"bool":{"must":[{"bool":{"must":[[{"nested":{"path":"registrations","query":{"bool":{"should":[{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_APPLICATION_ID}"}},{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID}"}}]}}}}]]}},{"query_string":{"query":"${queryString}"}}]}}`,
         sortFields: [
           {
             missing: 'username',
@@ -129,13 +131,13 @@ export class FusionauthService {
         startRow: startRow,
       },
     };
-    console.log(searchRequest)
+    console.log(searchRequest);
     return this.fusionauthClient
       .searchUsersByQuery(searchRequest)
       .then(
         (
           response: ClientResponse<SearchResponse>,
-        ): { total: number, users: Array<User> } => {
+        ): { total: number; users: Array<User> } => {
           console.log('Found users');
           return {
             total: response.response.total,
@@ -143,11 +145,8 @@ export class FusionauthService {
           };
         },
       )
-      .catch((e): { total: number, users: Array<User> } => {
-        console.log(
-          `Could not fetch users`,
-          JSON.stringify(e),
-        );
+      .catch((e): { total: number; users: Array<User> } => {
+        console.log(`Could not fetch users`, JSON.stringify(e));
         return {
           total: 0,
           users: null,
@@ -433,5 +432,85 @@ export class FusionauthService {
         }
       }
     }
+  }
+
+  async createUser(user: UserRequest): Promise<{userId: UUID, user: User, err: Error}> {
+    return this.fusionauthClient
+      .createUser(null, user)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { userId: UUID; user: User, err: Error } => {
+          console.log('Found user');
+          return {
+            userId: response.response.user.id,
+            user: response.response.user,
+            err: null,
+          };
+        },
+      )
+      .catch((e): { userId: UUID; user: User, err: Error } => {
+        console.log(`Could not create user ${user}`, JSON.stringify(e));
+        return {
+          userId: null,
+          user: null,
+          err: e
+        };
+      });
+  }
+
+  async updateUser(userId: string, user: UserRequest): Promise<{_userId: UUID, user: User, err: Error}> {
+    return this.fusionauthClient
+      .patchUser(userId, user)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { _userId: UUID; user: User; err: Error } => {
+          console.log('Found user');
+          return {
+            _userId: response.response.user.id,
+            user: response.response.user,
+            err: null
+          };
+        },
+      )
+      .catch((e): { _userId: UUID; user: User; err: Error } => {
+        console.log(`Could not update user ${user.user.id}`, JSON.stringify(e));
+        return {
+          _userId: null,
+          user: null,
+          err: e
+        };
+      });
+  }
+
+  async changePassword(data: {loginId: string, password: string}): Promise<any> {
+    return this.httpService
+      .post(
+        process.env.FUSIONAUTH_BASE_URL + '/api/user/change-password',
+        {
+          loginId: data.loginId,
+          password: data.password,
+        },
+        {
+          headers: {
+            Authorization: process.env.FUSIONAUTH_API_KEY,
+            'Content-Type': 'application/json',
+          },
+        },
+      )
+      .pipe(
+        map((response) =>
+          response.status === 200
+            ? { msg: 'Password changed successfully' }
+            : { msg: 'Password cannot be changed' },
+        ),
+        catchError((e) => {
+          throw new HttpException(
+            { error: e.response.data },
+            HttpStatus.BAD_REQUEST,
+          );
+        }),
+      );
   }
 }

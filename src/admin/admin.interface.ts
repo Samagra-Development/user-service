@@ -61,7 +61,7 @@ export interface Admin {
     ts: Date;
     params: ResponseParams;
     responseCode: ResponseCode;
-    result: SignupResult;
+    result: any;
   
     init(msgId: UUID): SignupResponse {
       this.responseCode = ResponseCode.OK;
