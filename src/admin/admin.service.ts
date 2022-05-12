@@ -1,97 +1,95 @@
-import { User } from '@fusionauth/typescript-client';
+import { Error, User, UserRequest, UUID } from '@fusionauth/typescript-client';
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { ResponseCode, ResponseStatus, UsersResponse } from './admin.interface';
-import { FusionauthService } from './fusionauth/fusionauth.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ResponseCode,
+  ResponseStatus,
+  SignupResponse,
+  UsersResponse,
+} from './admin.interface';
+import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
-import { catchError, map } from 'rxjs';
+import { catchError, map, throwError } from 'rxjs';
+import { resolve } from 'path';
+import { rejects } from 'assert';
 
 @Injectable()
 export class AdminService {
-    constructor(
-        private readonly fusionAuthService: FusionauthService,
-        private readonly httpService: HttpService,
-      ) {}
+  constructor(
+    private readonly fusionAuthService: FusionauthService,
+    private readonly httpService: HttpService,
+  ) {}
 
-    async fetchUsers(req: any): Promise<UsersResponse> {
-        const {
-          total,
-          users,
-        }: { total: number; users: Array<User> } =
-          await this.fusionAuthService.getUsers(req.applicationId, req.startRow, req.numberOfResults);
-        const response: UsersResponse = new UsersResponse().init(uuidv4());
-        if(users!=null){
-          response.responseCode = ResponseCode.OK;
-          response.params.status = ResponseStatus.success;
-          response.result = {total, users}
-        }else{
-          response.responseCode = ResponseCode.FAILURE;
-          response.params.status = ResponseStatus.failure;
-          response.params.errMsg = "No users found"
-          response.params.err = "NO_USERS_FOUND"
-        }
-        return response;
-      }
-
-      async fetchUsersByString(queryString: string, startRow: number, numberOfResults: number): Promise<UsersResponse> {
-        const {
-          total,
-          users,
-        }: { total: number; users: Array<User> } =
-          await this.fusionAuthService.getUsersByString(queryString, startRow, numberOfResults);
-        const response: UsersResponse = new UsersResponse().init(uuidv4());
-        console.log(response)
-        if(users!=null){
-          response.responseCode = ResponseCode.OK;
-          response.params.status = ResponseStatus.success;
-          response.result = {total, users}
-        }else{
-          response.responseCode = ResponseCode.FAILURE;
-          response.params.status = ResponseStatus.failure;
-          response.params.errMsg = "No users found"
-          response.params.err = "NO_USERS_FOUND"
-        }
-        return response;
-      }
-    
-      async updatePassword(data: any): Promise<any> {
-        return this.httpService.post(process.env.FUSIONAUTH_BASE_URL+'/api/user/change-password', {
-            loginId: data.loginId,
-            password: data.password
-        }, {headers: {
-            'Authorization': process.env.FUSIONAUTH_API_KEY,
-            'Content-Type': 'application/json'
-        }}).pipe(
-        map(response => response.status===200?{msg: "Password changed successfully"}:{msg:"Password cannot be changed"}),
-        catchError(e=>{
-          return e.data;
-        })
-        );
+  async fetchUsers(req: any): Promise<UsersResponse> {
+    const { total, users }: { total: number; users: Array<User> } =
+      await this.fusionAuthService.getUsers(
+        req.applicationId,
+        req.startRow,
+        req.numberOfResults,
+      );
+    const response: UsersResponse = new UsersResponse().init(uuidv4());
+    if (users != null) {
+      response.responseCode = ResponseCode.OK;
+      response.params.status = ResponseStatus.success;
+      response.result = { total, users };
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.status = ResponseStatus.failure;
+      response.params.errMsg = 'No users found';
+      response.params.err = 'NO_USERS_FOUND';
     }
+    return response;
+  }
 
-    async createUser(data: any): Promise<any> {
-        const url = process.env.FUSIONAUTH_BASE_URL+'/api/user/registration';
-        return this.httpService.post(url, data, {headers: {
-            'Authorization': process.env.FUSIONAUTH_API_KEY,
-            'Content-Type': 'application/json'
-        }}).pipe(
-        map(response => response.data),
-        catchError(e=>{
-          return e.data;
-        })
-        );
+  async fetchUsersByString(
+    queryString: string,
+    startRow: number,
+    numberOfResults: number,
+  ): Promise<UsersResponse> {
+    const { total, users }: { total: number; users: Array<User> } =
+      await this.fusionAuthService.getUsersByString(
+        queryString,
+        startRow,
+        numberOfResults,
+      );
+    const response: UsersResponse = new UsersResponse().init(uuidv4());
+    console.log(response);
+    if (users != null) {
+      response.responseCode = ResponseCode.OK;
+      response.params.status = ResponseStatus.success;
+      response.result = { total, users };
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.status = ResponseStatus.failure;
+      response.params.errMsg = 'No users found';
+      response.params.err = 'NO_USERS_FOUND';
     }
+    return response;
+  }
 
-    async updateUser(user_id: string, data: any): Promise<any> {
-        const url = process.env.FUSIONAUTH_BASE_URL+`/api/user/${user_id}`
-        return this.httpService.patch(url, data, {headers: {
-            'Authorization': process.env.FUSIONAUTH_API_KEY,
-            'Content-Type': 'application/json'
-        }}).pipe(
-        map(response => response.data),
-        catchError(e=>{
-          return e.data;
-        })
-        );
+  async updatePassword(data: {loginId: string, password: string}): Promise<any> {
+      return this.fusionAuthService.changePassword(data);
+  }
+
+  async createUser(data: User): Promise<SignupResponse> {
+    const { userId, user, err }: { userId: UUID; user: User; err: Error } =
+      await this.fusionAuthService.createUser({user: data});
+    if (userId == null || user == null) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = user;
+    return response;
+  }
+
+  async updateUser(userId: string, data: User): Promise<any> {
+    const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
+      await this.fusionAuthService.updateUser(userId, {user: data});
+    if (_userId == null || user == null) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = user;
+    return response;
+  }
 }
