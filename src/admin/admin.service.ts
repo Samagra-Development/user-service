@@ -1,10 +1,11 @@
-import { Error, User, UserRequest, UUID } from '@fusionauth/typescript-client';
+import { Error, User, UUID } from '@fusionauth/typescript-client';
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   ResponseCode,
   ResponseStatus,
   SignupResponse,
+  UserRegistration,
   UsersResponse,
 } from './admin.interface';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
@@ -53,7 +54,6 @@ export class AdminService {
         numberOfResults,
       );
     const response: UsersResponse = new UsersResponse().init(uuidv4());
-    console.log(response);
     if (users != null) {
       response.responseCode = ResponseCode.OK;
       response.params.status = ResponseStatus.success;
@@ -68,12 +68,12 @@ export class AdminService {
   }
 
   async updatePassword(data: {loginId: string, password: string}): Promise<any> {
-      return this.fusionAuthService.changePassword(data);
+      return this.fusionAuthService.upddatePasswordWithLoginId(data);
   }
 
-  async createUser(data: User): Promise<SignupResponse> {
+  async createUser(data: UserRegistration): Promise<SignupResponse> {
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.createUser({user: data});
+      await this.fusionAuthService.createAndRegisterUser(data);
     if (userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
