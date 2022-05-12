@@ -154,7 +154,7 @@ export class FusionauthService {
       });
   }
 
-  updatePassword(
+  updatePasswordWithUserId(
     userId: UUID,
     password: string,
   ): Promise<{ statusFA: FAStatus; userId: UUID }> {
@@ -434,12 +434,12 @@ export class FusionauthService {
     }
   }
 
-  async createUser(user: UserRequest): Promise<{userId: UUID, user: User, err: Error}> {
+  async createAndRegisterUser(user: RegistrationRequest): Promise<{userId: UUID, user: User, err: Error}> {
     return this.fusionauthClient
-      .createUser(null, user)
+      .register(null, user)
       .then(
         (
-          response: ClientResponse<UserResponse>,
+          response: ClientResponse<RegistrationResponse>,
         ): { userId: UUID; user: User, err: Error } => {
           console.log('Found user');
           return {
@@ -484,7 +484,7 @@ export class FusionauthService {
       });
   }
 
-  async changePassword(data: {loginId: string, password: string}): Promise<any> {
+  async upddatePasswordWithLoginId(data: {loginId: string, password: string}): Promise<any> {
     return this.httpService
       .post(
         process.env.FUSIONAUTH_BASE_URL + '/api/user/change-password',

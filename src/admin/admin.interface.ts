@@ -1,4 +1,4 @@
-import { User, UUID } from '@fusionauth/typescript-client';
+import { RegistrationRequest, User, UUID } from '@fusionauth/typescript-client';
 import { SignupResult } from 'src/user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -115,5 +115,9 @@ export interface Admin {
     getFailure() {
       throw new Error('Method not implemented.');
     }
+  }
+
+  export class UserRegistration implements RegistrationRequest {
+    
   }
   

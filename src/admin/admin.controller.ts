@@ -2,7 +2,7 @@ import { User } from '@fusionauth/typescript-client';
 import { Body, Controller, Request, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth-jwt.guard';
-import { SignupResponse, UsersResponse } from './admin.interface';
+import { SignupResponse, UserRegistration, UsersResponse } from './admin.interface';
 import { AdminService } from './admin.service';
 import { Roles } from './roles.decorator';
 
@@ -31,7 +31,7 @@ export class AdminController {
     @Post('/createUser')
     @Roles('Admin')
     @UseGuards(JwtAuthGuard)
-    async createUser(@Body() data: User): Promise<SignupResponse> {
+    async createUser(@Body() data: UserRegistration): Promise<SignupResponse> {
         const users: SignupResponse = await this.adminService.createUser(data);
         return users;
     }
