@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { FusionauthService } from './fusionauth/fusionauth.service';
+import { QueryGeneratorService } from './query-generator/query-generator.service';
 
 describe('AdminController', () => {
   let controller: AdminController;
@@ -16,7 +17,8 @@ describe('AdminController', () => {
       imports: [AuthModule, HttpModule],
       providers: [
         FusionauthService,
-        AdminService
+        AdminService,
+        QueryGeneratorService,
       ],
     }).compile();
 

@@ -20,6 +20,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { response } from 'express';
 import { catchError, map } from 'rxjs';
+import { QueryGeneratorService } from '../query-generator/query-generator.service';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -31,7 +32,7 @@ export enum FAStatus {
 export class FusionauthService {
   fusionauthClient: FusionAuthClient;
 
-  constructor(private readonly httpService: HttpService) {
+  constructor(private readonly httpService: HttpService, private readonly queryGenService: QueryGeneratorService) {
     this.fusionauthClient = new FusionAuthClient(
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
@@ -76,7 +77,7 @@ export class FusionauthService {
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query: `{"bool":{"must":[{"nested":{"path":"registrations","query":{"bool":{"must":[{"match":{"registrations.applicationId":"${applicationId}"}}]}}}}]}}`,
+        query: this.queryGenService.queryUsersByApplicationId(applicationId),
         sortFields: [
           {
             missing: 'username',
@@ -120,7 +121,7 @@ export class FusionauthService {
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query: `{"bool":{"must":[{"bool":{"must":[[{"nested":{"path":"registrations","query":{"bool":{"should":[{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_APPLICATION_ID}"}},{"match":{"registrations.applicationId":"${process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID}"}}]}}}}]]}},{"query_string":{"query":"${queryString}"}}]}}`,
+        query: this.queryGenService.queryUsersByApplicationIdAndQueryString([process.env.FUSIONAUTH_APPLICATION_ID, process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID], queryString),
         sortFields: [
           {
             missing: 'username',
@@ -131,7 +132,6 @@ export class FusionauthService {
         startRow: startRow,
       },
     };
-    console.log(searchRequest);
     return this.fusionauthClient
       .searchUsersByQuery(searchRequest)
       .then(

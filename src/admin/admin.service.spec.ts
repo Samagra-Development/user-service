@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthModule } from '../auth/auth.module';
 import { AdminService } from './admin.service';
 import { FusionauthService } from './fusionauth/fusionauth.service';
+import { QueryGeneratorService } from './query-generator/query-generator.service';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -14,6 +15,7 @@ describe('AdminService', () => {
       providers: [
         FusionauthService,
         AdminService,
+        QueryGeneratorService,
       ],
     }).compile();
     fusionauthService = module.get<FusionauthService>(FusionauthService);
