@@ -13,7 +13,7 @@ export class AdminController {
       ) {}
 
     @Post('/all')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async fetchUsers(@Request() req, @Body() data: any): Promise<UsersResponse> {
         const users: UsersResponse = await this.adminService.fetchUsers(data);
@@ -21,7 +21,7 @@ export class AdminController {
     }
 
     @Post('/changePassword')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async updatePassword(@Body() data: {loginId: string, password: string}): Promise<SignupResponse> {
         const status: SignupResponse = await this.adminService.updatePassword(data);
@@ -29,7 +29,7 @@ export class AdminController {
     }
 
     @Post('/createUser')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async createUser(@Body() data: UserRegistration): Promise<SignupResponse> {
         const users: SignupResponse = await this.adminService.createUser(data);
@@ -37,7 +37,7 @@ export class AdminController {
     }
 
     @Patch('/updateUser/:userId')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async updateUser(@Param('userId') userId: string, @Body() data: User): Promise<SignupResponse> {
         const user: SignupResponse = await this.adminService.updateUser(userId, data);
@@ -45,7 +45,7 @@ export class AdminController {
     }
 
     @Get('/searchUser')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async searchUser(@Query() query: {queryString: string, startRow: number, numberOfResults: number}): Promise<UsersResponse> {
         console.log(query.numberOfResults)
@@ -54,7 +54,7 @@ export class AdminController {
     }
 
     @Get('/user/:userId')
-    @Roles('Admin')
+    @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async searchUserbyId(@Param('userId') userId: string): Promise<UsersResponse> {
         const users: UsersResponse = await this.adminService.fetchUsersByString(userId, undefined, undefined);
