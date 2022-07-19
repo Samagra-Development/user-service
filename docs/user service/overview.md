@@ -17,7 +17,7 @@ User service can be easily integrated and synced with many of the software appli
 
 Let us understand in detail how user service plays a part in the following sector
 
-### 
+### OTP Based Vaccine Registration system
 
 
 
