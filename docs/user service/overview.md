@@ -17,8 +17,17 @@ User service can be easily integrated and synced with many of the software appli
 
 Let us understand in detail how user service plays a part in the following sector
 
-### OTP Based Vaccine Registration system
+### Authenticate students for On-Campus Interview programmes
 
+We can use an instance of User Service to authenticate students for an on-campus interview programme. You can access various functionalities provided by User Service and modify them according to your own needs.
+
+For example, the university can utilize the user service to register their students on their web portal. Students can then sign up and view the list of companies and their details after authenticating themselves on the web portal.
+
+Similarly, college admins can create a user, retrieve student information, update it, and delete users according to company requirements or due to other causes. In this case, the admin has information on the list of students who have registered themselves on the college website.
+
+Reset password is used when a student has created a user profile but they don’t know their current password. A basic reset password functionality can be implemented either for the students where a user can directly change his/her password by clicking on the “Reset Password” button.
+
+User service OTPs can be integrated with the website backend to notify students about their selection status. A student can receive an OTP once he gets shortlisted for a company or moves forwards to the next interview round. All these user service functionalities like passwords, otp’s, reset passwords, RBAC are hosted centrally on the Samagra server. The organization just needs to invoke these services on their side and they can easily integrate all these services to their own advantage.
 
 
 
