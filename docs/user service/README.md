@@ -1,4 +1,6 @@
 1. [Overview](overview.md)
 
    - [Example use cases](overview.md#use-cases)
-   - [Authenticate students for On-Campus Interview programmes](overview.md#authenticate-students-for-on-campus-interview-programmes)
+   - [Shiksha Sathi](overview.md#shiksha-sathi-mobile-app)
+
+2. [Core features](core-features.md)
