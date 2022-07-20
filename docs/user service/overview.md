@@ -21,11 +21,14 @@ Let us understand in detail how user service plays a part in the following secto
 
 Shiksha Saathi is a mobile application developed by Samagra Shiksha for digitally recording the monthly school visits conducted by the different stakeholders across all levels in the state. The android app uses an instance of User service for its authentication portal. As you can see in the diagram below:
 
-![sathi app](./images/sathi-login.jpg)
+<p align="center">
+<img src="images/sathi-login.jpg"/>
+</p>
 
 Similarly, Whole School Development Plan (WSDP) App is a part of the school infrastructure monitoring & inventory management system of Samagra Shiksha, Gujarat. It also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
 
-![WSDP](./images/wsdp-login.jpg)
-
+<p align="center">
+<img src="images/wsdp-login.jpg"/>
+</p>
 
 
