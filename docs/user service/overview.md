@@ -8,12 +8,13 @@ Samagra’s User Service provides some basic set of functionalities, easy to int
 
 User service can be easily integrated and synced with many of the software applications in many industrial, medical & government sectors. These companies can then utilize the different services provided by the user service to either enhance user experience on their portals, provide easy to use authentication instance or strengthen the security to their network infrastructure.
 
-1. User Service for Government based applications
-2. User Service for School Education
-3. User Service for Agriculture
-4. User Service for Healthcare
+1. User Service for Shiksha Sathi app
+2. User Service for Samagra WSDP app
+2. User Service for School Education apps
+3. User Service for Agriculture apps
+4. User Service for Healthcare apps
 5. User Service for Corporate Sector
-6. User Service for Retail & E-commerce
+6. User Service for Retail & E-commerce service apps
 
 Let us understand in detail how user service plays a part in the following sector
 
@@ -21,11 +22,14 @@ Let us understand in detail how user service plays a part in the following secto
 
 Shiksha Saathi is a mobile application developed by Samagra Shiksha for digitally recording the monthly school visits conducted by the different stakeholders across all levels in the state. The android app uses an instance of User service for its authentication portal. As you can see in the diagram below:
 
-![sathi app](./images/sathi-login.jpg)
+<p align="center">
+<img src="images/sathi-login.jpg"/>
+</p>
 
-Similarly, Whole School Development Plan (WSDP) App is a part of the school infrastructure monitoring & inventory management system of Samagra Shiksha, Gujarat. It also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
+Similarly, Whole School Development Plan (WSDP) App which is a part of the school infrastructure monitoring & inventory management system of Samagra Shiksha, Gujarat also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
 
-![WSDP](./images/wsdp-login.jpg)
-
+<p align="center">
+<img src="images/wsdp-login.jpg"/>
+</p>
 
 
