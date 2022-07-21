@@ -5,7 +5,7 @@
 
 2. [Core features](core-features.md)
 
-4. [Developer Documentation]()
+4. [Developer Documentation](developer-docs.md)
 
    - [Contribution guidelines]()
    - [Development Environment setup]()
