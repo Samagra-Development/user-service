@@ -8,13 +8,7 @@ User service provides built-in login services for user sign up and sign in. The 
 
 An organization can create their own instance of the User service and integrate the login feature within their software to access these functionalities. The user credentials like Username and Password will be stored centrally on the user service server hosted on Samagra.
 
-### 2. Create/Retrieve/Update/Delete operations on User
-
-When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
-
-We can invoke a reset password functionality from user service in our android and web applications. 
-
-### 3. Reset/Forgot Password 
+### 2. Reset/Forgot Password 
 
 When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
 
@@ -35,9 +29,9 @@ The user service keeps track of the phone numbers associated with each username.
 <img src="images/resetSamwad.jpg"/>
 </p>
 
-### 4. RBAC
+### 3. RBAC
 
-### 5. JWT/Basic Auth Strategies
+### 4. JWT/Basic Auth Strategies
 
-### 6. User Creation and login on OTP based model (Available channels: Gupshup/CDAC)
+### 5. User Creation and login on OTP based model (Available channels: Gupshup/CDAC)
 
