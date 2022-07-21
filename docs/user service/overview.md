@@ -28,6 +28,8 @@ Shiksha Saathi is a mobile application developed by Samagra Shiksha for digitall
 
 Similarly, Whole School Development Plan (WSDP) App which is a part of the school infrastructure monitoring & inventory management system of Samagra Shiksha, Gujarat also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
 
+Similarly, Whole School Development Plan (WSDP) App is a part of the school infrastructure monitoring & inventory management system of Samagra Shiksha, Gujarat. It also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
+
 <p align="center">
 <img src="images/wsdp-login.jpg"/>
 </p>
