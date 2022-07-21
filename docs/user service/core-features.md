@@ -6,7 +6,7 @@ If you’re not familiar with what User service offers, let’s learn more about
 
 User service provides built-in login services for user sign up and sign in. The organization can modify and customize this service according to their own needs. You can use user service to add registration and login portals to your Android apps, IOS apps or a Website. 
 
-An organization can create their own instance of the User service and integrate the login feature within their software to access these functionalities. The user credentials like Username and Password will be stored centrally on the user service server hosted on Samagra.
+An organization can create their own instance of the User service and integrate the login feature within their software to access these functionalities. The user credentials like Username and Password will be stored centrally on the user service server hosted on Samagra. For example, the Login feature in Samagra’s Shiksha saathi app uses User service functionality. You can view it [here](overview.md#shiksha-sathi-mobile-app).
 
 ### 2. Reset/Forgot Password 
 
@@ -17,7 +17,7 @@ We can invoke a reset password functionality from user service in our android an
 >shiksha saathi "reset password" portal which uses an user service instance
 
 <p align="center">
-<img src="images/reset.jpg"/>
+<img src="images/reset.jpg" width="400" height="600"/>
 </p>
 
 Similarly, this exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service instance. But here, the password can be sent to our phone number just by entering our username in the textfield. 
@@ -26,7 +26,7 @@ The user service keeps track of the phone numbers associated with each username.
 >e-samwad app’s “reset password” portal
 
 <p align="center">
-<img src="images/resetSamwad.jpg"/>
+<img src="images/resetSamwad.jpg" width="400" height="600"/>
 </p>
 
 ### 3. RBAC
