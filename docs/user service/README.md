@@ -7,8 +7,8 @@
 
 4. [Developer Documentation](developer-docs.md)
 
-   - [Contribution guidelines]()
-   - [Development Environment setup]()
-   - [Your first PR]()
-   - [Community details]()
+   - [Contribution guidelines](developer-docs.md#📄-contribution-guidelines)
+   - [Development Environment setup](developer-docs.md#💻-development-environment-setup)
+   - [Your first PR](developer-docs.md#🥇-your-first-pull-request)
+   - [Community details](developer-docs.md#👨‍💻-community)
 

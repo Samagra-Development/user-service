@@ -6,7 +6,7 @@ In this guide you will get an overview of the contribution workflow from opening
 
 ### 📄 Contribution Guidelines
 
-If you are a new developer looking to contribute something to Templater, please take a look and see if there's anything that you'd like to work on in the [issue tracker](https://github.com/Samarth-HP/esamwad-user-service/issues).
+If you are a new developer looking to contribute something to User service, please take a look and see if there's anything that you'd like to work on in the [issue tracker](https://github.com/Samarth-HP/esamwad-user-service/issues).
 
 The "Good First Issue" label has been added to any tasks that seem like a good way to get started working with the codebase.
 
@@ -25,7 +25,7 @@ Here are some resources to help you get started with open source contributions:
 
 ### 💻 Development Environment Setup
 
-1. Fork the Templater repository.
+1. Fork the user service repository.
 
 2. Now let's set up our local repository
 
