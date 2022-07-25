@@ -31,6 +31,6 @@ Similarly, e-Samwad is a flagship program of the Department of Education, Himach
 ### User Service Workflow 
 
 <p align="center">
-<img src="images/sam.png" width="800" height="600"/>
+<img src="images/usecase2.png" width="800" height="600"/>
 </p>
 
