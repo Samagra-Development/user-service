@@ -10,8 +10,8 @@ At the same time, multiple applications can register with a single running insta
 
 Example for the governance ecosystem - In the state of Himachal Pradesh there are two apps used by the Department of Education. 
 
-- e-Samvad  
-- Shiksha Saathi
+- Shiksha Saathi  
+- e-Samwad
 
 e-Samvad is used by teachers for capturing student attendance, sharing content with students et al. While Shiksha Saathi is used by mentors and officers to capture their recordings of monthly school visits.
 
@@ -20,10 +20,10 @@ Both the apps are used by a different set of users and maintain their own user m
 > Shiksha sathi login portal
 
 <p align="middle">
-<img src="images/sathi-login.jpg" width="400" height="600" />
+<img src="images/sathi-login.jpg" width="400" height="600"/> 
+
 <img src="images/esamwad-login.jpg" width="400" height="600"/>
 </p>
-
 
 ### User Service High Level Diagram
 

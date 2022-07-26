@@ -1,18 +1,22 @@
 ## Core features
 
-This section dives deep into the core features of User Service. Lets see some of them:
+This section dives deep into the core features of User Service. But before that let us see some of the key benefits of using User service:
 
+1. Readymade backend APIs - Applications can configure their credentials and start using the APIs without doing any backend development. 
+
+2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
+
+3. Readymade reset password portal - Instead of spending resources on programming a separate Reset password portal, we can use the ready to use User service functionality to integrate into our existing applications.
+
+4. Cost saving and reusability - Because of these ready made services, an organization can cut costs on programming some of these portals from scratch. What's more is that, the organization can reuse the same instance of user service for different applications without creating a different backend.
+
+5. Security - User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
+ 
 ### 1. Login & Sign-Up feature
 
 User service provides login services for user Login and Registration. 
 
 - **Log-In**: With the User service Login, The organization can configure log-in portals into their  applications. The user credentials are stored in the organization auth (like Fusion Auth). The User service provides a ready-made API, which can be leveraged by the application to connect with its Auth for allowing Login.
-
-The key benefits offered by user service are:
-
-1. Readymade backend APIs - Applications can configure their credentials and start using the APIs without doing any backend development. 
-
-2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
 
 - **Sign Up** : User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements. You can view the user service fusion auth service backend [here](/src/admin/fusionauth/).
 
@@ -24,9 +28,7 @@ We can invoke a reset password functionality from user service in our applicatio
 
 Similarly, this exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service reset password portal.
 
-Some of the key benefits of this functionality are:
-
-1. Readymade reset password portal - Instead of spending resources on programming a separate Reset password portal, we can use the ready to use User service functionality to integrate into our existing applications.
+The user service currently supports two channels for the SMS transmission, they are [Gupshup](/src/user/sms/gupshup/) and [CDAC](/src/user/sms/cdac/) respectively.
 
 ### 3. Role Based Access Control
 
@@ -44,17 +46,11 @@ As we know, the User service allows us to create a user in the database. But wit
 
 CRUD operations may be important in various situations and use cases. Lets say, you want to retrieve the information of a customer who has the highest amount of purchases in a week on an E-commerce website. With user service, the admin can easily retrieve the information of that customer with one click.
 
-Similarly, the website admin can update the details associated with a user. For example, he can modify the faulty information attached to the user. If needed, the admin can delete the user and all the related information associated with him/her from the organization databases.
+Similarly, the website admin can update the details associated with a user. For example, he can modify the faulty information attached to the user. If needed, the admin can delete the user and all the related information associated with him/her from the organization databases. To learn more about operations performed on user, click [here](/src/user/user-db/).
 
 ### 6. Login using OTP based Model
 
 Just like how we can use an OTP in user service to reset the forgotten password of a user. We can also use the OTP to log in a user in the organization portal. The OTP based login model is quite different from the standard Username-Password model.
-
-Key benefits:
-
-1. One crucial advantage of and primary reason for using OTPs is security. Since a single-use password will change with each login attempt, the risk of an account being compromised is drastically reduced, if not eliminated.
-
-2. User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
 
 OTP service specifications are given [here](/src/dst/otp/) and the SMS interface and channel details like Gupshup and CDAC are provided in  [this](/src/dst/sms/) codebase.
 
