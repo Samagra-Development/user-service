@@ -73,5 +73,5 @@ git push origin HEAD -f
 
 ### 👨‍💻 Community 
 
-If you have any queries or want to share any suggestions regarding User service you can create a issue in the [Issue tracker][https://github.com/Samarth-HP/esamwad-user-service/issues] and tag the Maintainers about your query/feedback. You don't need to have a solution to the problem you are facing to kick off a discussion. We are hoping to foster productive and collaborative conversations!
+If you have any queries or want to share any suggestions regarding User service you can create a issue in the [Issue tracker](https://github.com/Samarth-HP/esamwad-user-service/issues) and tag the Maintainers about your query/feedback. You don't need to have a solution to the problem you are facing to kick off a discussion. We are hoping to foster productive and collaborative conversations!
 
