@@ -20,9 +20,9 @@ Configuration update:
 
 Once your app is configured, you can test the following APIs.
 
-1. Login API - API curl
-2. Reset password API - API curl
-3. User data crud - API curl
+1. [Login API]()
+2. [Reset password API]()
+3. [User data crud]()
 
 ## Calling the APIs from your application
 
