@@ -58,8 +58,6 @@ yarn start:debug
 yarn start:prod
 ```
 
-### Post Installation
-
-### Data Exhaust and Analytics
-
 ### Next Steps
+
+

@@ -1,7 +1,7 @@
 1. [Overview](overview.md)
 
    - [Example use cases](overview.md#use-cases)
-   - [Shiksha Sathi](overview.md#shiksha-sathi-mobile-app)
+   - [Use cases](overview.md#shiksha-sathi-mobile-app)
 
 2. [Core features](core-features.md)
    - [Login and Signup feature](core-features.md#1-login--sign-up-feature)
@@ -18,7 +18,6 @@
 
 4. [How to use User service in applications](userservice-usage)
    - [Post installation]()
-   - [Data exhaust and Analytics]()
    - [Set up]()
    - [Docker]()
 
