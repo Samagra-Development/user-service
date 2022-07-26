@@ -14,7 +14,7 @@ The key benefits offered by user service are:
 
 2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
 
-- **Sign Up** : User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements.
+- **Sign Up** : User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements. You can view the user service fusion auth service backend [here](/src/admin/fusionauth/).
 
 ### 2. Reset/Forgot Password 
 
@@ -28,13 +28,11 @@ Some of the key benefits of this functionality are:
 
 1. Readymade reset password portal - Instead of spending resources on programming a separate Reset password portal, we can use the ready to use User service functionality to integrate into our existing applications.
 
-
-
 ### 3. Role Based Access Control
 
 Role-based access control (RBAC) is a method of regulating access to computer or network resources based on the roles of individual users within your organization. RBAC ensures people access only information they need to do their jobs and prevents them from accessing information that doesn't concern them.
 
-With user service RBAC, you can create users for your application and assign them specific permissions. These permissions will decide to which limit each user is allowed to access information. The aim of introducing RBAC in user service was to enhance the security of the organization applications and make the job of system administrators easy and efficient.
+With user service RBAC, you can create users for your application and assign them specific permissions. These permissions will decide to which limit each user is allowed to access information. The aim of introducing RBAC in user service was to enhance the security of the organization applications and make the job of system administrators easy and efficient. The backend for assigning permissions and decorating user roles is given [here](/src/admin/admin.controller.ts)
 
 ### 4. JWT/Basic Authentication Strategies
 
@@ -57,4 +55,6 @@ Key benefits:
 1. One crucial advantage of and primary reason for using OTPs is security. Since a single-use password will change with each login attempt, the risk of an account being compromised is drastically reduced, if not eliminated.
 
 2. User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
+
+OTP service specifications are given [here](/src/dst/otp/) and the SMS interface and channel details like Gupshup and CDAC are provided in  [this](/src/dst/sms/) codebase.
 
