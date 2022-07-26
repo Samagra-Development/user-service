@@ -16,7 +16,7 @@
    - [Installation](adopter.md#installation)
    - [Next steps](adopter.md#next-steps)
 
-4. [How to use User service in applications]()
+4. [How to use User service in applications](userservice-usage)
    - [Post installation]()
    - [Data exhaust and Analytics]()
    - [Set up]()

@@ -65,11 +65,9 @@ Similarly, the website admin can update the details associated with a user. For 
 
 Just like how we can use an OTP in user service to reset the forgotten password of a user. We can also use the OTP to log in a user in the organization portal. The OTP based login model is quite different from the standard Username-Password model.
 
-One crucial advantage of and primary reason for using OTPs is security. Since a single-use password will change with each login attempt, the risk of an account being compromised is drastically reduced, if not eliminated. 
-
-User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
-
 Key benefits:
 
-1. 
+1. One crucial advantage of and primary reason for using OTPs is security. Since a single-use password will change with each login attempt, the risk of an account being compromised is drastically reduced, if not eliminated.
+
+2. User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
 
