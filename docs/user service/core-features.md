@@ -61,7 +61,7 @@ CRUD operations may be important in various situations and use cases. Lets say, 
 
 Similarly, the website admin can update the details associated with a user. For example, he can modify the faulty information attached to the user. If needed, the admin can delete the user and all the related information associated with him/her from the organization databases.
 
-### 6. Login on OTP based Model
+### 6. Login using OTP based Model
 
 Just like how we can use an OTP in user service to reset the forgotten password of a user. We can also use the OTP to log in a user in the organization portal. The OTP based login model is quite different from the standard Username-Password model.
 
