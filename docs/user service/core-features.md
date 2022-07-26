@@ -26,9 +26,8 @@ Similarly, this exact functionality can be achieved by entering only our usernam
 
 Some of the key benefits of this functionality are:
 
-1. Security - Passwords cannot be read from the OTP by potential attackers.
+1. Readymade reset password portal - Instead of spending resources on programming a separate Reset password portal, we can use the ready to use User service functionality to integrate into our existing applications.
 
-2. Expiration time - OTP's are only valid temporarily. Additionally, after someone uses a OTP, it becomes invalid and cannot be accessed again.
 
 
 ### 3. Role Based Access Control
@@ -37,21 +36,9 @@ Role-based access control (RBAC) is a method of regulating access to computer or
 
 With user service RBAC, you can create users for your application and assign them specific permissions. These permissions will decide to which limit each user is allowed to access information. The aim of introducing RBAC in user service was to enhance the security of the organization applications and make the job of system administrators easy and efficient.
 
-Some of the key benefits of this functionality are:
-
-1. Selective access: A software system can have multiple user roles at the same time with specific permissions for each role. It allows organizations to impose hiearchies for assigning permissions based on the seniority or positions in an organization.
-
-2. Confidentiality: Data is accessed only by the people who are allowed to view it. This protects organization information from unauthorized access.
-
 ### 4. JWT/Basic Authentication Strategies
 
 JSON Web Tokens is an authentication standard that works by assigning and passing around an encrypted token in requests that helps to identify the logged in user, instead of storing the user in a session on the server and creating a cookie. You can view some of these basic stratergies [here](/src/auth/auth-basic.strategy.ts)
-
-Some of the key benefits of this functionality are:
-
-1. Device compability: JWT is used at internet scale. This means that it is easier to process on user's devices, especially mobile.
-
-2. User service JWT is a stateless authentication mechanism as the user state is never saved in the database. As JWTs are self-contained, all the necessary information is there, reducing the need of going back and forward to the database.
 
 ### 5. CRUD Operations on a User
 

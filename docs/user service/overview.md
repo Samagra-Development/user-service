@@ -1,36 +1,39 @@
 ## Overview
 
-Today, most organizations need to keep their software applications secure by allowing only authenticated users to gain access to their protected data and resources. This may include computer systems, networks, databases, websites and other software based applications.
+Most applications maintain a user login module. This is essentially created to ensure that only authorized users are accessing the application. All the authentication and authorization modules require a few basic flows like, Login, Reset password, Updating user, etc. Typically each app ends up creating its own backend flows. And then, in the long run, it is also required to maintain the backend code as well as manage the load as per the usage of the application.
 
-Samagra’s User Service provides some basic set of functionalities, easy to integrate apis and various authentication strategies to authenticate users to your application. You can directly use an instance of User Service in your application to access these services. With this, your users can sign in to a web or mobile app instantly through User service. It supports authentication using Passwords, Phone number, Bit password as well as additional services such as Forget/Reset password, Providing Role based access control (RBAC) to users within an enterprise, User creation &  various CRUD operations on a user.
+User service is open-source software built to address the above-mentioned redundancy of backend effort. It offers a set of backend APIs, which can be leveraged by any application. User service does not store or manage the Application’s user data. The user data remains within the host application’s user management auth service like Fusion Auth. The host application registers itself with the User service by sharing the credentials. On registration, the application can start using the Auth service.
+
+At the same time, multiple applications can register with a single running instance of user service. For example, Uber has two apps, the rider app, and the driver app. For both the apps, it does not need to create a separate authentication backend. Uber can register both apps on user service and use the APIs for both apps.
 
 ### Use Cases
 
-User service can be easily integrated and synced with many of the software applications in many industrial, medical & government sectors. These companies can then utilize the different services provided by the user service to either enhance user experience on their portals, provide easy to use authentication instance or strengthen the security to their network infrastructure.
+Example for the governance ecosystem - In the state of Himachal Pradesh there are two apps used by the Department of Education. 
 
-1. User Service for Shiksha Sathi app
-2. User Service for Samagra E-samwad app
+- e-Samvad  
+- Shiksha Saathi
 
-Let us understand in detail how user service plays a part in the following sector
+e-Samvad is used by teachers for capturing student attendance, sharing content with students et al. While Shiksha Saathi is used by mentors and officers to capture their recordings of monthly school visits.
 
-### Shiksha Sathi Mobile App
+Both the apps are used by a different set of users and maintain their own user management over different Fusion Auth instances. They both can register to the same user service instance and leverage all the readily available APIs.
 
-Shiksha Saathi is a mobile application developed by Samagra Shiksha for digitally recording the monthly school visits conducted by the different stakeholders across all levels in the state. The android app uses an instance of User service for its authentication portal. As you can see in the diagram below:
-
+> Shiksha sathi login portal
 <p align="center">
 <img src="images/sathi-login.jpg" width="400" height="600"/>
 </p>
 
-Similarly, e-Samwad is a flagship program of the Department of Education, Himachal Pradesh to involve parents in child's education by providing them regular updates about child's progress. It is an android app which also uses the same instance of User service for its registration portal. As you can see, User service components are reusable and can be easily re-integrate into different applications smoothly. As all the user credentials are stored centrally on a server hosted by Samagra, the developer need not worry about managing server hardware and creating a separate authentication software from scratch.
-
+> e-Samwad login portal
 <p align="center">
 <img src="images/esamwad-login.jpg" width="400" height="600"/>
 </p>
 
-
 ### User Service Workflow 
 
+This diagram captures the high-level view of the User service and how different applications can register on the user service for using its APIs.
+
 <p align="center">
-<img src="images/usecase2.png" width="800" height="600"/>
+<img src="images/User-service_HLD.png" width="800" height="600"/>
 </p>
+
+>User service only provides Backend APIs, the frontend has to be maned by the host application
 
