@@ -13,19 +13,13 @@ The key benefits offered by user service are:
 1. Readymade backend APIs - Applications can configure their credentials and start using the APIs without doing any backend development. 
 2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
 
-- Sign Up: User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements.
+- **Sign Up**: User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements.
 
 ### 2. Reset/Forgot Password 
 
 When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
 
-We can invoke a reset password functionality from user service in our applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield. The user will then receive an OTP from the user service backend that will contain the steps to reset a user password. For example,
-
->shiksha saathi "reset password" portal which uses an user service instance
-
-<p align="center">
-<img src="images/reset.jpg" width="400" height="600"/>
-</p>
+We can invoke a reset password functionality from user service in our applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield.
 
 Similarly, this exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service instance. But here, the password can be sent to our phone number just by entering our username in the textfield. 
 The user service keeps track of the phone numbers associated with each username. Once the user requests for a reset password action by entering his username, User service instantly sends an OTP to the phone number attached to that particular username. For example:
