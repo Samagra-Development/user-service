@@ -6,15 +6,20 @@ This section dives deep into the core features of User Service. Lets see some of
 
 User service provides login services for user Login and Registration. 
 
-Log-In: With the User service Login, The organization can configure sign in portals into their software applications. The user credentials are stored in the organization database while the User service acts as an authentication gateway between the application and the database that will fetch those login credentials. One advantage of this service is that, Instead of programming different authentication systems for different applications, we can use the same User service login portal for all organization applications.
+- **Log-In**: With the User service Login, The organization can configure log-in portals into their  applications. The user credentials are stored in the organization auth (like Fusion Auth). The User service provides a ready-made API, which can be leveraged by the application to connect with its Auth for allowing Login.
 
-Sign Up: We can integrate registration portals in a software application using User service. When the user registers, User service will act as a middleman to store the newly created user credentials in the organization database.
+The key benefits offered by user service are:
+
+1. Readymade backend APIs - Applications can configure their credentials and start using the APIs without doing any backend development. 
+2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
+
+- Sign Up: User service also provides APIs for creating your own users and creating the entries for the users in the application's auth (Like Fusion Auth). User service can integrate with Application Auth through configuration. It allows for dynamic user attributes to be sent, as per the application's requirements.
 
 ### 2. Reset/Forgot Password 
 
 When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
 
-We can invoke a reset password functionality from user service in our android and web applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield. The user will then receive an OTP from the user service backend that will contain the steps to reset a user password. For example,
+We can invoke a reset password functionality from user service in our applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield. The user will then receive an OTP from the user service backend that will contain the steps to reset a user password. For example,
 
 >shiksha saathi "reset password" portal which uses an user service instance
 
@@ -24,12 +29,6 @@ We can invoke a reset password functionality from user service in our android an
 
 Similarly, this exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service instance. But here, the password can be sent to our phone number just by entering our username in the textfield. 
 The user service keeps track of the phone numbers associated with each username. Once the user requests for a reset password action by entering his username, User service instantly sends an OTP to the phone number attached to that particular username. For example:
-
->e-samwad app’s “reset password” portal
-
-<p align="center">
-<img src="images/resetSamwad.jpg" width="400" height="600"/>
-</p>
 
 ### 3. Role Based Access Control
 
