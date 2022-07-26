@@ -1,12 +1,14 @@
 ## Core features
 
-If you’re not familiar with what User service offers, let’s learn more about it. This section dives deep into the core features of User Service. Here you can gain an understanding of the key features you can utilize in your project. Lets see some of them:
+This section dives deep into the core features of User Service. Lets see some of them:
 
-### 1. Built-in Login feature
+### 1. Login & Sign-Up feature
 
-User service provides built-in login services for user sign up and sign in. The organization can modify and customize this service according to their own needs. You can use user service to add registration and login portals to your Android apps, IOS apps or a Website. 
+User service provides login services for user Login and Registration. 
 
-An organization can create their own instance of the User service and integrate the login feature within their software to access these functionalities. The user credentials like Username and Password will be stored centrally on the user service server hosted on Samagra. For example, the Login feature in Samagra’s Shiksha saathi app uses User service functionality. You can view it [here](overview.md#shiksha-sathi-mobile-app).
+Log-In: With the User service Login, The organization can configure sign in portals into their software applications. The user credentials are stored in the organization database while the User service acts as an authentication gateway between the application and the database that will fetch those login credentials. One advantage of this service is that, Instead of programming different authentication systems for different applications, we can use the same User service login portal for all organization applications.
+
+Sign Up: We can integrate registration portals in a software application using User service. When the user registers, User service will act as a middleman to store the newly created user credentials in the organization database.
 
 ### 2. Reset/Forgot Password 
 
