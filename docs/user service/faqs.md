@@ -7,7 +7,7 @@
 ##
 **Question**: I want to help out, what can I do?
 
-**Answer**: You can help by creating issues and submit improvements at our [Issue tracker](https://github.com/Samarth-HP/esamwad-user-service/issues). Make sure our Maintainers, [Chakshu Gautam](https://github.com/ChakshuGautam) and [Radhay Anand](https://github.com/radhay-samagra) after raising an issue.
+**Answer**: You can help by creating issues and submit improvements at our [Issue tracker](https://github.com/Samarth-HP/esamwad-user-service/issues). Make sure to ping our Maintainers, [Chakshu Gautam](https://github.com/ChakshuGautam) and [Radhay Anand](https://github.com/radhay-samagra) after raising an issue.
 
 ##
 **Question**: Why user service?

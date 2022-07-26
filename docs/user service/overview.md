@@ -17,13 +17,19 @@ e-Samvad is used by teachers for capturing student attendance, sharing content w
 
 Both the apps are used by a different set of users and maintain their own user management over different Fusion Auth instances. They both can register to the same user service instance and leverage all the readily available APIs.
 
-> Shiksha sathi login portal
+> Shiksha sathi and e-Samwad login portal
 
-<p align="middle">
+<p align="center">
+  <img alt="sathi" src="images/sathi-login.jpg" width="30%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="esamwad" src="images/esamwad-login.jpg" width="30%">
+</p>
+
+<!-- <p align="middle">
 <img src="images/sathi-login.jpg" width="400" height="600"/> 
 
 <img src="images/esamwad-login.jpg" width="400" height="600"/>
-</p>
+</p> -->
 
 ### User Service High Level Diagram
 
@@ -33,5 +39,5 @@ This diagram captures the high-level view of the User service and how different 
 <img src="images/User-service_HLD.png" width="800" height="600"/>
 </p>
 
->User service only provides Backend APIs, the frontend has to be maned by the host application
+>User service only provides Backend APIs, the frontend has to be maned by the host application.
 
