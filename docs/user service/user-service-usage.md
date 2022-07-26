@@ -10,7 +10,7 @@ Prequisites required for using User service:
 
 ## Setup
 
-*how to exactly configure and setup user service within an software application by (to be confirmed by Radhey). i.e how can an end-user setup an authentication gateway(or other user service gateways) on his own software application and use it*
+>*how to exactly configure and setup user service within an software application by (to be confirmed by Radhey). i.e how can an end-user setup an authentication gateway(or other user service gateways) on his own software application and use it*
 
 Setup the User service instance for your application:
 
@@ -30,7 +30,7 @@ Once your app is configured, you can test the following APIs.
 
 ## Calling the APIs from your application
 
-*this section needs to be covered in detail after confirming the exact process and code sample details with radhey*
+>*this section needs to be covered in detail after confirming the exact process and code sample details with radhey*
 
 1. On your app, you need to call the user service APIs, using the token provided for your Application.
 2. Sample code 

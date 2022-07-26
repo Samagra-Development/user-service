@@ -12,7 +12,7 @@
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
 
 3. [Adopter](adopter.md)
-   - [Prerequisites(for your local machine)](adopter.md#pre-requisites)
+   - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
    - [Installation](adopter.md#installation)
    - [Docker](adopter.md#docker)
 
