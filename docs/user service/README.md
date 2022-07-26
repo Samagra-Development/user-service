@@ -11,21 +11,17 @@
    - [CRUD Operations](core-features.md#5-crud-operations-on-a-user)
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
 
-3. [Adopter](adopter.md)
-   - [Pre-requisites](adopter.md#pre-requisites)
-   - [Installation](adopter.md#installation)
-   - [Next steps](adopter.md#next-steps)
-
-4. [How to use User service in applications](userservice-usage)
-   - [Post installation]()
+3. [How to use User service in applications](userservice-usage)
+   - [Prerequisites]()
    - [Set up]()
-   - [Docker]()
+   - [Test the APIs]()
+   - [Calling the APIs from your application]()
 
-5. [Developer Documentation](developer-docs.md)
+4. [Developer Documentation](developer-docs.md)
    - [Contribution guidelines](developer-docs.md#📄-contribution-guidelines)
    - [Development Environment setup](developer-docs.md#💻-development-environment-setup)
    - [Your first PR](developer-docs.md#🥇-your-first-pull-request)
    - [Community details](developer-docs.md#👨‍💻-community)
 
-6. [FAQs](faqs.md#faqs)
+5. [FAQs](faqs.md#faqs)
 
