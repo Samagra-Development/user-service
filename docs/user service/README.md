@@ -11,11 +11,11 @@
    - [CRUD Operations](core-features.md#5-crud-operations-on-a-user)
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
 
-3. [How to use User service in applications](userservice-usage)
-   - [Prerequisites]()
-   - [Set up]()
-   - [Test the APIs]()
-   - [Calling the APIs from your application]()
+3. [How to use User service in applications](user-service-usage)
+   - [Prerequisites](user-service-usage.md#prerequisites)
+   - [Set up](user-service-usage.md#setup)
+   - [Test the APIs](user-service-usage.md#test-the-apis)
+   - [Calling the APIs from your application](user-service-usage.md#calling-the-apis-from-your-application)
 
 4. [Developer Documentation](developer-docs.md)
    - [Contribution guidelines](developer-docs.md#📄-contribution-guidelines)
