@@ -77,5 +77,5 @@ If you have any queries or want to share any suggestions regarding User service 
 
 Maintainers:
 
-- [Chakshu Gautam](https://github.com/ChakshuGautam) - chakshu@samagragovernance.in 
-- [Radhay Anand](https://github.com/radhay-samagra) - radhay@samagragovernance.in
+- Chakshu Gautam - chakshu@samagragovernance.in 
+- Radhay Anand - radhay@samagragovernance.in

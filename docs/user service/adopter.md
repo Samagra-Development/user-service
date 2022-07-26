@@ -1,6 +1,6 @@
 ## Adopter
 
-I want to use User service instance in my own project and I want to set up my own instance of User service.
+User service is an open-source software, which can be used and installed by anyone. Along with the standard installation procedure, User service provides a docker based setup. Shared below are the prerequisites and installation instructions.
 
 ### Pre-requisites
 
@@ -58,6 +58,8 @@ yarn start:debug
 yarn start:prod
 ```
 
-### Next Steps
+### Docker
+
+*Docker setup commands - Coming Soon*
 
 
