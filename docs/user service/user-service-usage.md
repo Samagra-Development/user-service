@@ -20,9 +20,9 @@ Configuration update:
 
 Once your app is configured, you can test the following APIs.
 
-1. [Login API]()
-2. [Reset password API]()
-3. [User data crud]()
+1. [Login API](/src/admin/fusionauth/)
+2. [Reset password API](core-features.md#2-resetforgot-password)
+3. [User data (CRUD)](/src/user/user-db/)
 
 ## Calling the APIs from your application
 

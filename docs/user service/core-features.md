@@ -32,11 +32,11 @@ Some of the key benefits of this functionality are:
 
 Role-based access control (RBAC) is a method of regulating access to computer or network resources based on the roles of individual users within your organization. RBAC ensures people access only information they need to do their jobs and prevents them from accessing information that doesn't concern them.
 
-With user service RBAC, you can create users for your application and assign them specific permissions. These permissions will decide to which limit each user is allowed to access information. The aim of introducing RBAC in user service was to enhance the security of the organization applications and make the job of system administrators easy and efficient. The backend for assigning permissions and decorating user roles is given [here](/src/admin/admin.controller.ts)
+With user service RBAC, you can create users for your application and assign them specific permissions. These permissions will decide to which limit each user is allowed to access information. The aim of introducing RBAC in user service was to enhance the security of the organization applications and make the job of system administrators easy and efficient. The backend for assigning permissions and decorating user roles is given [here](/src/admin/admin.controller.ts).
 
 ### 4. JWT/Basic Authentication Strategies
 
-JSON Web Tokens is an authentication standard that works by assigning and passing around an encrypted token in requests that helps to identify the logged in user, instead of storing the user in a session on the server and creating a cookie. You can view some of these basic stratergies [here](/src/auth/auth-basic.strategy.ts)
+JSON Web Tokens is an authentication standard that works by assigning and passing around an encrypted token in requests that helps to identify the logged in user, instead of storing the user in a session on the server and creating a cookie. You can view some of these basic stratergies [here](/src/auth/auth-basic.strategy.ts).
 
 ### 5. CRUD Operations on a User
 
