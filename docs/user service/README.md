@@ -1,7 +1,7 @@
 1. [Overview](overview.md)
 
    - [Example use cases](overview.md#use-cases)
-   - [Use cases](overview.md#shiksha-sathi-mobile-app)
+   - [Shiksha Sathi and e-Samwad](overview.md#use-cases)
 
 2. [Core features](core-features.md)
    - [Login and Signup feature](core-features.md#1-login--sign-up-feature)
