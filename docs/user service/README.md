@@ -2,6 +2,7 @@
 
    - [Use cases](overview.md#use-cases)
    - [High Level Diagram](overview.md#user-service-high-level-diagram)
+   - [Currently Supported](overview.md#currently-supported)
 
 2. [Core features](core-features.md)
    - [Login and Signup feature](core-features.md#1-login--sign-up-feature)
