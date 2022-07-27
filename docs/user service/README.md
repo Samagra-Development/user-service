@@ -11,22 +11,24 @@
    - [CRUD Operations](core-features.md#5-crud-operations-on-a-user)
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
 
-3. [Setting up user service on your local machine](adopter.md)
-   - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
-   - [Installation](adopter.md#installation)
-   - [Docker](adopter.md#docker)
-
-4. [How to use User service in applications](user-service-usage.md)
+3. [How to use User service in applications](user-service-usage.md)
    - [Prerequisites](user-service-usage.md#prerequisites)
    - [Set up](user-service-usage.md#setup)
    - [Test the APIs](user-service-usage.md#test-the-apis)
    - [Calling the APIs from your application](user-service-usage.md#calling-the-apis-from-your-application)
 
-5. [Developer Documentation](developer-docs.md)
+4. [Developer Documentation](developer-docs.md)
    - [Contribution guidelines](developer-docs.md#📄-contribution-guidelines)
    - [Development Environment setup](developer-docs.md#💻-development-environment-setup)
    - [Your first PR](developer-docs.md#🥇-your-first-pull-request)
    - [Community details](developer-docs.md#👨‍💻-community)
+
+
+5. [Setting up user service on your own server](adopter.md)
+   - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
+   - [Installation](adopter.md#installation)
+   - [Installation using Docker](adopter.md#docker)
+
 
 6. [FAQs](faqs.md#faqs)
 
