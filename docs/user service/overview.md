@@ -26,16 +26,10 @@ Both the apps are used by a different set of users and maintain their own user m
 
 > Shiksha sathi and e-Samwad login portal
 
-<!-- <p align="center">
-  <img alt="sathi" src="images/sathi-login.jpg" width="30%" height="30%">
-&nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="esamwad" src="images/esamwad-login.jpg" width="30%" height="30%">
-</p> -->
-
 <p align="middle">
-<img src="images/sathi-login.jpg" width="400" height="600"/> 
+<img src="images/sathi-login.jpg" width="200" height="40"/> 
 &nbsp; &nbsp; &nbsp; &nbsp;
-<img src="images/esamwad-login.jpg" width="400" height="600"/>
+<img src="images/esamwad-login.jpg" width="200" height="400"/>
 </p>
 
 ### User Service High Level Diagram
@@ -43,8 +37,13 @@ Both the apps are used by a different set of users and maintain their own user m
 This diagram captures the high-level view of the User service and how different applications can register on the user service for using its APIs.
 
 <p align="center">
-<img src="images/User-service_HLD.png" width="800" height="600"/>
+<img src="images/User-service_HLD.png" width="600" height="400"/>
 </p>
 
 >User service only provides Backend APIs, the frontend has to be maned by the host application.
+
+### Currently supported:
+
+1. User management auth service - [Fusion Auth](/src/user/fusionauth/)
+2. SMS service providers - [CDAC](/src/user/sms/cdac/) and [Gupshup](/src/user/sms/gupshup/)
 

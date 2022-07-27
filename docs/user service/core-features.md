@@ -22,11 +22,10 @@ We can:
 
 - This exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service reset password portal.
 
-The user service currently supports two channels for the SMS transmission, they are:
+The user service currently supports two providers for the SMS, they are:
+[Gupshup](/src/user/sms/gupshup/) and [CDAC](/src/user/sms/cdac/)
 
-1. [Gupshup](/src/user/sms/gupshup/) &
-
-2. [CDAC](/src/user/sms/cdac/) respectively.
+**More providers can be contributed to the user service by the community.**
 
 ### 3. Role Based Access Control
 
