@@ -14,7 +14,7 @@ User service provides login services for user Login and Registration.
 
 ### 2. Reset/Forgot Password 
 
-There are cases, When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons🤔 In such cases, a system to reset the existing password may be very helpful to the user. 
+There are cases, When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
 
 We can:
 
