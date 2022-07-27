@@ -1,4 +1,4 @@
-## Adopter
+## Setting up user service on your own server
 
 User service is an open-source software, which can be used and installed by anyone. Along with the standard installation procedure, User service provides a docker based setup. Shared below are the prerequisites and installation instructions.
 
