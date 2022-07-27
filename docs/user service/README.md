@@ -1,7 +1,7 @@
 1. [Overview](overview.md)
 
-   - [Example use cases](overview.md#use-cases)
-   - [Shiksha Sathi and e-Samwad](overview.md#use-cases)
+   - [Use cases](overview.md#use-cases)
+   - [High Level Diagram](overview.md#user-service-high-level-diagram)
 
 2. [Core features](core-features.md)
    - [Login and Signup feature](core-features.md#1-login--sign-up-feature)
@@ -11,7 +11,7 @@
    - [CRUD Operations](core-features.md#5-crud-operations-on-a-user)
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
 
-3. [Adopter](adopter.md)
+3. [Setting up user service on your local machine](adopter.md)
    - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
    - [Installation](adopter.md#installation)
    - [Docker](adopter.md#docker)

@@ -1,10 +1,17 @@
 ## Overview
 
-Most applications maintain a user login module. This is essentially created to ensure that only authorized users are accessing the application. All the authentication and authorization modules require a few basic flows like, Login, Reset password, Updating user, etc. Typically each app ends up creating its own backend flows. And then, in the long run, it is also required to maintain the backend code as well as manage the load as per the usage of the application.
+Most applications maintain a user login module. This is essentially created to ensure that only authorized users are accessing the application. All the authentication and authorization modules require a few basic flows like, Login, Reset password, Updating user, etc.
 
-User service is open-source software built to address the above-mentioned redundancy of backend effort. It offers a set of backend APIs, which can be leveraged by any application. User service does not store or manage the Application’s user data. The user data remains within the host application’s user management auth service like Fusion Auth. The host application registers itself with the User service by sharing the credentials. On registration, the application can start using the Auth service.
+Typically each app ends up creating its own backend flows. And then, in the long run, it is also required to maintain the backend code as well as manage the load as per the usage of the application.
 
-At the same time, multiple applications can register with a single running instance of user service. For example, Uber has two apps, the rider app, and the driver app. For both the apps, it does not need to create a separate authentication backend. Uber can register both apps on user service and use the APIs for both apps.
+User service is open-source software built to address the above-mentioned redundancy of backend effort. It offers a set of backend APIs, which can be leveraged by any application. 
+
+- User service does not store or manage the Application’s user data. The user data remains within the host application’s user management auth service like Fusion Auth. 
+- The host application registers itself with the User service by sharing the credentials. On registration, the application can start using the Auth service.
+
+- At the same time, multiple applications can register with a single running instance of user service. 
+
+For example, Uber has two apps, the rider app, and the driver app. For both the apps, it does not need to create a separate authentication backend. Uber can register both apps on user service and use the APIs for both apps.
 
 ### Use Cases
 
