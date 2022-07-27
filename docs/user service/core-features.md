@@ -24,11 +24,17 @@ User service provides login services for user Login and Registration.
 
 When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
 
-We can invoke a reset password functionality from user service in our applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield.
+We can:
 
-Similarly, this exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service reset password portal.
+- Invoke a reset password functionality from user service in our applications. If a case arises where the user has forgotten his password he can simply click on the “reset password” button. This action will take the user to a different portal where he will be asked to enter his mobile number in a textfield.
 
-The user service currently supports two channels for the SMS transmission, they are [Gupshup](/src/user/sms/gupshup/) and [CDAC](/src/user/sms/cdac/) respectively.
+- This exact functionality can be achieved by entering only our username. e-Samwad is an android app that also uses the User service reset password portal.
+
+The user service currently supports two channels for the SMS transmission, they are:
+
+1. [Gupshup](/src/user/sms/gupshup/) &
+ 
+2. [CDAC](/src/user/sms/cdac/) respectively.
 
 ### 3. Role Based Access Control
 
@@ -44,9 +50,13 @@ JSON Web Tokens is an authentication standard that works by assigning and passin
 
 As we know, the User service allows us to create a user in the database. But with that, it also allows us to perform various actions on the created user. Lets learn about the importance of other operations in a software application.
 
-CRUD operations may be important in various situations and use cases. Lets say, you want to retrieve the information of a customer who has the highest amount of purchases in a week on an E-commerce website. With user service, the admin can easily retrieve the information of that customer with one click.
+CRUD operations may be important in various situations and use cases. 
 
-Similarly, the website admin can update the details associated with a user. For example, he can modify the faulty information attached to the user. If needed, the admin can delete the user and all the related information associated with him/her from the organization databases. To learn more about operations performed on user, click [here](/src/user/user-db/).
+- Lets say, you want to retrieve the information of a customer who has the highest amount of purchases in a week on an E-commerce website. With user service, the admin can easily retrieve the information of that customer with one click.
+
+- Similarly, the website admin can update the details associated with a user. For example, he can modify the faulty information attached to the user. If needed, the admin can delete the user and all the related information associated with him/her from the organization databases. 
+
+To learn more about operations performed on user, click [here](/src/user/user-db/).
 
 ### 6. Login using OTP based Model
 

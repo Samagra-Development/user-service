@@ -25,7 +25,6 @@ Once your app is configured, you can test the following APIs.
 1. [Login API](/src/admin/fusionauth/)
 2. [Reset password API](/src/user/sms/)
 3. [User data (CRUD)](/src/user/user-db/)
-..
 4. More APIs coming soon
 
 ## Calling the APIs from your application
