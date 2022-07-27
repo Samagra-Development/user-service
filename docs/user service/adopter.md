@@ -60,6 +60,61 @@ yarn start:prod
 
 ### Docker
 
-*Docker setup commands - Coming Soon*
+- Docker compose file helps us to define how the one or more containers in our application are configured. Once you have a Compose file, you can create and start your application with a single command:
+
+```shell
+docker compose up
+```
+
+You can access the user service compose file [here](/docker-compose.yml).
+
+- User service [Dockerfile](/Dockerfile) contains all the commands a user could call on the command line to assemble an image
+
+1. To create an app directory:
+
+```shell
+WORKDIR /app
+```
+
+2. Make sure that both package.json AND package-lock.json are copied by executing the Wildcard COPY command as shown below:
+
+```shell
+COPY package.json ./
+COPY yarn.lock ./
+COPY prisma ./prisma/
+```
+
+3. If not done already, Install the app dependencies for the user service by running the following command:
+
+```shell
+RUN yarn install
+```
+
+4. Run the build:
+
+```shell
+COPY . .
+
+RUN yarn run build
+
+FROM node:12
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/yarn.lock ./
+COPY --from=builder /app/dist ./dist
+```
+
+5. Expose the port of your choice:
+
+```shell
+EXPOSE 3000
+```
+
+6. Start the production module:
+
+```shell
+CMD [ "npm", "run", "start:prod" ]
+```
 
 
