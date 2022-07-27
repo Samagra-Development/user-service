@@ -13,7 +13,7 @@ User service is open-source software built to address the above-mentioned redund
 
 For example, Uber has two apps, the rider app, and the driver app. For both the apps, it does not need to create a separate authentication backend. Uber can register both apps on user service and use the APIs for both apps.
 
-### Use Cases
+### ⚒️ Use Cases
 
 Example for the governance ecosystem - In the state of Himachal Pradesh there are two apps used by the Department of Education. 
 
@@ -32,7 +32,7 @@ Both the apps are used by a different set of users and maintain their own user m
 <img src="images/esamwad-login.jpg" width="150" height="300"/>
 </p>
 
-### User Service High Level Diagram
+### 🪜 User Service High Level Diagram
 
 This diagram captures the high-level view of the User service and how different applications can register on the user service for using its APIs.
 
@@ -42,7 +42,7 @@ This diagram captures the high-level view of the User service and how different 
 
 User service only provides Backend APIs, the frontend has to be maned by the host application.
 
-### Currently supported:
+### 💁‍♂️ Currently supported:
 
 1. User management auth service - [Fusion Auth](https://github.com/fusionauth)
 2. SMS service providers - [CDAC](/src/user/sms/cdac/) and [Gupshup](/src/user/sms/gupshup/)

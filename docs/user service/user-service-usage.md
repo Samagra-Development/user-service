@@ -1,4 +1,4 @@
-## Prerequisites
+## 📕 Prerequisites
 
 Prequisites required for using User service:
 
@@ -8,7 +8,7 @@ Prequisites required for using User service:
 
 3. SMS service provider credentials - User service has two channels used for SMS providers, they are [Gupshup](/src/user/sms/gupshup/) and [CDAC](/src/user/sms/cdac/). However, you can also configure a custom channel for an SMS provider.
 
-## Setup
+## 🖥️ Setup
 
 >*how to exactly configure and setup user service within an software application by (to be confirmed by Radhey). i.e how can an end-user setup an authentication gateway(or other user service gateways) on his own software application and use it*
 
@@ -18,7 +18,7 @@ Configuration update:
 
 1. On the user service, Share these <> credentials with the administrator to register your application
 
-## Test the APIs
+## 🔨 Test the APIs
 
 Once your app is configured, you can test the following APIs.
 
@@ -27,7 +27,7 @@ Once your app is configured, you can test the following APIs.
 3. [User data (CRUD)](/src/user/user-db/)
 4. More APIs coming soon
 
-## Calling the APIs from your application
+## 📲 Calling the APIs from your application
 
 >*this section needs to be covered in detail after confirming the exact process and code sample details with radhey*
 

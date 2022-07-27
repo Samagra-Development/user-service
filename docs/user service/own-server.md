@@ -5,7 +5,7 @@ User service is an open-source software, which can be used and installed by anyo
 ### Pre-requisites
 
 1. Install [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable), If not already Installed.
-2. System requirements
+2. System requirements 🖱️
      - Operating system - Linux or Windows 8/10 (64 bit)
      - 4 GB RAM or more
      - At least 20 GB storage
@@ -17,7 +17,7 @@ User service is an open-source software, which can be used and installed by anyo
      - Git & Github
      - Basic Knowledge of Nest
      - Familiar with Gupshup/CDAC Channels (For SMS)
-     - Docker
+     - Docker 🐳
 
 ### Installation
 
@@ -58,7 +58,7 @@ yarn start:debug
 yarn start:prod
 ```
 
-### Docker
+### 🐳 Docker
 
 - Docker compose file helps us to define how the one or more containers in our application are configured. Once you have a Compose file, you can create and start your application with a single command:
 

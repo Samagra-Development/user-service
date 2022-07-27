@@ -1,6 +1,6 @@
 ## Core features
 
-The key benefit for the applications using user service is that they get to use the readily available backend APIs which they do not need to maintain or manage it is taken care by the user service. 
+The key benefit for the applications using user service is that they get to use the readily available backend APIs which they do not need to maintain or manage it is taken care by the user service! 
 
 The following section dives deep into the core features of User Service:
 
@@ -14,7 +14,7 @@ User service provides login services for user Login and Registration.
 
 ### 2. Reset/Forgot Password 
 
-When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons. In such cases, a system to reset the existing password may be very helpful to the user. 
+There are cases, When a user creates a profile but is unable to recall his current password or the user credentials are lost due to some reasons🤔 In such cases, a system to reset the existing password may be very helpful to the user. 
 
 We can:
 

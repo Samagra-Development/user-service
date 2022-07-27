@@ -11,6 +11,7 @@
    - [JWT or Basic Auth Strategies](core-features.md#4-jwtbasic-authentication-strategies)
    - [CRUD Operations](core-features.md#5-crud-operations-on-a-user)
    - [Login using OTP Model](core-features.md#6-login-on-otp-based-model)
+   - [Load Balancing](core-features.md#7-load-balancing)
 
 3. [How to use User service in applications](user-service-usage.md)
    - [Prerequisites](user-service-usage.md#prerequisites)
@@ -25,7 +26,7 @@
    - [Community details](developer-docs.md#👨‍💻-community)
 
 
-5. [Setting up user service on your own server](adopter.md)
+5. [Setting up user service on your own server](own-server.md)
    - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
    - [Installation](adopter.md#installation)
    - [Installation using Docker](adopter.md#docker)
