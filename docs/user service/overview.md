@@ -40,7 +40,7 @@ This diagram captures the high-level view of the User service and how different 
 <img src="images/User-service_HLD.png" width="500" height="300"/>
 </p>
 
->User service only provides Backend APIs, the frontend has to be maned by the host application.
+User service only provides Backend APIs, the frontend has to be maned by the host application.
 
 ### Currently supported:
 

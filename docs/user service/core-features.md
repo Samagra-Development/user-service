@@ -55,7 +55,7 @@ Just like how we can use an OTP in user service to reset the forgotten password 
 
 OTP service specifications are given [here](/src/dst/otp/) and the SMS interface and channel details like Gupshup and CDAC are provided in  [this](/src/dst/sms/) codebase.
 
-### Load Balancing  
+### 7. Load Balancing  
 
 The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests.
  
