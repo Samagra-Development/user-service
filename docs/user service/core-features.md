@@ -1,17 +1,9 @@
 ## Core features
 
-This section dives deep into the core features of User Service. But before that let us see some of the key benefits of using User service:
+The key benefit for the applications using user service is that they get to use the readily available backend APIs which they do not need to maintain or manage it is taken care by the user service. 
 
-1. Readymade backend APIs - Applications can configure their credentials and start using the APIs without doing any backend development. 
+The following section dives deep into the core features of User Service:
 
-2. Load Balancing - The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests
-
-3. Readymade reset password portal - Instead of spending resources on programming a separate Reset password portal, we can use the ready to use User service functionality to integrate into our existing applications.
-
-4. Cost saving and reusability - Because of these ready made services, an organization can cut costs on programming some of these portals from scratch. What's more is that, the organization can reuse the same instance of user service for different applications without creating a different backend.
-
-5. Security - User service OTPs are randomly generated and sent directly to your mobile phone. Randomly generated strings of characters are virtually impossible to guess.
- 
 ### 1. Login & Sign-Up feature
 
 User service provides login services for user Login and Registration. 
@@ -33,7 +25,7 @@ We can:
 The user service currently supports two channels for the SMS transmission, they are:
 
 1. [Gupshup](/src/user/sms/gupshup/) &
- 
+
 2. [CDAC](/src/user/sms/cdac/) respectively.
 
 ### 3. Role Based Access Control
@@ -63,4 +55,9 @@ To learn more about operations performed on user, click [here](/src/user/user-db
 Just like how we can use an OTP in user service to reset the forgotten password of a user. We can also use the OTP to log in a user in the organization portal. The OTP based login model is quite different from the standard Username-Password model.
 
 OTP service specifications are given [here](/src/dst/otp/) and the SMS interface and channel details like Gupshup and CDAC are provided in  [this](/src/dst/sms/) codebase.
+
+### Load Balancing  
+
+The APIs are built in a way that mitigates the DevOps task for the application to manage load in case of event-driven, one-off high usage. It scales horizontally to process all the requests.
+ 
 
