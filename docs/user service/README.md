@@ -27,9 +27,9 @@
 
 
 5. [Setting up user service on your own server](own-server.md)
-   - [Prerequisites (for your local machine)](adopter.md#pre-requisites)
-   - [Installation](adopter.md#installation)
-   - [Installation using Docker](adopter.md#docker)
+   - [Prerequisites (for your local machine)](own-server.md#pre-requisites)
+   - [Installation](own-server.md#installation)
+   - [Installation using Docker](own-server.md#🐳-docker)
 
 
 6. [FAQs](faqs.md#faqs)
