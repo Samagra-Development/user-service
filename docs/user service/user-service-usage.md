@@ -18,7 +18,7 @@ Configuration update:
 1. On the user service, Share your application details with the administrator to register your application.
 2. The new endpoints will be exposed by the admin which can be consumed later over http/https.
 
-- ### If setting up a separate instance on perm.
+- ### If Setting Up a Separate Instance on Perm.
 4. Register a new application on FusionAuth (or any other supported Authentication/Authorization platform).
 5. Add the `applicationId`, `APIKey`, `fusion auth endpoint`, and you can update any default value populated in the `sample.env` to your requirements.
 6. Update the `sample.env` file and rename it to `.env`.
