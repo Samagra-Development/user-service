@@ -19,10 +19,10 @@ Configuration update:
 2. The new endpoints will be exposed by the admin which can be consumed later over http/https.
 
 - ### If Setting Up a Separate Instance on Perm.
-4. Register a new application on FusionAuth (or any other supported Authentication/Authorization platform).
-5. Add the `applicationId`, `APIKey`, `fusion auth endpoint`, and you can update any default value populated in the `sample.env` to your requirements.
-6. Update the `sample.env` file and rename it to `.env`.
-7. Now you can run you nest application on any docker instance by using 
+3. Register a new application on FusionAuth (or any other supported Authentication/Authorization platform).
+4. Add the `applicationId`, `APIKey`, `fusion auth endpoint`, and you can update any default value populated in the `sample.env` to your requirements.
+5. Update the `sample.env` file and rename it to `.env`.
+6. Now you can run you nest application on any docker instance by using 
 
     ```shell
     docker-compose up -d
