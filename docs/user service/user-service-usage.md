@@ -10,19 +10,20 @@ Prequisites required for using User service:
 
 ## 🖥️ Setup
 
->*how to exactly configure and setup user service within an software application by (to be confirmed by Radhey). i.e how can an end-user setup an authentication gateway(or other user service gateways) on his own software application and use it*
-
 Setup the User service instance for your application:
 
 Configuration update:
-- ### If setting up on a hosted instance
+
+- ### If Setting Up on a Hosted Instance
 1. On the user service, Share your application details with the administrator to register your application.
 2. The new endpoints will be exposed by the admin which can be consumed later over http/https.
+
 - ### If setting up a separate instance on perm.
 4. Register a new application on FusionAuth (or any other supported Authentication/Authorization platform).
 5. Add the `applicationId`, `APIKey`, `fusion auth endpoint`, and you can update any default value populated in the `sample.env` to your requirements.
 6. Update the `sample.env` file and rename it to `.env`.
 7. Now you can run you nest application on any docker instance by using 
+
     ```shell
     docker-compose up -d
     ```
@@ -43,8 +44,6 @@ yarn run test:watch ./src/user/sms/gupshup/gupshup.service.spec.ts
 4. More APIs coming soon
 
 ## 📲 Calling the APIs from your application
-
->*this section needs to be covered in detail after confirming the exact process and code sample details with radhey*
 
 1. On your app, you need to call the user service APIs, using the token provided for your Application.
 2. Sample code 
