@@ -14,7 +14,6 @@ import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { DstModule } from './dst/dst.module';
 import { AuthModule } from './auth/auth.module';
-import { ApiModule } from './api/api.module';
 import got from 'got/dist/source';
 
 const gupshupFactory = {
@@ -49,7 +48,6 @@ const otpServiceFactory = {
     AdminModule,
     DstModule,
     AuthModule,
-    ApiModule,
   ],
   controllers: [AppController],
   providers: [

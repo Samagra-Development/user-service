@@ -14,7 +14,6 @@ import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { DstModule } from './dst/dst.module';
 import { AuthModule } from './auth/auth.module';
-import { ApiModule } from './api/api.module';
 import got from 'got/dist/source';
 
 const gupshupFactory = {
@@ -40,7 +39,9 @@ const otpServiceFactory = {
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: 'config/config.json'
+    }),
     UserModule,
     ThrottlerModule.forRoot({
       ttl: parseInt(process.env.RATE_LIMIT_TTL), //Seconds
@@ -49,7 +50,6 @@ const otpServiceFactory = {
     AdminModule,
     DstModule,
     AuthModule,
-    ApiModule,
   ],
   controllers: [AppController],
   providers: [
