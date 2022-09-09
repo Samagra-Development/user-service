@@ -1,13 +1,3 @@
-node_modules
-# Keep environment variables out of version control
-.env
-dist
-coverage/lcov-report
-badges
-templates.json
-.history/
-dist/
-
 # Logs
 logs
 *.log
