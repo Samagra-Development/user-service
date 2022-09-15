@@ -14,6 +14,8 @@ CryptoJS.lib.WordArray.words;
 
 @Injectable()
 export class ApiService {
+  encodedBase64Key;
+  parsedBase64Key
   constructor(
     private configService: ConfigService,
     private readonly fusionAuthService: FusionauthService,
@@ -22,8 +24,13 @@ export class ApiService {
   ) {}
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
-    const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+    const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
+    if(encStatus){
+      this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
+      this.parsedBase64Key = this.encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(this.encodedBase64Key);
+      user.loginId = this.encrypt(user.loginId, this.parsedBase64Key);
+      user.password = this.encrypt(user.password, this.parsedBase64Key);
+    }
     return this.fusionAuthService
       .login(user, authHeader)
       .then(async (resp: ClientResponse<LoginResponse>) => {
@@ -35,9 +42,14 @@ export class ApiService {
         if (fusionAuthUser.user.data.accountName === undefined) {
           if (fusionAuthUser.user.fullName == undefined) {
             if (fusionAuthUser.user.firstName === undefined) {
-              fusionAuthUser['user']['data']['accountName'] = this.decrypt(
-                user.loginId, parsedBase64Key
-              );
+              if(encStatus){
+                fusionAuthUser['user']['data']['accountName'] = this.decrypt(
+                  user.loginId, this.parsedBase64Key
+                );
+              }else {
+                fusionAuthUser['user']['data']['accountName'] = user.loginId;
+              }
+              
             } else {
               fusionAuthUser['user']['data']['accountName'] =
                 fusionAuthUser.user.firstName;
@@ -78,8 +90,8 @@ export class ApiService {
   }
 
   loginByPin(user: any, authHeader: string): Promise<SignupResponse> {
-    const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+    this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
+    this.parsedBase64Key = this.encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(this.encodedBase64Key);
     return this.fusionAuthService
       .login(user, authHeader)
       .then(async (resp: ClientResponse<LoginResponse>) => {
@@ -91,7 +103,7 @@ export class ApiService {
           if (fusionAuthUser.user.fullName == undefined) {
             if (fusionAuthUser.user.firstName === undefined) {
               fusionAuthUser['user']['data']['accountName'] = this.decrypt(
-                user.loginId, parsedBase64Key
+                user.loginId, this.parsedBase64Key
               );
             } else {
               fusionAuthUser['user']['data']['accountName'] =
