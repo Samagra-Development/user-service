@@ -8,6 +8,7 @@ import { UserController } from './user.controller';
 import { UserDBService } from './user-db/user-db.service';
 import { UserService } from './user.service';
 import got from 'got/dist/source';
+import { SignupResponse } from './user.interface';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -74,5 +75,15 @@ describe('UserController', () => {
     expect(await controller.verifyUsernamePhoneCombination()).toStrictEqual({
       status: result,
     });
+  });
+
+  it('should verify if POST /user/login is working as expected', async function () {
+    expect(
+      await controller.login({
+        loginId: 'xxxx',
+        password: 'xxxx',
+        applicationId: process.env.FUSIONAUTH_APPLICATION_ID,
+      }),
+    ).toBeInstanceOf(SignupResponse);
   });
 });
