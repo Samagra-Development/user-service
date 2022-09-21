@@ -66,7 +66,6 @@ export class ApiService {
           accountStatus: null,
           data: {
             user: fusionAuthUser,
-            schoolResponse: null,
           },
         };
         return response;
@@ -121,7 +120,6 @@ export class ApiService {
           accountStatus: null,
           data: {
             user: fusionAuthUser,
-            schoolResponse: null,
           },
         };
         return response;
