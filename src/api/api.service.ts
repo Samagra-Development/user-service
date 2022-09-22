@@ -39,26 +39,26 @@ export class ApiService {
           console.log('Here');
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
         }
-        if (fusionAuthUser.user.data.accountName === undefined) {
-          if (fusionAuthUser.user.fullName == undefined) {
-            if (fusionAuthUser.user.firstName === undefined) {
-              if(encStatus){
-                fusionAuthUser['user']['data']['accountName'] = this.decrypt(
-                  user.loginId, this.parsedBase64Key
-                );
-              }else {
-                fusionAuthUser['user']['data']['accountName'] = user.loginId;
-              }
+        // if (fusionAuthUser.user.data.accountName === undefined) {
+        //   if (fusionAuthUser.user.fullName == undefined) {
+        //     if (fusionAuthUser.user.firstName === undefined) {
+        //       if(encStatus){
+        //         fusionAuthUser['user']['data']['accountName'] = this.decrypt(
+        //           user.loginId, this.parsedBase64Key
+        //         );
+        //       }else {
+        //         fusionAuthUser['user']['data']['accountName'] = user.loginId;
+        //       }
               
-            } else {
-              fusionAuthUser['user']['data']['accountName'] =
-                fusionAuthUser.user.firstName;
-            }
-          } else {
-            fusionAuthUser['user']['data']['accountName'] =
-              fusionAuthUser.user.fullName;
-          }
-        }
+        //     } else {
+        //       fusionAuthUser['user']['data']['accountName'] =
+        //         fusionAuthUser.user.firstName;
+        //     }
+        //   } else {
+        //     fusionAuthUser['user']['data']['accountName'] =
+        //       fusionAuthUser.user.fullName;
+        //   }
+        // }
         const response: SignupResponse = new SignupResponse().init(uuidv4());
         response.responseCode = ResponseCode.OK;
         response.result = {
@@ -98,21 +98,21 @@ export class ApiService {
         if (fusionAuthUser.user === undefined) {
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
         }
-        if (fusionAuthUser.user.data.accountName === undefined) {
-          if (fusionAuthUser.user.fullName == undefined) {
-            if (fusionAuthUser.user.firstName === undefined) {
-              fusionAuthUser['user']['data']['accountName'] = this.decrypt(
-                user.loginId, this.parsedBase64Key
-              );
-            } else {
-              fusionAuthUser['user']['data']['accountName'] =
-                fusionAuthUser.user.firstName;
-            }
-          } else {
-            fusionAuthUser['user']['data']['accountName'] =
-              fusionAuthUser.user.fullName;
-          }
-        }
+        // if (fusionAuthUser.user.data.accountName === undefined) {
+        //   if (fusionAuthUser.user.fullName == undefined) {
+        //     if (fusionAuthUser.user.firstName === undefined) {
+        //       fusionAuthUser['user']['data']['accountName'] = this.decrypt(
+        //         user.loginId, this.parsedBase64Key
+        //       );
+        //     } else {
+        //       fusionAuthUser['user']['data']['accountName'] =
+        //         fusionAuthUser.user.firstName;
+        //     }
+        //   } else {
+        //     fusionAuthUser['user']['data']['accountName'] =
+        //       fusionAuthUser.user.fullName;
+        //   }
+        // }
         const response: SignupResponse = new SignupResponse().init(uuidv4());
         response.responseCode = ResponseCode.OK;
         response.result = {
@@ -180,7 +180,9 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
   }
 
   async createUserByPin(data: UserRegistration, applicationId: string, authHeader?: string): Promise<SignupResponse> {
-    data.user.password = this.encrypt(data.user.password, this.configResolverService.getEncryptionKey(applicationId))
+    const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
+    const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+    data.user.password = this.encrypt(data.user.password, parsedBase64Key)
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
       await this.fusionAuthService.createAndRegisterUser(data, applicationId , authHeader);
     if (userId == null || user == null) {

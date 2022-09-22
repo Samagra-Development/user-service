@@ -101,7 +101,7 @@ export class ApiController {
 
   @Post('changePassword')
   async updatePassword(
-    @Body() data: { loginId: string, password: string, applicationId: string},
+    @Body() data: { loginId: string, password: string },
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId
   ): Promise<SignupResponse> {
@@ -111,7 +111,7 @@ export class ApiController {
 
   @Post('changePin')
   async updatePin(
-    @Body() data: { loginId: string, password: string, applicationId: string},
+    @Body() data: { loginId: string, password: string },
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId
   ): Promise<SignupResponse> {
