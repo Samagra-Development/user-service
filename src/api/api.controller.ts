@@ -75,10 +75,16 @@ export class ApiController {
 
   @Post('login/pin')
   async loginByPin(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
+      const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
       const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
       const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
-      user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
-      user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+      if(encStatus){
+        user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+        // user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+      }else{
+        user.password = this.apiService.encrypt(user.password, parsedBase64Key);
+      }
+      
       const status: SignupResponse = await this.apiService.login(user, authHeader);
       return status;
   }
@@ -111,7 +117,7 @@ export class ApiController {
   ): Promise<SignupResponse> {
     const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
     const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
-    data.password = this.apiService.encrypt(data.loginId, parsedBase64Key);
+    data.password = this.apiService.encrypt(data.password, parsedBase64Key);
     const status: SignupResponse = await this.apiService.updatePassword(data, applicationId, authHeader);
     return status;
   }
