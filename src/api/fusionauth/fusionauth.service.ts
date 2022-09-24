@@ -11,14 +11,13 @@ import FusionAuthClient, {
   UserRegistration,
   UserRequest,
   UserResponse,
-  ChangePasswordResponse,
-  Error, JWTRefreshResponse,
+  Error,
+  JWTRefreshResponse,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { response } from 'express';
 import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
 import { ConfigResolverService } from '../config.resolver.service';
@@ -322,16 +321,19 @@ export class FusionauthService {
     return resp;
   }
 
-  login(user: LoginRequest, authHeader: string): Promise<ClientResponse<LoginResponse>> {
+  login(
+    user: LoginRequest,
+    authHeader: string,
+  ): Promise<ClientResponse<LoginResponse>> {
     console.log(user);
-    let apiKey = this.configResolverService.getApiKey(user.applicationId)
-    console.log("here", apiKey);
-      if ( authHeader != null ) {
-          apiKey = authHeader
+    let apiKey = this.configResolverService.getApiKey(user.applicationId);
+    console.log('here', apiKey);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
-    console.log({apiKey});
+    console.log({ apiKey });
     const host = this.configResolverService.getHost(user.applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .login(user)
       .then((response: ClientResponse<LoginResponse>): any => {
@@ -594,15 +596,31 @@ export class FusionauthService {
     return fusionauthClient
       .exchangeRefreshTokenForJWT(refreshRequest)
       .then((response: ClientResponse<JWTRefreshResponse>) => {
-        return response;
-      })
-      .catch((e): { _userId: UUID; user: User; err: Error } => {
-        console.log(`Could not update token`, JSON.stringify(e));
+        const token: string = response.response.token;
+        const decodedToken = JSON.parse(
+          Buffer.from(token.split('.')[1], 'base64').toString(),
+        );
         return {
-          _userId: null,
-          user: null,
-          err: e,
+          token: token,
+          refreshToken: response.response.refreshToken,
+          exp: decodedToken.exp
         };
-      });
+      })
+      .catch(
+        (
+          e,
+        ): {
+          token: string | null;
+          refreshToken: string | null;
+          exp: number | null;
+        } => {
+          console.log(`Could not update token`, JSON.stringify(e));
+          return {
+            token: null,
+            refreshToken: null,
+            exp: null,
+          };
+        },
+      );
   }
 }
