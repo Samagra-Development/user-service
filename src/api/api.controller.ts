@@ -21,6 +21,7 @@ import { ConfigResolverService } from './config.resolver.service';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
+import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 const CryptoJS = require('crypto-js');
 const AES = require('crypto-js/aes');
 
@@ -84,7 +85,7 @@ export class ApiController {
       }else{
         user.password = this.apiService.encrypt(user.password, parsedBase64Key);
       }
-      
+
       const status: SignupResponse = await this.apiService.login(user, authHeader);
       return status;
   }
@@ -181,5 +182,18 @@ export class ApiController {
       authHeader
     );
     return users;
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Body() refreshRequest: RefreshRequest,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ) {
+    return this.apiService.refreshToken(
+      applicationId,
+      refreshRequest,
+      authHeader,
+    );
   }
 }

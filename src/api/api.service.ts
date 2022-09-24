@@ -7,6 +7,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigResolverService } from './config.resolver.service';
+import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 const CryptoJS = require('crypto-js');
 const AES = require('crypto-js/aes');
 
@@ -245,5 +246,17 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
       mode: CryptoJS.mode.ECB,
     }).toString(CryptoJS.enc.Utf8);
     return plainString;
+  }
+
+  async refreshToken(
+    applicationId: string,
+    refreshRequest: RefreshRequest,
+    authHeader?: string,
+  ) {
+    return this.fusionAuthService.refreshToken(
+      applicationId,
+      refreshRequest,
+      authHeader,
+    );
   }
 }
