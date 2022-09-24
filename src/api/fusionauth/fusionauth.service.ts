@@ -603,7 +603,7 @@ export class FusionauthService {
         return {
           token: token,
           refreshToken: response.response.refreshToken,
-          exp: decodedToken.exp
+          tokenExpirationInstant: decodedToken.exp * 1000, // convert to milli second same as login api
         };
       })
       .catch(
@@ -612,13 +612,13 @@ export class FusionauthService {
         ): {
           token: string | null;
           refreshToken: string | null;
-          exp: number | null;
+          tokenExpirationInstant: number | null;
         } => {
           console.log(`Could not update token`, JSON.stringify(e));
           return {
             token: null,
             refreshToken: null,
-            exp: null,
+            tokenExpirationInstant: null,
           };
         },
       );
