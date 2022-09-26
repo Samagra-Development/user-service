@@ -189,7 +189,7 @@ export class ApiController {
     @Body() refreshRequest: RefreshRequest,
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
-  ) {
+  ): Promise<UsersResponse> {
     return this.apiService.refreshToken(
       applicationId,
       refreshRequest,

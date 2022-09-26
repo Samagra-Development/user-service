@@ -2,7 +2,14 @@ import { LoginResponse, User, UUID, Error } from '@fusionauth/typescript-client'
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ResponseCode, ResponseStatus, SignupResponse, UsersResponse, UserRegistration } from './api.interface';
+import {
+  ResponseCode,
+  ResponseStatus,
+  SignupResponse,
+  UsersResponse,
+  UserRegistration,
+  RefreshTokenResult,
+} from './api.interface';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -252,11 +259,26 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
     applicationId: string,
     refreshRequest: RefreshRequest,
     authHeader?: string,
-  ) {
-    return this.fusionAuthService.refreshToken(
-      applicationId,
-      refreshRequest,
-      authHeader,
-    );
+  ): Promise<UsersResponse> {
+    const refreshTokenResponse: RefreshTokenResult =
+      await this.fusionAuthService.refreshToken(
+        applicationId,
+        refreshRequest,
+        authHeader,
+      );
+    const response: UsersResponse = new UsersResponse().init(uuidv4());
+    if (refreshTokenResponse.user.token !== null) {
+      response.responseCode = ResponseCode.OK;
+      response.params.status = ResponseStatus.success;
+      response.result = refreshTokenResponse;
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.status = ResponseStatus.failure;
+      response.params.errMsg =
+        'Failed to refresh token. Please ensure the input you have provided is correct';
+      response.params.err = 'REFRESH_TOKEN_FAILED';
+    }
+
+    return response;
   }
 }

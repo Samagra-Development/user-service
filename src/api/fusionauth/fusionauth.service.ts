@@ -22,6 +22,7 @@ import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
 import { ConfigResolverService } from '../config.resolver.service';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+import { RefreshTokenResult } from '../api.interface';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -586,7 +587,7 @@ export class FusionauthService {
     applicationId: string,
     refreshRequest: RefreshRequest,
     authHeader?: string,
-  ) {
+  ): Promise<RefreshTokenResult> {
     let apiKey = this.configResolverService.getApiKey(applicationId);
     if (authHeader != null) {
       apiKey = authHeader;
@@ -601,26 +602,22 @@ export class FusionauthService {
           Buffer.from(token.split('.')[1], 'base64').toString(),
         );
         return {
-          token: token,
-          refreshToken: response.response.refreshToken,
-          tokenExpirationInstant: decodedToken.exp * 1000, // convert to milli second same as login api
+          user: {
+            token: token,
+            refreshToken: response.response.refreshToken,
+            tokenExpirationInstant: decodedToken.exp * 1000, // convert to milli second same as login api
+          },
         };
       })
-      .catch(
-        (
-          e,
-        ): {
-          token: string | null;
-          refreshToken: string | null;
-          tokenExpirationInstant: number | null;
-        } => {
-          console.log(`Could not update token`, JSON.stringify(e));
-          return {
+      .catch((e): RefreshTokenResult => {
+        console.log(`Could not update token`, JSON.stringify(e));
+        return {
+          user: {
             token: null,
             refreshToken: null,
             tokenExpirationInstant: null,
-          };
-        },
-      );
+          },
+        };
+      });
   }
 }

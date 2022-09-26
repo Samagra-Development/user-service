@@ -58,12 +58,12 @@ export interface Admin {
     accountStatus?: AccountStatus;
     data?: any;
   }
-  
+
   export interface UsersResult {
     total?: number;
     users?: Array<User>;
   }
-  
+
   export class SignupResponse implements IGenericResponse {
     id: string;
     ver: string;
@@ -71,7 +71,7 @@ export interface Admin {
     params: ResponseParams;
     responseCode: ResponseCode;
     result: any;
-  
+
     init(msgId: UUID): SignupResponse {
       this.responseCode = ResponseCode.OK;
       this.params = {
@@ -86,7 +86,7 @@ export interface Admin {
       this.result = null;
       return this;
     }
-  
+
     getSuccess() {
       throw new Error('Method not implemented.');
     }
@@ -94,15 +94,15 @@ export interface Admin {
       throw new Error('Method not implemented.');
     }
   }
-  
+
   export class UsersResponse implements IGenericResponse {
     id: string;
     ver: string;
     ts: Date;
     params: ResponseParams;
     responseCode: ResponseCode;
-    result: UsersResult;
-  
+    result: UsersResult | RefreshTokenResult;
+
     init(msgId: UUID): UsersResponse {
       this.responseCode = ResponseCode.OK;
       this.params = {
@@ -117,7 +117,7 @@ export interface Admin {
       this.result = null;
       return this;
     }
-  
+
     getSuccess() {
       throw new Error('Method not implemented.');
     }
@@ -126,6 +126,12 @@ export interface Admin {
     }
   }
 
-  export type UserRegistration = RegistrationRequest;
-  
+export interface RefreshTokenResult {
+  user: {
+    token: string | null;
+    refreshToken: string | null;
+    tokenExpirationInstant?: number | null;
+  };
+}
 
+export type UserRegistration = RegistrationRequest;
