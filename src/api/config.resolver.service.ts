@@ -8,7 +8,8 @@ export class ConfigResolverService {
     }
 
     transform(applicationId: string): string {
-        return applicationId.split("_").join("-");
+        // we'll replace "-" with "_" because docker-compose cannot load hyphens & we expect applicationId with underscore separator
+        return applicationId.split("-").join("_");
     }
 
     getConfigByApplicationId(applicationId: string): ApiConfig {
