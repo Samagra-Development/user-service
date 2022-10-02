@@ -39,8 +39,11 @@ export class ConfigResolverService {
     }
 
     getEncryptionKey(applicationId: string): string{
-        applicationId = this.transform(applicationId);
-        const config = this.configService.get<string>(applicationId);
-        return JSON.parse(config).encryption.key || null;
+        if (this.getEncryptionStatus(applicationId)) {
+            applicationId = this.transform(applicationId);
+            const config = this.configService.get<string>(applicationId);
+            return JSON.parse(config).encryption.key || undefined;
+        }
+        return undefined;
     }
 }

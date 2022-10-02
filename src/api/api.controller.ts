@@ -66,7 +66,7 @@ export class ApiController {
       const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
       if(encStatus){
         const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-        const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+        const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
         user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
         user.password = this.apiService.decrypt(user.password, parsedBase64Key);
       } 
@@ -78,7 +78,7 @@ export class ApiController {
   async loginByPin(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
       const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
       const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-      const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+      const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
       if(encStatus){
         user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
         // user.password = this.apiService.decrypt(user.password, parsedBase64Key);
@@ -117,7 +117,7 @@ export class ApiController {
     @Headers('x-application-id') applicationId
   ): Promise<SignupResponse> {
     const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+    const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
     data.password = this.apiService.encrypt(data.password, parsedBase64Key);
     const status: SignupResponse = await this.apiService.updatePassword(data, applicationId, authHeader);
     return status;

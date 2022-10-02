@@ -35,7 +35,7 @@ export class ApiService {
     const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
     if(encStatus){
       this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-      this.parsedBase64Key = this.encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(this.encodedBase64Key);
+      this.parsedBase64Key = this.encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(this.encodedBase64Key);
       user.loginId = this.encrypt(user.loginId, this.parsedBase64Key);
       user.password = this.encrypt(user.password, this.parsedBase64Key);
     }
@@ -98,7 +98,7 @@ export class ApiService {
 
   loginByPin(user: any, authHeader: string): Promise<SignupResponse> {
     this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-    this.parsedBase64Key = this.encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(this.encodedBase64Key);
+    this.parsedBase64Key = this.encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(this.encodedBase64Key);
     return this.fusionAuthService
       .login(user, authHeader)
       .then(async (resp: ClientResponse<LoginResponse>) => {
@@ -189,7 +189,7 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
 
   async createUserByPin(data: UserRegistration, applicationId: string, authHeader?: string): Promise<SignupResponse> {
     const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? 'bla': CryptoJS.enc.Base64.parse(encodedBase64Key);
+    const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
     data.user.password = this.encrypt(data.user.password, parsedBase64Key)
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
       await this.fusionAuthService.createAndRegisterUser(data, applicationId , authHeader);
