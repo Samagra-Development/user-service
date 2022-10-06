@@ -21,6 +21,11 @@ import { ConfigResolverService } from './config.resolver.service';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
+import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+const CryptoJS = require('crypto-js');
+const AES = require('crypto-js/aes');
+
+CryptoJS.lib.WordArray.words;
 
 @Controller('api')
 export class ApiController {
@@ -60,12 +65,31 @@ export class ApiController {
   async login(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
       const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
       if(encStatus){
-        user.loginId = this.apiService.encrypt(user.loginId);
-        user.password = this.apiService.encrypt(user.password);
+        const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
+        const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
+        user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+        user.password = this.apiService.decrypt(user.password, parsedBase64Key);
       } 
       const status: SignupResponse = await this.apiService.login(user, authHeader);
       return status;
   }
+
+  @Post('login/pin')
+  async loginByPin(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
+      const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
+      const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
+      const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
+      if(encStatus){
+        user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+        // user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+      }else{
+        user.password = this.apiService.encrypt(user.password, parsedBase64Key);
+      }
+
+      const status: SignupResponse = await this.apiService.login(user, authHeader);
+      return status;
+  }
+
   //
   @Get('all')
   async fetchUsers(@Query() data: {
@@ -78,7 +102,7 @@ export class ApiController {
 
   @Post('changePassword')
   async updatePassword(
-    @Body() data: { loginId: string, password: string, applicationId: string},
+    @Body() data: { loginId: string, password: string },
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId
   ): Promise<SignupResponse> {
@@ -86,9 +110,28 @@ export class ApiController {
     return status;
   }
 
+  @Post('changePin')
+  async updatePin(
+    @Body() data: { loginId: string, password: string },
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId
+  ): Promise<SignupResponse> {
+    const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
+    const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
+    data.password = this.apiService.encrypt(data.password, parsedBase64Key);
+    const status: SignupResponse = await this.apiService.updatePassword(data, applicationId, authHeader);
+    return status;
+  }
+
   @Post('signup')
   async createUser(@Body() data: UserRegistration, @Headers('authorization') authHeader, @Headers('x-application-id') applicationId): Promise<SignupResponse> {
     const users: SignupResponse = await this.apiService.createUser(data, applicationId, authHeader);
+    return users;
+  }
+
+  @Post('signupByPin')
+  async createUserByPin(@Body() data: UserRegistration, @Headers('authorization') authHeader, @Headers('x-application-id') applicationId): Promise<SignupResponse> {
+    const users: SignupResponse = await this.apiService.createUserByPin(data, applicationId, authHeader);
     return users;
   }
 
@@ -139,5 +182,18 @@ export class ApiController {
       authHeader
     );
     return users;
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Body() refreshRequest: RefreshRequest,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<UsersResponse> {
+    return this.apiService.refreshToken(
+      applicationId,
+      refreshRequest,
+      authHeader,
+    );
   }
 }

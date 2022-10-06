@@ -11,17 +11,18 @@ import FusionAuthClient, {
   UserRegistration,
   UserRequest,
   UserResponse,
-  ChangePasswordResponse,
   Error,
+  JWTRefreshResponse,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { response } from 'express';
 import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
 import { ConfigResolverService } from '../config.resolver.service';
+import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+import { RefreshTokenResult } from '../api.interface';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -35,8 +36,9 @@ export class FusionauthService {
 
   constructor(
     private readonly httpService: HttpService,
-     private readonly queryGenService: QueryGeneratorService,
-     private configResolverService: ConfigResolverService,) {
+    private readonly queryGenService: QueryGeneratorService,
+    private configResolverService: ConfigResolverService,
+  ) {
     this.fusionauthClient = new FusionAuthClient(
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
@@ -44,10 +46,7 @@ export class FusionauthService {
   }
 
   getClient(apiKey: string, host: string): FusionAuthClient {
-    return new FusionAuthClient(
-      apiKey,
-      host
-    );
+    return new FusionAuthClient(apiKey, host);
   }
 
   getUser(
@@ -100,12 +99,12 @@ export class FusionauthService {
         startRow: startRow,
       },
     };
-    let apiKey = this.configResolverService.getApiKey(applicationId)
-      if ( authHeader != null ) {
-          apiKey = authHeader
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
     const host = this.configResolverService.getHost(applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .searchUsersByQuery(searchRequest)
       .then(
@@ -136,12 +135,15 @@ export class FusionauthService {
     startRow: number,
     numberOfResults: number,
     applicationId: string,
-    authHeader?: string
+    authHeader?: string,
   ): Promise<{ total: number; users: Array<User> }> {
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query: this.queryGenService.queryUsersByApplicationIdAndQueryString([applicationId], queryString),
+        query: this.queryGenService.queryUsersByApplicationIdAndQueryString(
+          [applicationId],
+          queryString,
+        ),
         sortFields: [
           {
             missing: 'username',
@@ -152,12 +154,12 @@ export class FusionauthService {
         startRow: startRow,
       },
     };
-    let apiKey = this.configResolverService.getApiKey(applicationId)
-      if ( authHeader != null ) {
-          apiKey = authHeader
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
     const host = this.configResolverService.getHost(applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .searchUsersByQuery(searchRequest)
       .then(
@@ -218,8 +220,8 @@ export class FusionauthService {
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
     console.log(authObj);
-    var resp;
-    var resp1;
+    let resp;
+    let resp1;
     const responses: Array<{ statusFA: FAStatus; userId: UUID }> = [];
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
@@ -320,16 +322,19 @@ export class FusionauthService {
     return resp;
   }
 
-  login(user: LoginRequest, authHeader: string): Promise<ClientResponse<LoginResponse>> {
+  login(
+    user: LoginRequest,
+    authHeader: string,
+  ): Promise<ClientResponse<LoginResponse>> {
     console.log(user);
-    let apiKey = this.configResolverService.getApiKey(user.applicationId)
-    console.log("here", apiKey);
-      if ( authHeader != null ) {
-          apiKey = authHeader
+    let apiKey = this.configResolverService.getApiKey(user.applicationId);
+    console.log('here', apiKey);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
-    console.log({apiKey});
+    console.log({ apiKey });
     const host = this.configResolverService.getHost(user.applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .login(user)
       .then((response: ClientResponse<LoginResponse>): any => {
@@ -468,19 +473,23 @@ export class FusionauthService {
     }
   }
 
-  async createAndRegisterUser(user: RegistrationRequest, applicationId: string, authHeader: string): Promise<{userId: UUID, user: User, err: Error}> {
-    let apiKey = this.configResolverService.getApiKey(applicationId)
-      if ( authHeader != null ) {
-          apiKey = authHeader
+  async createAndRegisterUser(
+    user: RegistrationRequest,
+    applicationId: string,
+    authHeader: string,
+  ): Promise<{ userId: UUID; user: User; err: Error }> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
     const host = this.configResolverService.getHost(applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .register(null, user)
       .then(
         (
           response: ClientResponse<RegistrationResponse>,
-        ): { userId: UUID; user: User, err: Error } => {
+        ): { userId: UUID; user: User; err: Error } => {
           console.log('Found user');
           return {
             userId: response.response.user.id,
@@ -489,23 +498,28 @@ export class FusionauthService {
           };
         },
       )
-      .catch((e): { userId: UUID; user: User, err: Error } => {
+      .catch((e): { userId: UUID; user: User; err: Error } => {
         console.log(`Could not create user ${user}`, JSON.stringify(e));
         return {
           userId: null,
           user: null,
-          err: e
+          err: e,
         };
       });
   }
 
-  async updateUser(userId: string, user: UserRequest, applicationId: string, authHeader?: string): Promise<{_userId: UUID, user: User, err: Error}> {
-    let apiKey = this.configResolverService.getApiKey(applicationId)
-      if ( authHeader != null ) {
-          apiKey = authHeader;
+  async updateUser(
+    userId: string,
+    user: UserRequest,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<{ _userId: UUID; user: User; err: Error }> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
     const host = this.configResolverService.getHost(applicationId);
-    const fusionauthClient = this.getClient(apiKey, host)
+    const fusionauthClient = this.getClient(apiKey, host);
     return fusionauthClient
       .patchUser(userId, user)
       .then(
@@ -516,7 +530,7 @@ export class FusionauthService {
           return {
             _userId: response.response.user.id,
             user: response.response.user,
-            err: null
+            err: null,
           };
         },
       )
@@ -525,15 +539,19 @@ export class FusionauthService {
         return {
           _userId: null,
           user: null,
-          err: e
+          err: e,
         };
       });
   }
 
-  async upddatePasswordWithLoginId(data: {loginId: string, password: string}, applicationId: string, authHeader?: string): Promise<any> {
-    let apiKey = this.configResolverService.getApiKey(applicationId)
-      if ( authHeader != null ) {
-          apiKey = authHeader
+  async upddatePasswordWithLoginId(
+    data: { loginId: string; password: string },
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
     }
     const host = this.configResolverService.getHost(applicationId);
     return this.httpService
@@ -563,5 +581,43 @@ export class FusionauthService {
           );
         }),
       );
+  }
+
+  async refreshToken(
+    applicationId: string,
+    refreshRequest: RefreshRequest,
+    authHeader?: string,
+  ): Promise<RefreshTokenResult> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
+    }
+    const host = this.configResolverService.getHost(applicationId);
+    const fusionauthClient = this.getClient(apiKey, host);
+    return fusionauthClient
+      .exchangeRefreshTokenForJWT(refreshRequest)
+      .then((response: ClientResponse<JWTRefreshResponse>) => {
+        const token: string = response.response.token;
+        const decodedToken = JSON.parse(
+          Buffer.from(token.split('.')[1], 'base64').toString(),
+        );
+        return {
+          user: {
+            token: token,
+            refreshToken: response.response.refreshToken,
+            tokenExpirationInstant: decodedToken.exp * 1000, // convert to milli second same as login api
+          },
+        };
+      })
+      .catch((e): RefreshTokenResult => {
+        console.log(`Could not update token`, JSON.stringify(e));
+        return {
+          user: {
+            token: null,
+            refreshToken: null,
+            tokenExpirationInstant: null,
+          },
+        };
+      });
   }
 }
