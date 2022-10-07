@@ -1,33 +1,33 @@
 node() {
-    try {
-        stage('Checkout') {
-                cleanWs()
-                checkout scm
-                commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                env.commit_id = sh(script: 'echo ' + 'esamwad-user-service' + '_' + commit_hash + '_' + env.BUILD_NUMBER, returnStdout: true).trim()
-                echo "${env.commit_id}"
-        }
+    properties([
+        parameters([
+            string(name: 'docker_repo', defaultValue: 'user-service', description: 'Docker Image Name'),
+            string(name: 'docker_server', defaultValue: 'localhost:5000', description: 'Docker Registry URL'),
 
-        stage('docker-build') {
-                sh '''
-                   docker build -t $docker_server/$docker_repo:$commit_id ./
-                   '''
-        }
-
-        stage('docker-push') {
-            sh '''
-                  docker push $docker_server/$docker_repo:$commit_id
-                  docker rmi -f $docker_server/$docker_repo:$commit_id
-                  '''
-        }
-        stage('ArchiveArtifacts') {
-            sh("echo ${commit_id} > commit_id.txt")
-                    archiveArtifacts 'commit_id.txt'
-                    currentBuild.description = "${commit_id}"
-        }
+        ])
+    ])
+    stage('Checkout') {
+            cleanWs()
+            checkout scm
+            commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            env.commit_id = sh(script: 'echo ' + env.docker_repo + '_' + commit_hash + '_' + env.BRANCH_NAME, returnStdout: true).trim()
+            echo "${env.commit_id}"
     }
-    catch (err) {
-        currentBuild.result = 'FAILURE'
-        throw err
+
+    stage('docker-build') {
+            sh ''' 
+                docker build -f build/Dockerfile -t $docker_server/$docker_repo:$commit_id 
+                '''
+    }
+
+    stage('docker-push') {
+        sh '''
+                docker push $docker_server/$docker_repo:$commit_id
+                '''
+    }
+    stage('ArchiveArtifacts') {
+        sh("echo ${commit_id} > commit_id.txt")
+                archiveArtifacts 'commit_id.txt'
+                currentBuild.description = "${commit_id}"
     }
 }
