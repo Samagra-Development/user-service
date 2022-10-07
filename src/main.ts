@@ -13,7 +13,7 @@ async function bootstrap() {
     .addTag('cats')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('swagger', app, document);
   // app.enableCors({
   //   origin: '*',
   //   methods: 'GET, PUT, POST, DELETE, PATCH, OPTIONS',

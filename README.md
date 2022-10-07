@@ -49,9 +49,29 @@ $ yarn test:cov
 $ yarn run test:watch ./src/user/sms/gupshup/gupshup.service.spec.ts
 ```
 
+## Add a sample service
+```bash
+# open .env file
+$ vi .env
+
+# add your service info in below format
+application_id={"host": "dummy.com", "apiKey": "zse12344@#%ddsr", "encryption": {"enabled": true, "key": "veryhardkey"}}
+# where apiKey and encryption.key is not mandatory
+# Precedence will be given apiKey sent in Authorization header (Check swagger collection below for references)
+# encryption.enabled provides option to encrypt username/password with the provided enrption.key before sending to the FA server.
+
+# restart docker-compose
+$ docker-compose down
+$ docker-compose up -d --build
+```
+
+## Postman Collection
+
+Find [here](https://www.getpostman.com/collections/273dc33e3e37977a22b5)
+
 ## Stay in touch
 
-- Author - [Chakshu Gautam](https://github.com/ChakshuGautam)
+- Author - [Radhay Anand](https://github.com/radhay-samagra)
 
 ## License
 
