@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigResolverService } from '../api/config.resolver.service';
+import { HasuraService } from './hasura/hasura.service';
 
 @Module({
   imports: [HttpModule, AuthModule, ConfigModule],
@@ -16,6 +17,7 @@ import { ConfigResolverService } from '../api/config.resolver.service';
     FusionauthService,
     QueryGeneratorService,
     ConfigResolverService,
+    HasuraService,
   ],
   controllers: [AdminController],
 })

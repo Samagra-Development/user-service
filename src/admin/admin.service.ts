@@ -20,6 +20,7 @@ export class AdminService {
       private readonly fusionAuthService: FusionauthService,
       private readonly configResolverService: ConfigResolverService,
       private readonly httpService: HttpService,
+      private readonly hasuraService: HasuraService,
   ) {}
 
   async fetchUsers(req: any): Promise<UsersResponse> {
@@ -103,7 +104,7 @@ export class AdminService {
 
     // if there are hasuraMutations Array, we'll call Hasura APIs based on mapping
     for (const mutation of hasuraMutations) {
-      await (new HasuraService(mutation.applicationId, this.configResolverService, this.httpService)).hasuraGraphQLCall(mutation.mutation, mutation.payload);
+      await this.hasuraService.hasuraGraphQLCall(mutation.applicationId,mutation.mutation, mutation.payload);
     }
 
     // fetch the latest user info now & respond
