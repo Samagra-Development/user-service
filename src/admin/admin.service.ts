@@ -1,5 +1,4 @@
 import { Error, User, UUID } from '@fusionauth/typescript-client';
-import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   FusionAuthUserRegistration,
@@ -9,17 +8,13 @@ import {
   UserRegistration,
   UsersResponse,
 } from './admin.interface';
-import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
+import { FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
-import { catchError, map, throwError } from 'rxjs';
-import { resolve } from 'path';
-import { rejects } from 'assert';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly fusionAuthService: FusionauthService,
-    private readonly httpService: HttpService,
+    private readonly fusionAuthService: FusionauthService
   ) {}
 
   async fetchUsers(req: any): Promise<UsersResponse> {
