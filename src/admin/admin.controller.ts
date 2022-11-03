@@ -60,18 +60,4 @@ export class AdminController {
         const users: UsersResponse = await this.adminService.fetchUsersByString(userId, undefined, undefined);
         return users;
     }
-
-
-    @Patch('/updateUserRegistration/:userId')
-    @Roles('Admin', 'school')
-    @UseGuards(JwtAuthGuard)
-    async updateUserRegistration(
-      @Param('userId') userId: UUID,
-      @Body() data: FusionAuthUserRegistration,
-    ): Promise<SignupResponse> {
-        return await this.adminService.updateUserRegistration(
-          userId,
-          data,
-        );
-    }
 }

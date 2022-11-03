@@ -84,13 +84,24 @@ export class AdminService {
   }
 
   async updateUser(userId: string, data: User): Promise<any> {
+    const registrations: Array<FusionAuthUserRegistration> = data?.registrations ? data.registrations : [];
+    delete data.registrations;  // delete the registrations key
+
     const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
       await this.fusionAuthService.updateUser(userId, {user: data});
     if (_userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+
+    // if there are registrations object, we'll update the registrations too
+    for (const registration of registrations) {
+      await this.updateUserRegistration(userId, registration);  // calling patch registration API
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(userId);
     const response: SignupResponse = new SignupResponse().init(uuidv4());
-    response.result = user;
+    response.result = userResponse.user;
     return response;
   }
 
@@ -98,14 +109,9 @@ export class AdminService {
     const { _userId, registration, err }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
       await this.fusionAuthService.updateUserRegistration(userId, data);
 
-    // now that we have valid updated user with registration, we'll respond with User Response as usual
-    const userResponse = await this.fusionAuthService.getUserById(userId);
-
-    if (_userId == null || registration == null || userResponse.user == null) {
+    if (_userId == null || registration == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
-    const response: SignupResponse = new SignupResponse().init(uuidv4());
-    response.result = userResponse.user;
-    return response;
+    return registration;
   }
 }
