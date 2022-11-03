@@ -46,4 +46,15 @@ export class ConfigResolverService {
         }
         return undefined;
     }
+
+    getHasura(applicationId: string): {
+        graphql_url: string,
+        admin_secret: string,
+        enabled: boolean,
+        mutations: object
+    } | undefined {
+        applicationId = this.transform(applicationId);
+        const config = this.configService.get<string>(applicationId);
+        return config ? (JSON.parse(config)?.hasura || undefined) : undefined;
+    }
 }

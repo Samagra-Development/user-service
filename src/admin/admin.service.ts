@@ -10,20 +10,25 @@ import {
 } from './admin.interface';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { v4 as uuidv4 } from 'uuid';
+import { HasuraService } from './hasura/hasura.service';
+import { ConfigResolverService } from '../api/config.resolver.service';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly fusionAuthService: FusionauthService
+      private readonly fusionAuthService: FusionauthService,
+      private readonly configResolverService: ConfigResolverService,
+      private readonly httpService: HttpService,
   ) {}
 
   async fetchUsers(req: any): Promise<UsersResponse> {
     const { total, users }: { total: number; users: Array<User> } =
-      await this.fusionAuthService.getUsers(
-        req.applicationId,
-        req.startRow,
-        req.numberOfResults,
-      );
+        await this.fusionAuthService.getUsers(
+            req.applicationId,
+            req.startRow,
+            req.numberOfResults,
+        );
     const response: UsersResponse = new UsersResponse().init(uuidv4());
     if (users != null) {
       response.responseCode = ResponseCode.OK;
@@ -39,16 +44,16 @@ export class AdminService {
   }
 
   async fetchUsersByString(
-    queryString: string,
-    startRow: number,
-    numberOfResults: number,
+      queryString: string,
+      startRow: number,
+      numberOfResults: number,
   ): Promise<UsersResponse> {
     const { total, users }: { total: number; users: Array<User> } =
-      await this.fusionAuthService.getUsersByString(
-        queryString,
-        startRow,
-        numberOfResults,
-      );
+        await this.fusionAuthService.getUsersByString(
+            queryString,
+            startRow,
+            numberOfResults,
+        );
     const response: UsersResponse = new UsersResponse().init(uuidv4());
     if (users != null) {
       response.responseCode = ResponseCode.OK;
@@ -64,12 +69,12 @@ export class AdminService {
   }
 
   async updatePassword(data: {loginId: string, password: string}): Promise<any> {
-      return this.fusionAuthService.upddatePasswordWithLoginId(data);
+    return this.fusionAuthService.upddatePasswordWithLoginId(data);
   }
 
   async createUser(data: UserRegistration): Promise<SignupResponse> {
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.createAndRegisterUser(data);
+        await this.fusionAuthService.createAndRegisterUser(data);
     if (userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -82,15 +87,23 @@ export class AdminService {
     const registrations: Array<FusionAuthUserRegistration> = data?.registrations ? data.registrations : [];
     delete data.registrations;  // delete the registrations key
 
+    const hasuraMutations: Array<{ applicationId: UUID, mutation: string, payload: object}> = data['hasuraMutations'] || [];
+    delete data['hasuraMutations'];  // delete the hasuraMutations key
+
     const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.updateUser(userId, {user: data});
+        await this.fusionAuthService.updateUser(userId, {user: data});
     if (_userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
 
-    // if there are registrations object, we'll update the registrations too
+    // if there are registrations Array, we'll update the registrations too
     for (const registration of registrations) {
       await this.updateUserRegistration(userId, registration);  // calling patch registration API
+    }
+
+    // if there are hasuraMutations Array, we'll call Hasura APIs based on mapping
+    for (const mutation of hasuraMutations) {
+      await (new HasuraService(mutation.applicationId, this.configResolverService, this.httpService)).hasuraGraphQLCall(mutation.mutation, mutation.payload);
     }
 
     // fetch the latest user info now & respond
@@ -102,7 +115,7 @@ export class AdminService {
 
   async updateUserRegistration(userId: UUID, data: FusionAuthUserRegistration): Promise<any> {
     const { _userId, registration, err }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
-      await this.fusionAuthService.updateUserRegistration(userId, data);
+        await this.fusionAuthService.updateUserRegistration(userId, data);
 
     if (_userId == null || registration == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);

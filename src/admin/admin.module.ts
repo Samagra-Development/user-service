@@ -3,17 +3,19 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 
 import { FusionauthService } from './fusionauth/fusionauth.service';
-import got from 'got/dist/source';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from '../auth/auth.module';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
+import { ConfigModule } from '@nestjs/config';
+import { ConfigResolverService } from '../api/config.resolver.service';
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [HttpModule, AuthModule, ConfigModule],
   providers: [
     AdminService,
     FusionauthService,
     QueryGeneratorService,
+    ConfigResolverService,
   ],
   controllers: [AdminController],
 })
