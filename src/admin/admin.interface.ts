@@ -1,4 +1,9 @@
-import { RegistrationRequest, User, UUID } from '@fusionauth/typescript-client';
+import {
+  RegistrationRequest,
+  UserRegistration as FaUserRegistration,
+  User,
+  UUID,
+} from '@fusionauth/typescript-client';
 import { SignupResult } from 'src/user/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -120,4 +125,5 @@ export interface Admin {
   export class UserRegistration implements RegistrationRequest {
     
   }
-  
+
+export class FusionAuthUserRegistration implements FaUserRegistration {}

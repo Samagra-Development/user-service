@@ -2,6 +2,7 @@ import { Error, User, UUID } from '@fusionauth/typescript-client';
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
+  FusionAuthUserRegistration,
   ResponseCode,
   ResponseStatus,
   SignupResponse,
@@ -90,6 +91,21 @@ export class AdminService {
     }
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     response.result = user;
+    return response;
+  }
+
+  async updateUserRegistration(userId: UUID, data: FusionAuthUserRegistration): Promise<any> {
+    const { _userId, registration, err }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
+      await this.fusionAuthService.updateUserRegistration(userId, data);
+
+    // now that we have valid updated user with registration, we'll respond with User Response as usual
+    const userResponse = await this.fusionAuthService.getUserById(userId);
+
+    if (_userId == null || registration == null || userResponse.user == null) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
     return response;
   }
 }

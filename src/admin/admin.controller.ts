@@ -1,8 +1,8 @@
-import { User } from '@fusionauth/typescript-client';
+import { User, UUID } from '@fusionauth/typescript-client';
 import { Body, Controller, Request, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth-jwt.guard';
-import { SignupResponse, UserRegistration, UsersResponse } from './admin.interface';
+import { FusionAuthUserRegistration, SignupResponse, UserRegistration, UsersResponse } from './admin.interface';
 import { AdminService } from './admin.service';
 import { Roles } from './roles.decorator';
 
@@ -59,5 +59,19 @@ export class AdminController {
     async searchUserbyId(@Param('userId') userId: string): Promise<UsersResponse> {
         const users: UsersResponse = await this.adminService.fetchUsersByString(userId, undefined, undefined);
         return users;
+    }
+
+
+    @Patch('/updateUserRegistration/:userId')
+    @Roles('Admin', 'school')
+    @UseGuards(JwtAuthGuard)
+    async updateUserRegistration(
+      @Param('userId') userId: UUID,
+      @Body() data: FusionAuthUserRegistration,
+    ): Promise<SignupResponse> {
+        return await this.adminService.updateUserRegistration(
+          userId,
+          data,
+        );
     }
 }

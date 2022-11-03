@@ -21,6 +21,7 @@ import { HttpService } from '@nestjs/axios';
 import { response } from 'express';
 import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from '../query-generator/query-generator.service';
+import { FusionAuthUserRegistration } from '../admin.interface';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -512,5 +513,61 @@ export class FusionauthService {
           );
         }),
       );
+  }
+
+  async updateUserRegistration(userId: UUID, registration: FusionAuthUserRegistration): Promise<{_userId: UUID, registration: FusionAuthUserRegistration, err: Error}> {
+    return this.fusionauthClient
+      .patchRegistration(userId, { registration: registration })
+      .then(
+        (
+          response: ClientResponse<RegistrationResponse>,
+        ): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
+          console.log('Found user');
+          console.log(response);
+          return {
+            _userId: userId,
+            registration: response.response.registration,
+            err: null
+          };
+        },
+      )
+      .catch((e): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
+        console.log(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          _userId: null,
+          registration: null,
+          err: e
+        };
+      });
+  }
+
+  async getUserById(
+    userId: UUID,
+  ): Promise<{ statusFA: FAStatus; userId: UUID; user: User }> {
+    return this.fusionauthClient
+      .retrieveUser(userId)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { statusFA: FAStatus; userId: UUID; user: User } => {
+          console.log('Found user');
+          return {
+            statusFA: FAStatus.USER_EXISTS,
+            userId: response.response.user.id,
+            user: response.response.user,
+          };
+        },
+      )
+      .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
+        console.log(
+          `Could not fetch user with user id ${userId}`,
+          JSON.stringify(e),
+        );
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+          user: null,
+        };
+      });
   }
 }
