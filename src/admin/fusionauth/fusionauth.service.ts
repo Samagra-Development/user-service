@@ -11,16 +11,15 @@ import FusionAuthClient, {
   UserRegistration,
   UserRequest,
   UserResponse,
-  ChangePasswordResponse,
   Error,
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { response } from 'express';
 import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from '../query-generator/query-generator.service';
+import { FusionAuthUserRegistration } from '../admin.interface';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -31,6 +30,8 @@ export enum FAStatus {
 @Injectable()
 export class FusionauthService {
   fusionauthClient: FusionAuthClient;
+
+  protected readonly logger = new Logger(FusionauthService.name); // logger instance
 
   constructor(private readonly httpService: HttpService, private readonly queryGenService: QueryGeneratorService) {
     this.fusionauthClient = new FusionAuthClient(
@@ -48,7 +49,7 @@ export class FusionauthService {
         (
           response: ClientResponse<UserResponse>,
         ): { statusFA: FAStatus; userId: UUID; user: User } => {
-          console.log('Found user');
+          this.logger.log('Found user');
           return {
             statusFA: FAStatus.USER_EXISTS,
             userId: response.response.user.id,
@@ -57,7 +58,7 @@ export class FusionauthService {
         },
       )
       .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
-        console.log(
+        this.logger.error(
           `Could not fetch user with username ${username}`,
           JSON.stringify(e),
         );
@@ -94,7 +95,7 @@ export class FusionauthService {
         (
           response: ClientResponse<SearchResponse>,
         ): { total: number; users: Array<User> } => {
-          console.log('Found users');
+          this.logger.log('Found users');
           return {
             total: response.response.total,
             users: response.response.users,
@@ -102,7 +103,7 @@ export class FusionauthService {
         },
       )
       .catch((e): { total: number; users: Array<User> } => {
-        console.log(
+        this.logger.error(
           `Could not fetch users for applicationId ${applicationId}`,
           JSON.stringify(e),
         );
@@ -138,7 +139,7 @@ export class FusionauthService {
         (
           response: ClientResponse<SearchResponse>,
         ): { total: number; users: Array<User> } => {
-          console.log('Found users');
+          this.logger.log('Found users');
           return {
             total: response.response.total,
             users: response.response.users,
@@ -146,7 +147,7 @@ export class FusionauthService {
         },
       )
       .catch((e): { total: number; users: Array<User> } => {
-        console.log(`Could not fetch users`, JSON.stringify(e));
+        this.logger.error(`Could not fetch users`, JSON.stringify(e));
         return {
           total: 0,
           users: null,
@@ -171,7 +172,7 @@ export class FusionauthService {
         };
       })
       .catch((response) => {
-        console.log(JSON.stringify(response));
+        this.logger.error(JSON.stringify(response));
         return {
           statusFA: FAStatus.ERROR,
           userId: null,
@@ -183,18 +184,16 @@ export class FusionauthService {
     return this.fusionauthClient
       .deleteUser(userId)
       .then((response) => {
-        console.log(response);
+        this.logger.log(JSON.stringify(response));
       })
       .catch((e) => {
-        console.log(e);
+        this.logger.error(e);
       });
   }
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
-    console.log(authObj);
+    this.logger.log(JSON.stringify(authObj));
     var resp;
-    var resp1;
-    const responses: Array<{ statusFA: FAStatus; userId: UUID }> = [];
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
       username: authObj.username,
@@ -241,18 +240,18 @@ export class FusionauthService {
           this.fusionauthClient
             .register(response.response.user.id, userRequest_samarth_hp)
             .then((res: ClientResponse<RegistrationResponse>): any => {
-              console.log({ res });
+              this.logger.log(JSON.stringify({ res }));
             })
             .catch((e): Promise<{ statusFA: FAStatus; userId: UUID }> => {
-              console.log('Could not create a user in', JSON.stringify(e));
-              console.log('Trying to fetch an existing user in');
+              this.logger.error('Could not create a user in', JSON.stringify(e));
+              this.logger.error('Trying to fetch an existing user in');
               return this.fusionauthClient
                 .retrieveUserByUsername(authObj.username)
                 .then((response: ClientResponse<UserResponse>): any => {
-                  console.log('Found user in');
+                  this.logger.log('Found user in');
                 })
                 .catch((e): any => {
-                  console.log(
+                  this.logger.error(
                     `Could not fetch user with username in ${authObj.username}`,
                     JSON.stringify(e),
                   );
@@ -265,15 +264,15 @@ export class FusionauthService {
         },
       )
       .catch((e): Promise<{ statusFA: FAStatus; userId: UUID }> => {
-        console.log('Could not create a user', JSON.stringify(e));
-        console.log('Trying to fetch an existing user');
+        this.logger.error('Could not create a user', JSON.stringify(e));
+        this.logger.error('Trying to fetch an existing user');
         return this.fusionauthClient
           .retrieveUserByUsername(authObj.username)
           .then(
             (
               response: ClientResponse<UserResponse>,
             ): { statusFA: FAStatus; userId: UUID } => {
-              console.log('Found user');
+              this.logger.log('Found user');
               return {
                 statusFA: FAStatus.USER_EXISTS,
                 userId: response.response.user.id,
@@ -281,7 +280,7 @@ export class FusionauthService {
             },
           )
           .catch((e): { statusFA: FAStatus; userId: UUID } => {
-            console.log(
+            this.logger.error(
               `Could not fetch user with username ${authObj.username}`,
               JSON.stringify(e),
             );
@@ -295,7 +294,7 @@ export class FusionauthService {
   }
 
   login(user: LoginRequest): Promise<ClientResponse<LoginResponse>> {
-    console.log(user);
+    this.logger.log(JSON.stringify(user));
     return this.fusionauthClient
       .login(user)
       .then((response: ClientResponse<LoginResponse>): any => {
@@ -357,7 +356,7 @@ export class FusionauthService {
         (
           response: ClientResponse<UserResponse>,
         ): { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } => {
-          console.log({ response });
+          this.logger.log(JSON.stringify({ response }));
           return {
             statusFA: FAStatus.SUCCESS,
             userId: response.response.user.id,
@@ -367,7 +366,7 @@ export class FusionauthService {
       )
       .catch(
         (e): { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } => {
-          console.log('Unable to update user', JSON.stringify(e));
+          this.logger.error('Unable to update user', JSON.stringify(e));
           return {
             statusFA: FAStatus.ERROR,
             userId: null,
@@ -407,26 +406,24 @@ export class FusionauthService {
       const resp: ClientResponse<SearchResponse> =
         await this.fusionauthClient.searchUsersByQuery(searchRequest);
       const total = resp.response.total;
-      console.log(iteration, total);
       if (total === 0) allDone = true;
       else {
         const users: Array<User> = resp.response.users;
         for (const user of users) {
           if (user.registrations[0].roles === undefined) {
             user.registrations[0].roles = ['school'];
-            console.log('Here', user);
             await this.fusionauthClient
               .updateRegistration(user.id, {
                 registration: user.registrations[0],
               })
               .then((resp) => {
-                console.log('response', JSON.stringify(resp));
+                this.logger.log('response', JSON.stringify(resp));
               })
               .catch((e) => {
-                console.log('error', JSON.stringify(e));
+                this.logger.error('error', JSON.stringify(e));
               });
           } else {
-            console.log('Invalid User', user.id);
+            this.logger.log('Invalid User', user.id);
             invalidUsersCount += 1;
           }
         }
@@ -441,7 +438,7 @@ export class FusionauthService {
         (
           response: ClientResponse<RegistrationResponse>,
         ): { userId: UUID; user: User, err: Error } => {
-          console.log('Found user');
+          this.logger.log('Found user');
           return {
             userId: response.response.user.id,
             user: response.response.user,
@@ -450,7 +447,7 @@ export class FusionauthService {
         },
       )
       .catch((e): { userId: UUID; user: User, err: Error } => {
-        console.log(`Could not create user ${user}`, JSON.stringify(e));
+        this.logger.error(`Could not create user ${user}`, JSON.stringify(e));
         return {
           userId: null,
           user: null,
@@ -466,7 +463,7 @@ export class FusionauthService {
         (
           response: ClientResponse<UserResponse>,
         ): { _userId: UUID; user: User; err: Error } => {
-          console.log('Found user');
+          this.logger.log('Found user');
           return {
             _userId: response.response.user.id,
             user: response.response.user,
@@ -475,7 +472,7 @@ export class FusionauthService {
         },
       )
       .catch((e): { _userId: UUID; user: User; err: Error } => {
-        console.log(`Could not update user ${user.user.id}`, JSON.stringify(e));
+        this.logger.error(`Could not update user ${user.user.id}`, JSON.stringify(e));
         return {
           _userId: null,
           user: null,
@@ -512,5 +509,61 @@ export class FusionauthService {
           );
         }),
       );
+  }
+
+  async updateUserRegistration(userId: UUID, registration: FusionAuthUserRegistration): Promise<{_userId: UUID, registration: FusionAuthUserRegistration, err: Error}> {
+    return this.fusionauthClient
+      .patchRegistration(userId, { registration: registration })
+      .then(
+        (
+          response: ClientResponse<RegistrationResponse>,
+        ): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
+          this.logger.log('Found user');
+          this.logger.log(JSON.stringify(response));
+          return {
+            _userId: userId,
+            registration: response.response.registration,
+            err: null
+          };
+        },
+      )
+      .catch((e): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
+        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          _userId: null,
+          registration: null,
+          err: e
+        };
+      });
+  }
+
+  async getUserById(
+    userId: UUID,
+  ): Promise<{ statusFA: FAStatus; userId: UUID; user: User }> {
+    return this.fusionauthClient
+      .retrieveUser(userId)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { statusFA: FAStatus; userId: UUID; user: User } => {
+          this.logger.log('Found user');
+          return {
+            statusFA: FAStatus.USER_EXISTS,
+            userId: response.response.user.id,
+            user: response.response.user,
+          };
+        },
+      )
+      .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
+        this.logger.error(
+          `Could not fetch user with user id ${userId}`,
+          JSON.stringify(e),
+        );
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+          user: null,
+        };
+      });
   }
 }
