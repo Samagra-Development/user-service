@@ -104,7 +104,7 @@ export class AdminService {
 
     // if there are hasuraMutations Array, we'll call Hasura APIs based on mapping
     for (const mutation of hasuraMutations) {
-      await this.hasuraService.hasuraGraphQLCall(mutation.applicationId,mutation.mutation, mutation.payload);
+      await this.hasuraService.query(mutation.applicationId,mutation.mutation, mutation.payload);
     }
 
     // fetch the latest user info now & respond

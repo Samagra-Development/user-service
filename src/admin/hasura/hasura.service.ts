@@ -14,7 +14,7 @@ export class HasuraService {
     ) {
     }
 
-    async hasuraGraphQLCall(
+    async query(
         applicationId: UUID,
         mutationKey: string,
         payload: object,

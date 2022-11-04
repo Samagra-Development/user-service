@@ -22,7 +22,7 @@ export class AdminController {
     @Roles('Admin', 'school')
     @UseGuards(JwtAuthGuard)
     async updatePassword(@Body() data: {loginId: string, password: string}): Promise<SignupResponse> {
-        return await this.adminService.updatePassword(data);
+        return this.adminService.updatePassword(data);
     }
 
     @Post('/createUser')
