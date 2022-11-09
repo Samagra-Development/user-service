@@ -74,37 +74,68 @@ export class AdminService {
   }
 
   async createUser(data: UserRegistration): Promise<SignupResponse> {
+    const hasuraMutations: Array<{
+      applicationId: UUID;
+      mutation: string;
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      payload: object;
+    }> = data['hasuraMutations'] || [];
+    delete data['hasuraMutations']; // delete the hasuraMutations key
+
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
-        await this.fusionAuthService.createAndRegisterUser(data);
+      await this.fusionAuthService.createAndRegisterUser(data);
     if (userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+
+    // if there are hasuraMutations Array, we'll call Hasura APIs based on mapping
+    for (const mutation of hasuraMutations) {
+      // we'll add user_id to payload
+      mutation.payload['user_id'] = userId;
+      await this.hasuraService.query(
+        mutation.applicationId,
+        mutation.mutation,
+        mutation.payload,
+      );
+    }
+
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     response.result = user;
     return response;
   }
 
   async updateUser(userId: string, data: User): Promise<any> {
-    const registrations: Array<FusionAuthUserRegistration> = data?.registrations ? data.registrations : [];
-    delete data.registrations;  // delete the registrations key
+    const registrations: Array<FusionAuthUserRegistration> = data?.registrations
+      ? data.registrations
+      : [];
+    delete data.registrations; // delete the registrations key
 
-    const hasuraMutations: Array<{ applicationId: UUID, mutation: string, payload: object}> = data['hasuraMutations'] || [];
-    delete data['hasuraMutations'];  // delete the hasuraMutations key
+    const hasuraMutations: Array<{
+      applicationId: UUID;
+      mutation: string;
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      payload: object;
+    }> = data['hasuraMutations'] || [];
+    delete data['hasuraMutations']; // delete the hasuraMutations key
 
     const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
-        await this.fusionAuthService.updateUser(userId, {user: data});
+      await this.fusionAuthService.updateUser(userId, { user: data });
     if (_userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
 
     // if there are registrations Array, we'll update the registrations too
     for (const registration of registrations) {
-      await this.updateUserRegistration(userId, registration);  // calling patch registration API
+      await this.updateUserRegistration(userId, registration); // calling patch registration API
     }
 
     // if there are hasuraMutations Array, we'll call Hasura APIs based on mapping
     for (const mutation of hasuraMutations) {
-      await this.hasuraService.query(mutation.applicationId,mutation.mutation, mutation.payload);
+      await this.hasuraService.query(
+        mutation.applicationId,
+        mutation.mutation,
+        mutation.payload,
+      );
     }
 
     // fetch the latest user info now & respond
@@ -114,9 +145,16 @@ export class AdminService {
     return response;
   }
 
-  async updateUserRegistration(userId: UUID, data: FusionAuthUserRegistration): Promise<any> {
-    const { _userId, registration, err }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
-        await this.fusionAuthService.updateUserRegistration(userId, data);
+  async updateUserRegistration(
+    userId: UUID,
+    data: FusionAuthUserRegistration,
+  ): Promise<any> {
+    const {
+      _userId,
+      registration,
+      err,
+    }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
+      await this.fusionAuthService.updateUserRegistration(userId, data);
 
     if (_userId == null || registration == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
