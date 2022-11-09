@@ -12,35 +12,35 @@ export class AdminController {
       ) {}
 
     @Post('/all')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async fetchUsers(@Request() req, @Body() data: any): Promise<UsersResponse> {
         return await this.adminService.fetchUsers(data);
     }
 
     @Post('/changePassword')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async updatePassword(@Body() data: {loginId: string, password: string}): Promise<SignupResponse> {
         return this.adminService.updatePassword(data);
     }
 
     @Post('/createUser')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async createUser(@Body() data: UserRegistration): Promise<SignupResponse> {
         return await this.adminService.createUser(data);
     }
 
     @Patch('/updateUser/:userId')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async updateUser(@Param('userId') userId: string, @Body() data: User): Promise<SignupResponse> {
         return await this.adminService.updateUser(userId, data);
     }
 
     @Get('/searchUser')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async searchUser(@Query() query: {queryString: string, startRow: number, numberOfResults: number}): Promise<UsersResponse> {
         console.log(query.numberOfResults)
@@ -48,7 +48,7 @@ export class AdminController {
     }
 
     @Get('/user/:userId')
-    @Roles('Admin', 'school')
+    @Roles('Admin', 'school', 'State Admin', 'District Admin', 'Block Admin', 'School Admin')
     @UseGuards(JwtAuthGuard)
     async searchUserbyId(@Param('userId') userId: string): Promise<UsersResponse> {
         return await this.adminService.fetchUsersByString(userId, undefined, undefined);
