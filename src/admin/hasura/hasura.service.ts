@@ -37,6 +37,16 @@ export class HasuraService {
         payload,
       )}`,
     );
+
+    // we'll check all the keys in the payload; if there are any which aren't variables in mutation, we'll remove them
+    for (const key in payload) {
+      if (payload.hasOwnProperty(key) && !mutation.includes(`$${key}`)) {
+        this.logger.debug(
+          `Removing key $${key} as it is not there in the mutation.`,
+        );
+        delete payload[key];
+      }
+    }
     const data = {
       query: `${mutation}`,
       variables: payload,
