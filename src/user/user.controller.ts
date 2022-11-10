@@ -17,7 +17,7 @@ export class UserController {
     private readonly otpService: OtpService,
     private readonly userService: UserService,
   ) {}
-  
+
   @Get('/verify')
   async verifyUsernamePhoneCombination(): Promise<any> {
     const status: boolean =
@@ -50,7 +50,7 @@ export class UserController {
         // for the below listed application Ids, we'll be encrypting the creds received
         process.env.FUSIONAUTH_APPLICATION_ID,
         process.env.FUSIONAUTH_HP_ADMIN_CONSOLE_APPLICATION_ID,
-      ].indexOf(user.applicationId) > 0
+      ].indexOf(user.applicationId) !== -1
     ) {
       user.loginId = this.userService.encrypt(user.loginId);
       user.password = this.userService.encrypt(user.password);
@@ -80,5 +80,4 @@ export class UserController {
     const status: SignupResponse = await this.userService.changePassword(data);
     return status;
   }
-
 }
