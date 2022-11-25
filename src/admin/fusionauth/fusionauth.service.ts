@@ -119,10 +119,27 @@ export class FusionauthService {
     startRow: number,
     numberOfResults: number,
   ): Promise<{ total: number; users: Array<User> }> {
+    let allowedApplicationIds: Array<string> = [
+      process.env.FUSIONAUTH_APPLICATION_ID,
+      process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID,
+    ];
+    if (
+      process.env.FUSIONAUTH_ADMIN_SEARCH_APPLICATION_IDS &&
+      JSON.parse(process.env.FUSIONAUTH_ADMIN_SEARCH_APPLICATION_IDS)
+    ) {
+      // if env has configured the variable FUSIONAUTH_ADMIN_SEARCH_APPLICATION_IDS & it's a valid JSON, we use the new list of search
+      console.log('Dynamic search list found:');
+      allowedApplicationIds = JSON.parse(
+        process.env.FUSIONAUTH_ADMIN_SEARCH_APPLICATION_IDS,
+      );
+    }
     const searchRequest = {
       search: {
         numberOfResults: numberOfResults,
-        query: this.queryGenService.queryUsersByApplicationIdAndQueryString([process.env.FUSIONAUTH_APPLICATION_ID, process.env.FUSIONAUTH_SHIKSHA_SATHI_HP_APPLICATION_ID], queryString),
+        query: this.queryGenService.queryUsersByApplicationIdAndQueryString(
+          allowedApplicationIds,
+          queryString,
+        ),
         sortFields: [
           {
             missing: 'username',
