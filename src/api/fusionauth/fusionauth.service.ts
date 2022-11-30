@@ -222,8 +222,6 @@ export class FusionauthService {
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
     console.log(authObj);
     let resp;
-    let resp1;
-    const responses: Array<{ statusFA: FAStatus; userId: UUID }> = [];
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
       username: authObj.username,
@@ -261,6 +259,7 @@ export class FusionauthService {
     const userRequest_samarth_hp: RegistrationRequest = {
       registration: currentRegistration_samarth_hp,
     };
+    // eslint-disable-next-line prefer-const
     resp = this.fusionauthClient
       .register(undefined, userRequest)
       .then(

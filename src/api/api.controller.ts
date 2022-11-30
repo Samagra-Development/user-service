@@ -2,16 +2,14 @@ import { User } from '@fusionauth/typescript-client';
 import {
   Body,
   Controller,
-  Request,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
   Query,
-  Headers,
 } from '@nestjs/common';
 import {
-    ApiConfig,
   SignupResponse,
   UserRegistration,
   UsersResponse,
@@ -22,8 +20,8 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
-const AES = require('crypto-js/aes');
 
 CryptoJS.lib.WordArray.words;
 
@@ -38,15 +36,10 @@ export class ApiController {
 
   @Get()
   getHello(): any {
-      let respVar: {respCode: string, respMessage: string}= {respCode: "200", respMessage: "Hello!"};
-      const config: ApiConfig = this.configResolverService.getConfigByApplicationId("port");
-      const host = this.configResolverService.getHost("port");
-      const apiKey = this.configResolverService.getApiKey("port");
-      const encStatus = this.configResolverService.getEncryptionStatus("port");
-      const encKey = this.configResolverService.getEncryptionKey("port");
-      respVar['authHeader']="Dummy"
-      respVar['authHeader1'] =  "authHeader1"
-    return {host: host, key: apiKey, encStatus: encStatus, encKey: encKey, respVar: respVar['authHeader']};
+    return {
+      respCode: '200',
+      respMessage: 'Hello!',
+    };
   }
 
   @Get('sendOTP')
@@ -62,77 +55,124 @@ export class ApiController {
   }
 
   @Post('login')
-  async login(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
-      const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
-      if(encStatus){
-        const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-        const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
-        user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
-        user.password = this.apiService.decrypt(user.password, parsedBase64Key);
-      } 
-      const status: SignupResponse = await this.apiService.login(user, authHeader);
-      return status;
+  async login(
+    @Body() user: any,
+    @Headers('authorization') authHeader,
+  ): Promise<any> {
+    const encStatus = this.configResolverService.getEncryptionStatus(
+      user.applicationId,
+    );
+    if (encStatus) {
+      const encodedBase64Key = this.configResolverService.getEncryptionKey(
+        user.applicationId,
+      );
+      const parsedBase64Key =
+        encodedBase64Key === undefined
+          ? CryptoJS.enc.Base64.parse('bla')
+          : CryptoJS.enc.Base64.parse(encodedBase64Key);
+      user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+      user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+    }
+    return await this.apiService.login(user, authHeader);
   }
 
   @Post('login/pin')
-  async loginByPin(@Body() user: any, @Headers('authorization') authHeader): Promise<any> {
-      const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
-      const encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-      const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
-      if(encStatus){
-        user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
-        // user.password = this.apiService.decrypt(user.password, parsedBase64Key);
-      }else{
-        user.password = this.apiService.encrypt(user.password, parsedBase64Key);
-      }
+  async loginByPin(
+    @Body() user: any,
+    @Headers('authorization') authHeader,
+  ): Promise<any> {
+    const encStatus = this.configResolverService.getEncryptionStatus(
+      user.applicationId,
+    );
+    const encodedBase64Key = this.configResolverService.getEncryptionKey(
+      user.applicationId,
+    );
+    const parsedBase64Key =
+      encodedBase64Key === undefined
+        ? CryptoJS.enc.Base64.parse('bla')
+        : CryptoJS.enc.Base64.parse(encodedBase64Key);
+    if (encStatus) {
+      user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+      // user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+    } else {
+      user.password = this.apiService.encrypt(user.password, parsedBase64Key);
+    }
 
-      const status: SignupResponse = await this.apiService.login(user, authHeader);
-      return status;
+    return await this.apiService.login(user, authHeader);
   }
 
   //
   @Get('all')
-  async fetchUsers(@Query() data: {
-    startRow: number;
-    numberOfResults: number;
-  }, @Headers('authorization') authHeader, @Headers('x-application-id') applicationId): Promise<UsersResponse> {
-    const users: UsersResponse = await this.apiService.fetchUsers(applicationId, data.startRow, data.numberOfResults, authHeader);
-    return users;
+  async fetchUsers(
+    @Query()
+    data: {
+      startRow: number;
+      numberOfResults: number;
+    },
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<UsersResponse> {
+    return await this.apiService.fetchUsers(
+      applicationId,
+      data.startRow,
+      data.numberOfResults,
+      authHeader,
+    );
   }
 
   @Post('changePassword')
   async updatePassword(
-    @Body() data: { loginId: string, password: string },
+    @Body() data: { loginId: string; password: string },
     @Headers('authorization') authHeader,
-    @Headers('x-application-id') applicationId
+    @Headers('x-application-id') applicationId,
   ): Promise<SignupResponse> {
-    const status: SignupResponse = await this.apiService.updatePassword(data, applicationId, authHeader);
-    return status;
+    return await this.apiService.updatePassword(
+      data,
+      applicationId,
+      authHeader,
+    );
   }
 
   @Post('changePin')
   async updatePin(
-    @Body() data: { loginId: string, password: string },
+    @Body() data: { loginId: string; password: string },
     @Headers('authorization') authHeader,
-    @Headers('x-application-id') applicationId
+    @Headers('x-application-id') applicationId,
   ): Promise<SignupResponse> {
-    const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
+    const encodedBase64Key =
+      this.configResolverService.getEncryptionKey(applicationId);
+    const parsedBase64Key =
+      encodedBase64Key === undefined
+        ? CryptoJS.enc.Base64.parse('bla')
+        : CryptoJS.enc.Base64.parse(encodedBase64Key);
     data.password = this.apiService.encrypt(data.password, parsedBase64Key);
-    const status: SignupResponse = await this.apiService.updatePassword(data, applicationId, authHeader);
-    return status;
+    return await this.apiService.updatePassword(
+      data,
+      applicationId,
+      authHeader,
+    );
   }
 
   @Post('signup')
-  async createUser(@Body() data: UserRegistration, @Headers('authorization') authHeader, @Headers('x-application-id') applicationId): Promise<SignupResponse> {
-    const users: SignupResponse = await this.apiService.createUser(data, applicationId, authHeader);
-    return users;
+  async createUser(
+    @Body() data: UserRegistration,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<SignupResponse> {
+    return await this.apiService.createUser(data, applicationId, authHeader);
   }
 
   @Post('signupByPin')
-  async createUserByPin(@Body() data: UserRegistration, @Headers('authorization') authHeader, @Headers('x-application-id') applicationId): Promise<SignupResponse> {
-    const users: SignupResponse = await this.apiService.createUserByPin(data, applicationId, authHeader);
-    return users;
+  async createUserByPin(
+    @Body() data: UserRegistration,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<SignupResponse> {
+    return await this.apiService.createUserByPin(
+      data,
+      applicationId,
+      authHeader,
+    );
   }
 
   @Patch('updateUser/:userId')
@@ -140,10 +180,14 @@ export class ApiController {
     @Param('userId') userId: string,
     @Body() data: User,
     @Headers('authorization') authHeader,
-    @Headers('x-application-id') applicationId
+    @Headers('x-application-id') applicationId,
   ): Promise<SignupResponse> {
-    const user: SignupResponse = await this.apiService.updateUser(userId, data, applicationId, authHeader);
-    return user;
+    return await this.apiService.updateUser(
+      userId,
+      data,
+      applicationId,
+      authHeader,
+    );
   }
 
   @Get('searchUserByQuery')
@@ -155,33 +199,31 @@ export class ApiController {
       numberOfResults: number;
     },
     @Headers('authorization') authHeader,
-    @Headers('x-application-id') applicationId
+    @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
     console.log(query.numberOfResults);
-    const users: UsersResponse = await this.apiService.fetchUsersByString(
+    return await this.apiService.fetchUsersByString(
       query.queryString,
       query.startRow,
       query.numberOfResults,
       applicationId,
-      authHeader
+      authHeader,
     );
-    return users;
   }
 
   @Get('user/:userId')
   async searchUserbyId(
     @Param('userId') userId: string,
     @Headers('authorization') authHeader,
-    @Headers('x-application-id') applicationId
+    @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
-    const users: UsersResponse = await this.apiService.fetchUsersByString(
+    return await this.apiService.fetchUsersByString(
       userId,
       undefined,
       undefined,
       applicationId,
-      authHeader
+      authHeader,
     );
-    return users;
   }
 
   @Post('refresh-token')
