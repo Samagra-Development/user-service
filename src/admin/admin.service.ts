@@ -161,4 +161,32 @@ export class AdminService {
     }
     return registration;
   }
+
+  async deactivateUserById(userId: string, hardDelete: boolean): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.deactivateUserById(userId, hardDelete);
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(userId);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
+    return response;
+  }
+
+  async activateUserById(userId: string): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.activateUserById(userId);
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(userId);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
+    return response;
+  }
 }

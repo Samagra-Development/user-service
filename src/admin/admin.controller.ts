@@ -129,4 +129,37 @@ export class AdminController {
       undefined,
     );
   }
+
+  @Patch('/user/:userId/deactivate')
+  @Roles(
+    'Admin',
+    'school',
+    'State Admin',
+    'District Admin',
+    'Block Admin',
+    'School Admin',
+  )
+  @UseGuards(JwtAuthGuard)
+  async deactivateUserById(
+    @Param('userId') userId: string,
+    @Query('hardDelete') hardDelete = false,
+  ): Promise<UsersResponse> {
+    return await this.adminService.deactivateUserById(userId, hardDelete);
+  }
+
+  @Patch('/user/:userId/activate')
+  @Roles(
+    'Admin',
+    'school',
+    'State Admin',
+    'District Admin',
+    'Block Admin',
+    'School Admin',
+  )
+  @UseGuards(JwtAuthGuard)
+  async activateUserById(
+    @Param('userId') userId: string,
+  ): Promise<UsersResponse> {
+    return await this.adminService.activateUserById(userId);
+  }
 }
