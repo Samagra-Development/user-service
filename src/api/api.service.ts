@@ -1,21 +1,28 @@
-import { LoginResponse, User, UUID, Error } from '@fusionauth/typescript-client';
+import {
+  Error,
+  LoginResponse,
+  User,
+  UUID,
+} from '@fusionauth/typescript-client';
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  RefreshTokenResult,
   ResponseCode,
   ResponseStatus,
   SignupResponse,
-  UsersResponse,
   UserRegistration,
-  RefreshTokenResult,
+  UsersResponse,
 } from './api.interface';
 import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigResolverService } from './config.resolver.service';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const AES = require('crypto-js/aes');
 
 CryptoJS.lib.WordArray.words;
@@ -23,7 +30,7 @@ CryptoJS.lib.WordArray.words;
 @Injectable()
 export class ApiService {
   encodedBase64Key;
-  parsedBase64Key
+  parsedBase64Key;
   constructor(
     private configService: ConfigService,
     private readonly fusionAuthService: FusionauthService,
@@ -32,10 +39,17 @@ export class ApiService {
   ) {}
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
-    const encStatus = this.configResolverService.getEncryptionStatus(user.applicationId);
-    if(encStatus){
-      this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-      this.parsedBase64Key = this.encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(this.encodedBase64Key);
+    const encStatus = this.configResolverService.getEncryptionStatus(
+      user.applicationId,
+    );
+    if (encStatus) {
+      this.encodedBase64Key = this.configResolverService.getEncryptionKey(
+        user.applicationId,
+      );
+      this.parsedBase64Key =
+        this.encodedBase64Key === undefined
+          ? CryptoJS.enc.Base64.parse('bla')
+          : CryptoJS.enc.Base64.parse(this.encodedBase64Key);
       user.loginId = this.encrypt(user.loginId, this.parsedBase64Key);
       user.password = this.encrypt(user.password, this.parsedBase64Key);
     }
@@ -57,7 +71,7 @@ export class ApiService {
         //       }else {
         //         fusionAuthUser['user']['data']['accountName'] = user.loginId;
         //       }
-              
+
         //     } else {
         //       fusionAuthUser['user']['data']['accountName'] =
         //         fusionAuthUser.user.firstName;
@@ -97,8 +111,13 @@ export class ApiService {
   }
 
   loginByPin(user: any, authHeader: string): Promise<SignupResponse> {
-    this.encodedBase64Key = this.configResolverService.getEncryptionKey(user.applicationId);
-    this.parsedBase64Key = this.encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(this.encodedBase64Key);
+    this.encodedBase64Key = this.configResolverService.getEncryptionKey(
+      user.applicationId,
+    );
+    this.parsedBase64Key =
+      this.encodedBase64Key === undefined
+        ? CryptoJS.enc.Base64.parse('bla')
+        : CryptoJS.enc.Base64.parse(this.encodedBase64Key);
     return this.fusionAuthService
       .login(user, authHeader)
       .then(async (resp: ClientResponse<LoginResponse>) => {
@@ -150,7 +169,12 @@ export class ApiService {
       });
   }
 
-  async fetchUsers(applicationId: string, startRow?: number, numberOfResults?: number, authHeader?: string): Promise<UsersResponse> {
+  async fetchUsers(
+    applicationId: string,
+    startRow?: number,
+    numberOfResults?: number,
+    authHeader?: string,
+  ): Promise<UsersResponse> {
     const { total, users }: { total: number; users: Array<User> } =
       await this.fusionAuthService.getUsers(
         applicationId,
@@ -172,13 +196,29 @@ export class ApiService {
     return response;
   }
 
-  async updatePassword(data: {loginId: string, password: string}, applicationId: string, authHeader?: string): Promise<any> {
-    return this.fusionAuthService.upddatePasswordWithLoginId(data, applicationId, authHeader);
-}
+  async updatePassword(
+    data: { loginId: string; password: string },
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    return this.fusionAuthService.upddatePasswordWithLoginId(
+      data,
+      applicationId,
+      authHeader,
+    );
+  }
 
-async createUser(data: UserRegistration, applicationId: string, authHeader?: string): Promise<SignupResponse> {
+  async createUser(
+    data: UserRegistration,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<SignupResponse> {
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.createAndRegisterUser(data, applicationId , authHeader);
+      await this.fusionAuthService.createAndRegisterUser(
+        data,
+        applicationId,
+        authHeader,
+      );
     if (userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -187,12 +227,24 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
     return response;
   }
 
-  async createUserByPin(data: UserRegistration, applicationId: string, authHeader?: string): Promise<SignupResponse> {
-    const encodedBase64Key = this.configResolverService.getEncryptionKey(applicationId);
-    const parsedBase64Key = encodedBase64Key === undefined? CryptoJS.enc.Base64.parse('bla'): CryptoJS.enc.Base64.parse(encodedBase64Key);
-    data.user.password = this.encrypt(data.user.password, parsedBase64Key)
+  async createUserByPin(
+    data: UserRegistration,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<SignupResponse> {
+    const encodedBase64Key =
+      this.configResolverService.getEncryptionKey(applicationId);
+    const parsedBase64Key =
+      encodedBase64Key === undefined
+        ? CryptoJS.enc.Base64.parse('bla')
+        : CryptoJS.enc.Base64.parse(encodedBase64Key);
+    data.user.password = this.encrypt(data.user.password, parsedBase64Key);
     const { userId, user, err }: { userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.createAndRegisterUser(data, applicationId , authHeader);
+      await this.fusionAuthService.createAndRegisterUser(
+        data,
+        applicationId,
+        authHeader,
+      );
     if (userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -201,9 +253,19 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
     return response;
   }
 
-  async updateUser(userId: string, data: User, applicationId: string, authHeader?: string): Promise<any> {
+  async updateUser(
+    userId: string,
+    data: User,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
     const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
-      await this.fusionAuthService.updateUser(userId, {user: data}, applicationId, authHeader);
+      await this.fusionAuthService.updateUser(
+        userId,
+        { user: data },
+        applicationId,
+        authHeader,
+      );
     if (_userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -217,7 +279,7 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
     startRow: number,
     numberOfResults: number,
     applicationId: string,
-    authHeader?: string
+    authHeader?: string,
   ): Promise<UsersResponse> {
     const { total, users }: { total: number; users: Array<User> } =
       await this.fusionAuthService.getUsersByString(
@@ -225,7 +287,7 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
         startRow,
         numberOfResults,
         applicationId,
-        authHeader
+        authHeader,
       );
     const response: UsersResponse = new UsersResponse().init(uuidv4());
     if (users != null) {
@@ -242,17 +304,15 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
   }
 
   encrypt(plainString: any, key: string): any {
-    const encryptedString = AES.encrypt(plainString, key, {
+    return AES.encrypt(plainString, key, {
       mode: CryptoJS.mode.ECB,
     }).toString();
-    return encryptedString;
   }
 
   decrypt(encryptedString: any, key: string): any {
-    const plainString = AES.decrypt(encryptedString, key, {
+    return AES.decrypt(encryptedString, key, {
       mode: CryptoJS.mode.ECB,
     }).toString(CryptoJS.enc.Utf8);
-    return plainString;
   }
 
   async refreshToken(
@@ -279,6 +339,60 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
       response.params.err = 'REFRESH_TOKEN_FAILED';
     }
 
+    return response;
+  }
+
+  async deactivateUserById(
+    userId: string,
+    hardDelete: boolean,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.deactivateUserById(
+        userId,
+        hardDelete,
+        applicationId,
+        authHeader,
+      );
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(
+      userId,
+      applicationId,
+      authHeader,
+    );
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
+    return response;
+  }
+
+  async activateUserById(
+    userId: string,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.activateUserById(
+        userId,
+        applicationId,
+        authHeader,
+      );
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(
+      userId,
+      applicationId,
+      authHeader,
+    );
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
     return response;
   }
 }

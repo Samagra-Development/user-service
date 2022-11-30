@@ -33,7 +33,10 @@ export class FusionauthService {
 
   protected readonly logger = new Logger(FusionauthService.name); // logger instance
 
-  constructor(private readonly httpService: HttpService, private readonly queryGenService: QueryGeneratorService) {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly queryGenService: QueryGeneratorService,
+  ) {
     this.fusionauthClient = new FusionAuthClient(
       process.env.FUSIONAUTH_API_KEY,
       process.env.FUSIONAUTH_BASE_URL,
@@ -210,7 +213,7 @@ export class FusionauthService {
 
   persist(authObj: any): Promise<{ statusFA: FAStatus; userId: UUID }> {
     this.logger.log(JSON.stringify(authObj));
-    var resp;
+    let resp;
     const registrations: Array<UserRegistration> = [];
     const currentRegistration: UserRegistration = {
       username: authObj.username,
@@ -260,7 +263,10 @@ export class FusionauthService {
               this.logger.log(JSON.stringify({ res }));
             })
             .catch((e): Promise<{ statusFA: FAStatus; userId: UUID }> => {
-              this.logger.error('Could not create a user in', JSON.stringify(e));
+              this.logger.error(
+                'Could not create a user in',
+                JSON.stringify(e),
+              );
               this.logger.error('Trying to fetch an existing user in');
               return this.fusionauthClient
                 .retrieveUserByUsername(authObj.username)
@@ -448,13 +454,15 @@ export class FusionauthService {
     }
   }
 
-  async createAndRegisterUser(user: RegistrationRequest): Promise<{userId: UUID, user: User, err: Error}> {
+  async createAndRegisterUser(
+    user: RegistrationRequest,
+  ): Promise<{ userId: UUID; user: User; err: Error }> {
     return this.fusionauthClient
       .register(null, user)
       .then(
         (
           response: ClientResponse<RegistrationResponse>,
-        ): { userId: UUID; user: User, err: Error } => {
+        ): { userId: UUID; user: User; err: Error } => {
           this.logger.log('Found user');
           return {
             userId: response.response.user.id,
@@ -463,17 +471,20 @@ export class FusionauthService {
           };
         },
       )
-      .catch((e): { userId: UUID; user: User, err: Error } => {
+      .catch((e): { userId: UUID; user: User; err: Error } => {
         this.logger.error(`Could not create user ${user}`, JSON.stringify(e));
         return {
           userId: null,
           user: null,
-          err: e
+          err: e,
         };
       });
   }
 
-  async updateUser(userId: string, user: UserRequest): Promise<{_userId: UUID, user: User, err: Error}> {
+  async updateUser(
+    userId: string,
+    user: UserRequest,
+  ): Promise<{ _userId: UUID; user: User; err: Error }> {
     return this.fusionauthClient
       .patchUser(userId, user)
       .then(
@@ -484,21 +495,27 @@ export class FusionauthService {
           return {
             _userId: response.response.user.id,
             user: response.response.user,
-            err: null
+            err: null,
           };
         },
       )
       .catch((e): { _userId: UUID; user: User; err: Error } => {
-        this.logger.error(`Could not update user ${user.user.id}`, JSON.stringify(e));
+        this.logger.error(
+          `Could not update user ${user.user.id}`,
+          JSON.stringify(e),
+        );
         return {
           _userId: null,
           user: null,
-          err: e
+          err: e,
         };
       });
   }
 
-  async upddatePasswordWithLoginId(data: {loginId: string, password: string}): Promise<any> {
+  async upddatePasswordWithLoginId(data: {
+    loginId: string;
+    password: string;
+  }): Promise<any> {
     return this.httpService
       .post(
         process.env.FUSIONAUTH_BASE_URL + '/api/user/change-password',
@@ -528,30 +545,52 @@ export class FusionauthService {
       );
   }
 
-  async updateUserRegistration(userId: UUID, registration: FusionAuthUserRegistration): Promise<{_userId: UUID, registration: FusionAuthUserRegistration, err: Error}> {
+  async updateUserRegistration(
+    userId: UUID,
+    registration: FusionAuthUserRegistration,
+  ): Promise<{
+    _userId: UUID;
+    registration: FusionAuthUserRegistration;
+    err: Error;
+  }> {
     return this.fusionauthClient
       .patchRegistration(userId, { registration: registration })
       .then(
         (
           response: ClientResponse<RegistrationResponse>,
-        ): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
+        ): {
+          _userId: UUID;
+          registration: FusionAuthUserRegistration;
+          err: Error;
+        } => {
           this.logger.log('Found user');
           this.logger.log(JSON.stringify(response));
           return {
             _userId: userId,
             registration: response.response.registration,
-            err: null
+            err: null,
           };
         },
       )
-      .catch((e): { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } => {
-        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
-        return {
-          _userId: null,
-          registration: null,
-          err: e
-        };
-      });
+      .catch(
+        (
+          e,
+        ): {
+          _userId: UUID;
+          registration: FusionAuthUserRegistration;
+          err: Error;
+        } => {
+          this.logger.error(
+            `Could not update user ${userId}`,
+            JSON.stringify(e),
+          );
+          return {
+            _userId: null,
+            registration: null,
+            err: e,
+          };
+        },
+      );
   }
 
   async getUserById(
@@ -580,6 +619,67 @@ export class FusionauthService {
           statusFA: FAStatus.ERROR,
           userId: null,
           user: null,
+        };
+      });
+  }
+
+  async deactivateUserById(
+    userId: string,
+    hardDelete: boolean,
+  ): Promise<{ userId: UUID; err: Error }> {
+    if (hardDelete) {
+      return this.fusionauthClient
+        .deleteUser(userId)
+        .then(
+          (response: ClientResponse<void>): { userId: UUID; err: Error } => {
+            this.logger.log(response);
+            return { userId: userId, err: null };
+          },
+        )
+        .catch((e): { userId: UUID; err: Error } => {
+          this.logger.error(
+            `Could not update user ${userId}`,
+            JSON.stringify(e),
+          );
+          return {
+            userId: null,
+            err: e,
+          };
+        });
+    }
+    return this.fusionauthClient
+      .deactivateUser(userId)
+      .then((response: ClientResponse<void>): { userId: UUID; err: Error } => {
+        this.logger.log(response);
+        return { userId: userId, err: null };
+      })
+      .catch((e): { userId: UUID; err: Error } => {
+        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          userId: null,
+          err: e,
+        };
+      });
+  }
+
+  async activateUserById(
+    userId: string,
+  ): Promise<{ userId: UUID; err: Error }> {
+    return this.fusionauthClient
+      .reactivateUser(userId)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { userId: UUID; err: Error } => {
+          this.logger.log(response);
+          return { userId: userId, err: null };
+        },
+      )
+      .catch((e): { userId: UUID; err: Error } => {
+        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          userId: null,
+          err: e,
         };
       });
   }
