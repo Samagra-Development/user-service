@@ -16,7 +16,7 @@ import FusionAuthClient, {
 } from '@fusionauth/typescript-client';
 
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, map } from 'rxjs';
 import { QueryGeneratorService } from './query-generator/query-generator.service';
@@ -33,6 +33,7 @@ export enum FAStatus {
 @Injectable()
 export class FusionauthService {
   fusionauthClient: FusionAuthClient;
+  protected readonly logger = new Logger(FusionauthService.name); // logger instance
 
   constructor(
     private readonly httpService: HttpService,
@@ -617,6 +618,121 @@ export class FusionauthService {
             refreshToken: null,
             tokenExpirationInstant: null,
           },
+        };
+      });
+  }
+
+  async getUserById(
+    userId: UUID,
+    applicationId,
+    authHeader?: string,
+  ): Promise<{ statusFA: FAStatus; userId: UUID; user: User }> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
+    }
+    const host = this.configResolverService.getHost(applicationId);
+    const fusionauthClient = this.getClient(apiKey, host);
+    return fusionauthClient
+      .retrieveUser(userId)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { statusFA: FAStatus; userId: UUID; user: User } => {
+          this.logger.log('Found user');
+          return {
+            statusFA: FAStatus.USER_EXISTS,
+            userId: response.response.user.id,
+            user: response.response.user,
+          };
+        },
+      )
+      .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
+        this.logger.error(
+          `Could not fetch user with user id ${userId}`,
+          JSON.stringify(e),
+        );
+        return {
+          statusFA: FAStatus.ERROR,
+          userId: null,
+          user: null,
+        };
+      });
+  }
+
+  async deactivateUserById(
+    userId: string,
+    hardDelete: boolean,
+    applicationId,
+    authHeader?: string,
+  ): Promise<{ userId: UUID; err: Error }> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
+    }
+    const host = this.configResolverService.getHost(applicationId);
+    const fusionauthClient = this.getClient(apiKey, host);
+    if (hardDelete) {
+      return fusionauthClient
+        .deleteUser(userId)
+        .then(
+          (response: ClientResponse<void>): { userId: UUID; err: Error } => {
+            this.logger.log(response);
+            return { userId: userId, err: null };
+          },
+        )
+        .catch((e): { userId: UUID; err: Error } => {
+          this.logger.error(
+            `Could not update user ${userId}`,
+            JSON.stringify(e),
+          );
+          return {
+            userId: null,
+            err: e,
+          };
+        });
+    }
+    return fusionauthClient
+      .deactivateUser(userId)
+      .then((response: ClientResponse<void>): { userId: UUID; err: Error } => {
+        this.logger.log(response);
+        return { userId: userId, err: null };
+      })
+      .catch((e): { userId: UUID; err: Error } => {
+        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          userId: null,
+          err: e,
+        };
+      });
+  }
+
+  async activateUserById(
+    userId: string,
+    applicationId,
+    authHeader?: string,
+  ): Promise<{ userId: UUID; err: Error }> {
+    let apiKey = this.configResolverService.getApiKey(applicationId);
+    if (authHeader != null) {
+      apiKey = authHeader;
+    }
+    const host = this.configResolverService.getHost(applicationId);
+    const fusionauthClient = this.getClient(apiKey, host);
+    return fusionauthClient
+      .reactivateUser(userId)
+      .then(
+        (
+          response: ClientResponse<UserResponse>,
+        ): { userId: UUID; err: Error } => {
+          this.logger.log(response);
+          return { userId: userId, err: null };
+        },
+      )
+      .catch((e): { userId: UUID; err: Error } => {
+        this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
+        return {
+          userId: null,
+          err: e,
         };
       });
   }

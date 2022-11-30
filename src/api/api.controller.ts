@@ -196,4 +196,32 @@ export class ApiController {
       authHeader,
     );
   }
+
+  @Patch('/user/:userId/deactivate')
+  async deactivateUserById(
+    @Param('userId') userId: string,
+    @Query('hardDelete') hardDelete = false,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<UsersResponse> {
+    return await this.apiService.deactivateUserById(
+      userId,
+      hardDelete,
+      applicationId,
+      authHeader,
+    );
+  }
+
+  @Patch('/user/:userId/activate')
+  async activateUserById(
+    @Param('userId') userId: string,
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+  ): Promise<UsersResponse> {
+    return await this.apiService.activateUserById(
+      userId,
+      applicationId,
+      authHeader,
+    );
+  }
 }

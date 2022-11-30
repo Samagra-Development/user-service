@@ -281,4 +281,58 @@ async createUser(data: UserRegistration, applicationId: string, authHeader?: str
 
     return response;
   }
+
+  async deactivateUserById(
+    userId: string,
+    hardDelete: boolean,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.deactivateUserById(
+        userId,
+        hardDelete,
+        applicationId,
+        authHeader,
+      );
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(
+      userId,
+      applicationId,
+      authHeader,
+    );
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
+    return response;
+  }
+
+  async activateUserById(
+    userId: string,
+    applicationId: string,
+    authHeader?: string,
+  ): Promise<any> {
+    const activationResponse: { userId: UUID; err: Error } =
+      await this.fusionAuthService.activateUserById(
+        userId,
+        applicationId,
+        authHeader,
+      );
+    if (activationResponse.userId == null) {
+      throw new HttpException(activationResponse.err, HttpStatus.BAD_REQUEST);
+    }
+
+    // fetch the latest user info now & respond
+    const userResponse = await this.fusionAuthService.getUserById(
+      userId,
+      applicationId,
+      authHeader,
+    );
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    response.result = userResponse.user;
+    return response;
+  }
 }
