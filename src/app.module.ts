@@ -16,6 +16,7 @@ import { DstModule } from './dst/dst.module';
 import { AuthModule } from './auth/auth.module';
 import { ApiModule } from './api/api.module';
 import got from 'got/dist/source';
+import { TerminusModule } from '@nestjs/terminus';
 
 const gupshupFactory = {
   provide: 'GupshupService',
@@ -50,6 +51,7 @@ const otpServiceFactory = {
     DstModule,
     AuthModule,
     ApiModule,
+    TerminusModule,
   ],
   controllers: [AppController],
   providers: [
