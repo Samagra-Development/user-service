@@ -58,8 +58,21 @@ export class ApiService {
       .then(async (resp: ClientResponse<LoginResponse>) => {
         let fusionAuthUser: any = resp.response;
         if (fusionAuthUser.user === undefined) {
-          console.log('Here');
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
+        }
+        if (
+          fusionAuthUser.user.registrations.filter((registration) => {
+            return registration.applicationId == user.applicationId;
+          }).length == 0
+        ) {
+          // User is not registered in the requested application. Let's throw error.
+          const response: SignupResponse = new SignupResponse().init(uuidv4());
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'INVALID_REGISTRATION';
+          response.params.errMsg =
+            'User registration not found in the given application.';
+          response.params.status = ResponseStatus.failure;
+          return response;
         }
         // if (fusionAuthUser.user.data.accountName === undefined) {
         //   if (fusionAuthUser.user.fullName == undefined) {
