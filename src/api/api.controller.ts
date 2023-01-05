@@ -20,6 +20,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -262,6 +263,32 @@ export class ApiController {
   ): Promise<UsersResponse> {
     return await this.apiService.activateUserById(
       userId,
+      applicationId,
+      authHeader,
+    );
+  }
+
+  @Post('/changePassword/sendOTP')
+  async changePasswordOTP(
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+    @Body() data: any,
+  ): Promise<SignupResponse> {
+    return await this.apiService.changePasswordOTP(
+      data.username,
+      applicationId,
+      authHeader,
+    );
+  }
+
+  @Patch('/changePassword/update')
+  async changePassword(
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+    @Body() data: ChangePasswordDTO,
+  ): Promise<SignupResponse> {
+    return await this.apiService.changePassword(
+      data,
       applicationId,
       authHeader,
     );
