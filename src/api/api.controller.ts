@@ -218,8 +218,9 @@ export class ApiController {
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
+    const queryString = `(id: ${userId})`;  // pass the strict user ID filter
     return await this.apiService.fetchUsersByString(
-      userId,
+      queryString,
       undefined,
       undefined,
       applicationId,
