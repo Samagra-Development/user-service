@@ -21,7 +21,7 @@ node() {
         '''
         if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
             sh '''
-            docker build -f build/Dockerfile -t $docker_server/$docker_repo:$commit_id .
+            docker build -f build/Dockerfile -t $docker_server/$docker_repo:latest .
             '''
         }
     }
