@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query, UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -44,7 +44,24 @@ export class ApiController {
   }
 
   @Get('sendOTP')
-  async sendOTP(@Query('phone') phone): Promise<any> {
+  async sendOTP(
+    @Query('phone') phone,
+    @Query('errorMessage') errorMessage = 'User not found.',
+    @Headers('x-application-id') applicationId?,
+  ): Promise<any> {
+    if (applicationId) {
+      const { total }: { total: number; users: Array<User> } =
+        await this.fusionAuthService.getUsersByString(
+          `(username: ${phone}, mobilePhone: ${phone})`,
+          0,
+          1,
+          applicationId,
+          null,
+        );
+      if (!total || total == 0) {
+        throw new UnprocessableEntityException(errorMessage);
+      }
+    }
     const status: SMSResponse = await this.otpService.sendOTP(phone);
     return { status };
   }
