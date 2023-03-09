@@ -1,25 +1,15 @@
 import * as addressSchema from './schema/address.json';
 import * as educationSchema from './schema/education.json';
 import * as userSchema from './schema/user.json';
-const env = require("dotenv").config();
-const CryptoJS = require("crypto-js");
-const AES = require("crypto-js/aes");
-
-CryptoJS.lib.WordArray.words;
-
-const encodedBase64Key = process.env.ENCRYPTION_KEY;
-const parsedBase64Key = ((encodedBase64Key === undefined) ? "bla" : CryptoJS.enc.Base64.parse(encodedBase64Key));
-
 import {
   AccountStatus,
   ResponseCode,
   ResponseStatus,
   SignupResponse,
-  UsersResponse,
 } from './user.interface';
 import Ajv, { ErrorObject } from 'ajv';
 import { FAStatus, FusionauthService } from './fusionauth/fusionauth.service';
-import { LoginResponse, UUID, User } from '@fusionauth/typescript-client';
+import { LoginResponse, User, UUID } from '@fusionauth/typescript-client';
 
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 import ClientResponse from '@fusionauth/typescript-client/build/src/ClientResponse';
@@ -28,6 +18,18 @@ import { OtpService } from './otp/otp.service';
 import { SMSResponseStatus } from './sms/sms.interface';
 import { UserDBService } from './user-db/user-db.service';
 import { v4 as uuidv4 } from 'uuid';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const CryptoJS = require('crypto-js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const AES = require('crypto-js/aes');
+
+CryptoJS.lib.WordArray.words;
+
+const encodedBase64Key = process.env.ENCRYPTION_KEY;
+const parsedBase64Key =
+  encodedBase64Key === undefined
+    ? 'bla'
+    : CryptoJS.enc.Base64.parse(encodedBase64Key);
 
 // ajv.addSchema(educationSchema, 'education');
 // ajv.addSchema(userSchema, 'user');
@@ -129,7 +131,7 @@ export class UserService {
             },
           };
         } else {
-          const deletedUser = await this.fusionAuthService.delete(userId);
+          await this.fusionAuthService.delete(userId);
           // Update response with correct status - ERROR.
           response.responseCode = ResponseCode.FAILURE;
           if (!status) {
@@ -190,7 +192,7 @@ export class UserService {
       }: { statusFA: FAStatus; userId: UUID; fusionAuthUser: User } =
         await this.fusionAuthService.update(userID, authObj);
 
-      if (this.isOldSchoolUser(fusionAuthUser)) {
+      if (UserService.isOldSchoolUser(fusionAuthUser)) {
         response.result = {
           responseMsg: 'User Updated Successfully',
           accountStatus: null,
@@ -263,23 +265,47 @@ export class UserService {
       .then(async (resp: ClientResponse<LoginResponse>) => {
         let fusionAuthUser: any = resp.response;
         if (fusionAuthUser.user === undefined) {
-          console.log("Here")
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
         }
-        if (fusionAuthUser.user.data.accountName === undefined) {
-          if (fusionAuthUser.user.fullName == undefined) {
-            if (fusionAuthUser.user.firstName === undefined){
-              fusionAuthUser['user']['data']['accountName'] = this.decrypt(user.loginId)
+        if (
+          fusionAuthUser.user.registrations.filter((registration) => {
+            return registration.applicationId == user.applicationId;
+          }).length == 0
+        ) {
+          // User is not registered in the requested application. Let's throw error.
+          const response: SignupResponse = new SignupResponse().init(uuidv4());
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'INVALID_REGISTRATION';
+          response.params.errMsg =
+            'User registration not found in the given application.';
+          response.params.status = ResponseStatus.failure;
+          return response;
+        }
+        if (fusionAuthUser?.user?.data?.accountName === undefined) {
+          if (fusionAuthUser?.user?.fullName == undefined) {
+            if (fusionAuthUser?.user?.firstName === undefined) {
+              if (!fusionAuthUser.user.data) {
+                fusionAuthUser.user.data = {};
+              }
+              fusionAuthUser['user']['data']['accountName'] = this.decrypt(
+                user.loginId,
+              );
+            } else {
+              if (!fusionAuthUser.user.data) {
+                fusionAuthUser.user.data = {};
+              }
+              fusionAuthUser['user']['data']['accountName'] =
+                fusionAuthUser.user.firstName;
             }
-            else {
-              fusionAuthUser['user']['data']['accountName'] = fusionAuthUser.user.firstName
+          } else {
+            if (!fusionAuthUser.user.data) {
+              fusionAuthUser.user.data = {};
             }
-          }
-          else{
-            fusionAuthUser['user']['data']['accountName'] = fusionAuthUser.user.fullName
+            fusionAuthUser['user']['data']['accountName'] =
+              fusionAuthUser.user.fullName;
           }
         }
-        if (this.isOldSchoolUser(fusionAuthUser.user)) {
+        if (UserService.isOldSchoolUser(fusionAuthUser.user)) {
           //updateUserData with school and udise
           fusionAuthUser.user.data = {};
           const udise = fusionAuthUser.user.username;
@@ -295,7 +321,6 @@ export class UserService {
           //login again to get new JWT
           fusionAuthUser = (await this.fusionAuthService.login(user)).response;
           if (fusionAuthUser.user === undefined) {
-            console.log("Here")
             fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
           }
           const response: SignupResponse = new SignupResponse().init(uuidv4());
@@ -474,7 +499,7 @@ export class UserService {
     return response;
   }
 
-  private isOldSchoolUser(fusionAuthUser: User) {
+  private static isOldSchoolUser(fusionAuthUser: User) {
     return (
       fusionAuthUser.registrations[0].roles === undefined ||
       (fusionAuthUser.registrations.length > 0 &&
@@ -500,17 +525,14 @@ export class UserService {
   }
 
   encrypt(plainString: any): any {
-    const encryptedString = AES.encrypt(plainString, parsedBase64Key, {
+    return AES.encrypt(plainString, parsedBase64Key, {
       mode: CryptoJS.mode.ECB,
     }).toString();
-    return encryptedString;
-  };
+  }
 
   decrypt(encryptedString: any): any {
-    const plainString = AES.decrypt(encryptedString, parsedBase64Key, {
+    return AES.decrypt(encryptedString, parsedBase64Key, {
       mode: CryptoJS.mode.ECB,
     }).toString(CryptoJS.enc.Utf8);
-    return plainString;
-  };
-  
+  }
 }

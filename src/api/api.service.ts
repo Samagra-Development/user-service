@@ -20,6 +20,9 @@ import { OtpService } from './otp/otp.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigResolverService } from './config.resolver.service';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+import { FAStatus } from '../user/fusionauth/fusionauth.service';
+import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
+import { SMSResponseStatus } from '../user/sms/sms.interface';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -58,8 +61,21 @@ export class ApiService {
       .then(async (resp: ClientResponse<LoginResponse>) => {
         let fusionAuthUser: any = resp.response;
         if (fusionAuthUser.user === undefined) {
-          console.log('Here');
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
+        }
+        if (
+          fusionAuthUser.user.registrations.filter((registration) => {
+            return registration.applicationId == user.applicationId;
+          }).length == 0
+        ) {
+          // User is not registered in the requested application. Let's throw error.
+          const response: SignupResponse = new SignupResponse().init(uuidv4());
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'INVALID_REGISTRATION';
+          response.params.errMsg =
+            'User registration not found in the given application.';
+          response.params.status = ResponseStatus.failure;
+          return response;
         }
         // if (fusionAuthUser.user.data.accountName === undefined) {
         //   if (fusionAuthUser.user.fullName == undefined) {
@@ -201,7 +217,7 @@ export class ApiService {
     applicationId: string,
     authHeader?: string,
   ): Promise<any> {
-    return this.fusionAuthService.upddatePasswordWithLoginId(
+    return this.fusionAuthService.updatePasswordWithLoginId(
       data,
       applicationId,
       authHeader,
@@ -393,6 +409,103 @@ export class ApiService {
     );
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     response.result = userResponse.user;
+    return response;
+  }
+
+  async changePasswordOTP(
+    username: string,
+    applicationId: UUID,
+    authHeader: null | string,
+  ): Promise<SignupResponse> {
+    // Get Phone No from username
+    const {
+      statusFA,
+      userId,
+      user,
+    }: { statusFA: FAStatus; userId: UUID; user: User } =
+      await this.fusionAuthService.getUser(username, applicationId, authHeader);
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    // If phone number is valid => Send OTP
+    if (statusFA === FAStatus.USER_EXISTS) {
+      const re = /^[6-9]{1}[0-9]{9}$/;
+      if (re.test(user.mobilePhone)) {
+        const result = await this.otpService.sendOTP(user.mobilePhone);
+        response.result = {
+          data: result,
+          responseMsg: `OTP has been sent to ${user.mobilePhone}.`,
+        };
+        response.responseCode = ResponseCode.OK;
+        response.params.status = ResponseStatus.success;
+      } else {
+        response.responseCode = ResponseCode.FAILURE;
+        response.params.err = 'INVALID_PHONE_NUMBER';
+        response.params.errMsg = 'Invalid Phone number';
+        response.params.status = ResponseStatus.failure;
+      }
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'INVALID_USERNAME';
+      response.params.errMsg = 'No user with this Username exists';
+      response.params.status = ResponseStatus.failure;
+    }
+    return response;
+  }
+
+  async changePassword(
+    data: ChangePasswordDTO,
+    applicationId: UUID,
+    authHeader: null | string,
+  ): Promise<SignupResponse> {
+    // Verify OTP
+    const {
+      statusFA,
+      userId,
+      user,
+    }: { statusFA: FAStatus; userId: UUID; user: User } =
+      await this.fusionAuthService.getUser(
+        data.username,
+        applicationId,
+        authHeader,
+      );
+    const response: SignupResponse = new SignupResponse().init(uuidv4());
+    if (statusFA === FAStatus.USER_EXISTS) {
+      const verifyOTPResult = await this.otpService.verifyOTP({
+        phone: user.mobilePhone,
+        otp: data.OTP,
+      });
+
+      if (verifyOTPResult.status === SMSResponseStatus.success) {
+        const result = await this.fusionAuthService.updatePassword(
+          userId,
+          data.password,
+          applicationId,
+          authHeader,
+        );
+
+        if (result.statusFA == FAStatus.SUCCESS) {
+          response.result = {
+            responseMsg: 'Password updated successfully',
+          };
+          response.responseCode = ResponseCode.OK;
+          response.params.status = ResponseStatus.success;
+        } else {
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'UNCAUGHT_EXCEPTION';
+          response.params.errMsg = 'Server Error';
+          response.params.status = ResponseStatus.failure;
+        }
+      } else {
+        response.responseCode = ResponseCode.FAILURE;
+        response.params.err = 'INVALID_OTP_USERNAME_PAIR';
+        response.params.errMsg = 'OTP and Username did not match.';
+        response.params.status = ResponseStatus.failure;
+      }
+    } else {
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'INVALID_USERNAME';
+      response.params.errMsg = 'No user with this Username exists';
+      response.params.status = ResponseStatus.failure;
+    }
     return response;
   }
 }

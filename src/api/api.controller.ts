@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Query, UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -20,6 +20,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
+import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -43,7 +44,24 @@ export class ApiController {
   }
 
   @Get('sendOTP')
-  async sendOTP(@Query('phone') phone): Promise<any> {
+  async sendOTP(
+    @Query('phone') phone,
+    @Query('errorMessage') errorMessage = 'User not found.',
+    @Headers('x-application-id') applicationId?,
+  ): Promise<any> {
+    if (applicationId) {
+      const { total }: { total: number; users: Array<User> } =
+        await this.fusionAuthService.getUsersByString(
+          `(username: ${phone}, mobilePhone: ${phone})`,
+          0,
+          1,
+          applicationId,
+          null,
+        );
+      if (!total || total == 0) {
+        throw new UnprocessableEntityException(errorMessage);
+      }
+    }
     const status: SMSResponse = await this.otpService.sendOTP(phone);
     return { status };
   }
@@ -217,8 +235,9 @@ export class ApiController {
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
+    const queryString = `(id: ${userId})`;  // pass the strict user ID filter
     return await this.apiService.fetchUsersByString(
-      userId,
+      queryString,
       undefined,
       undefined,
       applicationId,
@@ -262,6 +281,32 @@ export class ApiController {
   ): Promise<UsersResponse> {
     return await this.apiService.activateUserById(
       userId,
+      applicationId,
+      authHeader,
+    );
+  }
+
+  @Post('/changePassword/sendOTP')
+  async changePasswordOTP(
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+    @Body() data: any,
+  ): Promise<SignupResponse> {
+    return await this.apiService.changePasswordOTP(
+      data.username,
+      applicationId,
+      authHeader,
+    );
+  }
+
+  @Patch('/changePassword/update')
+  async changePassword(
+    @Headers('authorization') authHeader,
+    @Headers('x-application-id') applicationId,
+    @Body() data: ChangePasswordDTO,
+  ): Promise<SignupResponse> {
+    return await this.apiService.changePassword(
+      data,
       applicationId,
       authHeader,
     );
