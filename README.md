@@ -5,11 +5,18 @@
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-## Description
+# User Service
+An OIDC compliant extensible user authentication and authorization service that includes key features such as passwordless authentication and attribute based access control (ABAC). It is written in [Nest JS](https://github.com/nestjs/nest) & using Fusion Auth as the underlying service for all User Management related tasks.
 
-[Nest](https://github.com/nestjs/nest) service for managing eSamwad Users.
+## Features
+- CRUD support for respective Fusion Auth Applications
+- Authentication(Username/Password combo) for Fusion Auth Users
+- Passwordless (OTP based) authentication
+- RBAC support for the applications (Android, React Admin, etc.)
+- CRUD supporting creation/updation of records on 3rd party Hasura using Generic Config
 
-## Installation
+## Development
+#### Installation
 
 ```bash
 $ yarn install
@@ -17,7 +24,7 @@ $ yarn install
 
 _Note_: This project is built on VSCode and would be developed only with this IDE in mind. The [.vscode directory](./.vscode) will be kept updated with all the VSCode magic 🧙‍♂️.
 
-## Running the app
+#### Running the app
 
 ```bash
 # development
@@ -31,6 +38,21 @@ $ yarn start:debug
 
 # production mode
 $ yarn start:prod
+```
+
+## Deployment
+You can use docker image directly for production environment setup. A sample `docker-compose.yml` file should look like:
+```
+version: "3"
+
+services:
+  user-service:
+    image: samagragovernance/esamwad-user-service:latest
+    env_file:
+      - ./.env
+    ports:
+      - "3000:3000"
+    restart: always
 ```
 
 ## Test
@@ -49,14 +71,14 @@ $ yarn test:cov
 $ yarn run test:watch ./src/user/sms/gupshup/gupshup.service.spec.ts
 ```
 
-## Add a sample service
+## Add a sample service (Generic Config)
 ```bash
 # open .env file
 $ vi .env
 
 # add your service info in below format
-application_id={"host": "dummy.com", "apiKey": "zse12344@#%ddsr", "encryption": {"enabled": true, "key": "veryhardkey"}}
-# where apiKey and encryption.key is not mandatory
+APP_application_id={"host": "dummy.com", "apiKey": "zse12344@#%ddsr", "encryption": {"enabled": true, "key": "veryhardkey"}, "hasura": {"graphql_url": "https://example.com/graphql", "admin_secret": "xxxx", "mutations": {"some_mutation_key": "mutation query..."}}}
+# where apiKey, encryption.key and hasura is not mandatory
 # Precedence will be given apiKey sent in Authorization header (Check swagger collection below for references)
 # encryption.enabled provides option to encrypt username/password with the provided enrption.key before sending to the FA server.
 
@@ -64,14 +86,11 @@ application_id={"host": "dummy.com", "apiKey": "zse12344@#%ddsr", "encryption": 
 $ docker-compose down
 $ docker-compose up -d --build
 ```
+Note: In variable `APP_application_id`, **"APP_"** is the prefix and **"application_id"** is the UUID of Fusion Auth application with hyphen("-") replaced with underscore("_"). E.g. if application id is: `0000-0000-0000-0000` then the variable name must be: `APP_0000_0000_0000_0000`
 
 ## Postman Collection
 
 Find [here](https://www.getpostman.com/collections/273dc33e3e37977a22b5)
-
-## Stay in touch
-
-- Author - [Radhay Anand](https://github.com/radhay-samagra)
 
 ## License
 
