@@ -42,11 +42,11 @@ export class AppController {
           'Fusion Auth (Samarth)',
           this.configService.get<string>('FUSIONAUTH_BASE_URL'),
         ),
-      async () =>
+      /*async () =>
         this.http.pingCheck(
           'E-Samwad',
           this.configService.get<string>('ESAMWAD_BACKEND_BASE_URL'),
-        ),
+        ),*/
     ]);
   }
 }
