@@ -88,6 +88,7 @@ $ docker-compose up -d --build
 ```
 Note: In variable `APP_application_id`, **"APP_"** is the prefix and **"application_id"** is the UUID of Fusion Auth application with hyphen("-") replaced with underscore("_"). E.g. if application id is: `0000-0000-0000-0000` then the variable name must be: `APP_0000_0000_0000_0000`
 
+### JSON config
 | Variable              | Description                                                                                                                                                            |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `host`                | Fusion Auth Host. e.g. http://localhost:9011 or http://example.com                                                                                                     |
