@@ -88,6 +88,16 @@ $ docker-compose up -d --build
 ```
 Note: In variable `APP_application_id`, **"APP_"** is the prefix and **"application_id"** is the UUID of Fusion Auth application with hyphen("-") replaced with underscore("_"). E.g. if application id is: `0000-0000-0000-0000` then the variable name must be: `APP_0000_0000_0000_0000`
 
+| Variable              | Description                                                                                                                                                            |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `host`                | Fusion Auth Host. e.g. http://localhost:9011 or http://example.com                                                                                                     |
+| `apiKey`              | Fusion Auth API key to use for the Fusion Auth APIs being access via User Service. This key will be ignored if header `Authorization` header is passed in the request. |
+| `encryption.enabled`  | Boolean flag to enabled/disable encryption.                                                                                                                            |
+| `encryption.key`      | Encryption key. Must be passed if `encryption.enabled` is `true`.                                                                                                      |
+| `hasura.graphql_url`  | Hasura Graphql URL for custom mutation calls to be made on hit of certain APIs.                                                                                        |
+| `hasura.admin_secret` | Hasura Admin Secret.                                                                                                                                                   |
+| `hasura.mutations`    | A JSON object containing `key: value`; where `key` is the name of mutation & `value` contains the query/mutation for the Graphql call.                                 |
+
 ## Postman Collection
 
 Find [here](https://www.getpostman.com/collections/273dc33e3e37977a22b5)
