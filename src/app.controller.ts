@@ -34,12 +34,12 @@ export class AppController {
     return this.healthCheckService.check([
       async () =>
         this.http.pingCheck(
-          'Fusion Auth (Central)',
+          'Fusion Auth (Old)',
           this.configService.get<string>('FUSIONAUTH_OLD_BASE_URL'),
         ),
       async () =>
         this.http.pingCheck(
-          'Fusion Auth (Samarth)',
+          'Fusion Auth (New)',
           this.configService.get<string>('FUSIONAUTH_BASE_URL'),
         ),
       /*async () =>
