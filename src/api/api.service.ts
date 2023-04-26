@@ -23,6 +23,8 @@ import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAu
 import { FAStatus } from '../user/fusionauth/fusionauth.service';
 import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
 import { SMSResponseStatus } from '../user/sms/sms.interface';
+import { LoginDto } from '../user/dto/login.dto';
+import { FusionAuthUserRegistration } from '../admin/admin.interface';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -507,5 +509,122 @@ export class ApiService {
       response.params.status = ResponseStatus.failure;
     }
     return response;
+  }
+
+  async loginWithOtp(loginDto: LoginDto, authHeader: null | string): Promise<SignupResponse> {
+    /* Execution flow
+        1. Verify OTP
+        2. If invalid OTP, throw error; else continue with next steps
+        3. Check if user exists for the given applicationId.
+        3.1. If existing user, reset the password.
+        3.2. If new user, register to this application.
+        4. Send login response with the token
+     */
+    const salt = this.configResolverService.getSalt(loginDto.applicationId);
+    const verifyOTPResult = await this.otpService.verifyOTP({
+      phone: loginDto.loginId,
+      otp: loginDto.password, // existing OTP
+    });
+    loginDto.password = salt + loginDto.password;  // mix OTP with salt
+
+    if (verifyOTPResult.status === SMSResponseStatus.success) {
+      const {
+        statusFA,
+        userId,
+        user,
+      }: { statusFA: FAStatus; userId: UUID; user: User } =
+        await this.fusionAuthService.getUser(
+          loginDto.loginId,
+          loginDto.applicationId,
+          authHeader,
+        );
+      if (statusFA === FAStatus.USER_EXISTS) {
+        // console.log("EEEEEEEEEEEEEEEEEE");
+        // console.log(userId, user.registrations);
+        let isRegistrationExists = false;
+        if (user.registrations) {
+          user.registrations.map((item) => {
+            if (item.applicationId == loginDto.applicationId) {
+              isRegistrationExists = true;
+            }
+          });
+        }
+        // console.log("AAAAAAAAAAAAAAAa", isRegistrationExists);
+        /*if (!isRegistrationExists) {
+          // make sure the user registration exists
+          console.log(await this.updateUserRegistration(loginDto.applicationId, authHeader, user.id, {
+            applicationId: loginDto.applicationId,
+            roles: loginDto.roles ?? [],
+          })); // calling patch registration API
+        }*/
+        const updateUserResponse: { _userId: UUID; user: User; err: Error } =
+          await this.fusionAuthService.updateUser(
+            userId,
+            { user: {
+                password: loginDto.password
+              }
+            },
+            loginDto.applicationId,
+            authHeader,
+          );
+        if (updateUserResponse._userId == null || updateUserResponse.user == null) {
+          throw new HttpException(updateUserResponse.err, HttpStatus.BAD_REQUEST);
+        }
+        return this.login(loginDto, authHeader);
+      } else {
+        // create a new user
+        const createUserPayload: UserRegistration = {
+          user: {
+            timezone: "Asia/Kolkata",
+            username: loginDto.loginId,
+            mobilePhone: loginDto.loginId,
+            password: loginDto.password
+          },
+          registration: {
+            applicationId: loginDto.applicationId,
+            preferredLanguages: [
+              "en"
+            ],
+            roles: loginDto.roles ?? [],  // pass from request body if present, else empty list
+          }
+        }
+        const { userId, user, err }: { userId: UUID; user: User; err: Error } =
+          await this.fusionAuthService.createAndRegisterUser(
+            createUserPayload,
+            loginDto.applicationId,
+            authHeader,
+          );
+        if (userId == null || user == null) {
+          throw new HttpException(err, HttpStatus.BAD_REQUEST);
+        }
+        return this.login(loginDto, authHeader);
+      }
+    } else {
+      const response: SignupResponse = new SignupResponse().init(uuidv4());
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'OTP_VERIFICATION_FAILED';
+      response.params.errMsg = 'OTP verification failed.';
+      response.params.status = ResponseStatus.failure;
+      return response;
+    }
+  }
+
+  async updateUserRegistration(
+    applicationId: UUID,
+    authHeader: null | string,
+    userId: UUID,
+    data: FusionAuthUserRegistration,
+  ): Promise<any> {
+    const {
+      _userId,
+      registration,
+      err,
+    }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
+      await this.fusionAuthService.updateUserRegistration(applicationId, authHeader, userId, data);
+
+    if (_userId == null || registration == null) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+    return registration;
   }
 }

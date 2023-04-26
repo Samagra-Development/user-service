@@ -21,6 +21,7 @@ import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
+import { LoginDto } from '../user/dto/login.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -310,5 +311,13 @@ export class ApiController {
       applicationId,
       authHeader,
     );
+  }
+
+  @Post('login/otp')
+  async loginWithOtp(
+    @Body() user: LoginDto,
+    @Headers('authorization') authHeader,
+  ): Promise<any> {
+    return await this.apiService.loginWithOtp(user, authHeader);
   }
 }
