@@ -66,7 +66,7 @@ export class ApiService {
           fusionAuthUser = fusionAuthUser.loginResponse.successResponse;
         }
         if (
-          fusionAuthUser.user.registrations.filter((registration) => {
+          fusionAuthUser?.user?.registrations?.filter((registration) => {
             return registration.applicationId == user.applicationId;
           }).length == 0
         ) {
@@ -275,8 +275,12 @@ export class ApiService {
     userId: string,
     data: User,
     applicationId: string,
-    authHeader?: string,
-  ): Promise<any> {
+    authHeader?: string,): Promise<any> {
+    const registrations: Array<FusionAuthUserRegistration> = data?.registrations
+      ? data.registrations
+      : [];
+    delete data.registrations; // delete the registrations key
+
     const { _userId, user, err }: { _userId: UUID; user: User; err: Error } =
       await this.fusionAuthService.updateUser(
         userId,
@@ -287,6 +291,13 @@ export class ApiService {
     if (_userId == null || user == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+
+    // if there are registrations Array, we'll update the registrations too
+    for (const registration of registrations) {
+      console.log(`Updating registration: ${JSON.stringify(registration)}`);
+      await this.updateUserRegistration(applicationId, authHeader, userId, registration); // calling patch registration API
+    }
+
     const response: SignupResponse = new SignupResponse().init(uuidv4());
     response.result = user;
     return response;
@@ -539,37 +550,31 @@ export class ApiService {
           authHeader,
         );
       if (statusFA === FAStatus.USER_EXISTS) {
-        // console.log("EEEEEEEEEEEEEEEEEE");
-        // console.log(userId, user.registrations);
-        let isRegistrationExists = false;
+        let registrationId = null;
         if (user.registrations) {
           user.registrations.map((item) => {
             if (item.applicationId == loginDto.applicationId) {
-              isRegistrationExists = true;
+              registrationId = item.id;
             }
           });
         }
-        // console.log("AAAAAAAAAAAAAAAa", isRegistrationExists);
-        /*if (!isRegistrationExists) {
-          // make sure the user registration exists
-          console.log(await this.updateUserRegistration(loginDto.applicationId, authHeader, user.id, {
-            applicationId: loginDto.applicationId,
-            roles: loginDto.roles ?? [],
-          })); // calling patch registration API
-        }*/
-        const updateUserResponse: { _userId: UUID; user: User; err: Error } =
-          await this.fusionAuthService.updateUser(
-            userId,
-            { user: {
-                password: loginDto.password
-              }
-            },
-            loginDto.applicationId,
-            authHeader,
-          );
-        if (updateUserResponse._userId == null || updateUserResponse.user == null) {
-          throw new HttpException(updateUserResponse.err, HttpStatus.BAD_REQUEST);
-        }
+
+        // now resetting user's password for the new OTP
+        await this.updateUser(
+          userId,
+          {
+            password: loginDto.password,
+            registrations: [
+              {
+                applicationId: loginDto.applicationId,
+                roles: loginDto.roles ?? [],
+                id: registrationId,
+              },
+            ],
+          },
+          loginDto.applicationId,
+          authHeader,
+        );
         return this.login(loginDto, authHeader);
       } else {
         // create a new user

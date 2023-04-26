@@ -524,9 +524,14 @@ export class FusionauthService {
     registration: FusionAuthUserRegistration;
     err: Error;
   }> {
-    console.log(applicationId, authHeader, userId, registration);
-    return this.getClientForApplicationId(applicationId, authHeader)
-      .patchRegistration(userId, { registration: registration })
+    const client = this.getClientForApplicationId(applicationId, authHeader);
+    let callback;
+    if (registration['id'] === null) {
+      callback = client.register(userId, { registration: registration });
+    } else {
+      callback = client.patchRegistration(userId, { registration: registration });
+    }
+    return callback
       .then(
         (
           response: ClientResponse<RegistrationResponse>,
