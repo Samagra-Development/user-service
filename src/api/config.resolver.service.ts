@@ -57,4 +57,10 @@ export class ConfigResolverService {
         const config = this.configService.get<string>(applicationId);
         return config ? (JSON.parse(config)?.hasura || undefined) : undefined;
     }
+
+    getSalt(applicationId: string): string {
+        applicationId = this.transform(applicationId);
+        const config = this.configService.get<string>(applicationId);
+        return JSON.parse(config).salt || null;
+    }
 }

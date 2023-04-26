@@ -21,6 +21,7 @@ import { QueryGeneratorService } from './query-generator/query-generator.service
 import { ConfigResolverService } from '../config.resolver.service';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 import { RefreshTokenResult } from '../api.interface';
+import { FusionAuthUserRegistration } from '../../admin/admin.interface';
 
 export enum FAStatus {
   SUCCESS = 'SUCCESS',
@@ -511,5 +512,56 @@ export class FusionauthService {
           userId: null,
         };
       });
+  }
+
+  async updateUserRegistration(
+    applicationId: UUID,
+    authHeader: null | string,
+    userId: UUID,
+    registration: FusionAuthUserRegistration,
+  ): Promise<{
+    _userId: UUID;
+    registration: FusionAuthUserRegistration;
+    err: Error;
+  }> {
+    console.log(applicationId, authHeader, userId, registration);
+    return this.getClientForApplicationId(applicationId, authHeader)
+      .patchRegistration(userId, { registration: registration })
+      .then(
+        (
+          response: ClientResponse<RegistrationResponse>,
+        ): {
+          _userId: UUID;
+          registration: FusionAuthUserRegistration;
+          err: Error;
+        } => {
+          this.logger.log('Found user');
+          this.logger.log(JSON.stringify(response));
+          return {
+            _userId: userId,
+            registration: response.response.registration,
+            err: null,
+          };
+        },
+      )
+      .catch(
+        (
+          e,
+        ): {
+          _userId: UUID;
+          registration: FusionAuthUserRegistration;
+          err: Error;
+        } => {
+          this.logger.error(
+            `Could not update user ${userId}`,
+            JSON.stringify(e),
+          );
+          return {
+            _userId: null,
+            registration: null,
+            err: e,
+          };
+        },
+      );
   }
 }
