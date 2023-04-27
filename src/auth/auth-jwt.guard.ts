@@ -1,10 +1,8 @@
 import {
     ExecutionContext,
     Injectable,
-    UnauthorizedException,
   } from '@nestjs/common';
   import { AuthGuard, IAuthGuard } from '@nestjs/passport';
-  import { JwtService } from '@nestjs/jwt'
   import { Reflector } from '@nestjs/core';
   
   @Injectable()
@@ -36,8 +34,8 @@ import {
         return isAllowed;
     }
   
+    // noinspection JSUnusedLocalSymbols
     handleRequest(err, user, info) {
-        console.log({handleRequest: info, error: err, user: user})
         return user;
     }
   }
