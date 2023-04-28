@@ -10,24 +10,35 @@ import { OtpService } from './otp/otp.service';
 import { GupshupService } from './sms/gupshup/gupshup.service';
 import { SmsService } from './sms/sms.service';
 import got from 'got/dist/source';
-
-const gupshupFactory = {
-  provide: 'OtpService',
-  useFactory: (username, password, baseUrl) => {
-    return new GupshupService(
-      username,
-      password,
-      baseUrl,
-      got,
-    );
-  },
-  inject: [],
-};
+import { CdacService } from './sms/cdac/cdac.service';
 
 const otpServiceFactory = {
   provide: OtpService,
   useFactory: (config: ConfigService) => {
-    return new OtpService(gupshupFactory.useFactory(config.get('GUPSHUP_USERNAME'), config.get('GUPSHUP_PASSWORD'), config.get('GUPSHUP_BASEURL'),));
+    let factory;
+    if (config.get<string>('SMS_ADAPTER_TYPE') == 'CDAC') {
+      factory = {
+        provide: 'OtpService',
+        useFactory: () => {
+          return new CdacService(config);
+        },
+        inject: [],
+      }.useFactory();
+    } else {
+      factory = {
+        provide: 'OtpService',
+        useFactory: (username, password, baseUrl) => {
+          return new GupshupService(
+            username,
+            password,
+            baseUrl,
+            got,
+          );
+        },
+        inject: [],
+      }.useFactory(config.get('GUPSHUP_USERNAME'), config.get('GUPSHUP_PASSWORD'), config.get('GUPSHUP_BASEURL'));
+    }
+    return new OtpService(factory);
   },
   inject: [ConfigService],
 };
@@ -35,6 +46,7 @@ const otpServiceFactory = {
 @Module({
   imports: [HttpModule, ConfigModule],
   controllers: [ApiController],
-  providers: [ApiService, FusionauthService, SmsService, otpServiceFactory, QueryGeneratorService, ConfigResolverService]
+  providers: [ApiService, FusionauthService, SmsService, otpServiceFactory, QueryGeneratorService, ConfigResolverService],
 })
-export class ApiModule {}
+export class ApiModule {
+}
