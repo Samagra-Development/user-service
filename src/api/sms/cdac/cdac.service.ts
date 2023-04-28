@@ -13,7 +13,7 @@ import {
 import { HttpException, Injectable } from '@nestjs/common';
 import { SmsService } from '../sms.service';
 import { ConfigService } from '@nestjs/config';
-import got, { Got } from 'got/dist/source';
+import got, {Got} from 'got';
 import * as speakeasy from 'speakeasy';
 
 @Injectable()
@@ -49,7 +49,7 @@ export class CdacService extends SmsService implements SMS {
     else return this.doRequest();
   }
 
-  private __get_secret(phone): string {
+  private getTotpSecret(phone): string {
     return `${this.configService.get<string>('SMS_TOTP_SECRET')}${phone}`
   }
 
@@ -57,7 +57,7 @@ export class CdacService extends SmsService implements SMS {
     let otp = '';
     try {
       otp = speakeasy.totp({
-        secret: this.__get_secret(data.phone),
+        secret: this.getTotpSecret(data.phone),
         encoding: 'base32',
         step: this.configService.get<string>('SMS_TOTP_EXPIRY'),
       });
@@ -155,7 +155,7 @@ export class CdacService extends SmsService implements SMS {
     let verified = false;
     try {
       verified = speakeasy.totp.verify({
-        secret: this.__get_secret(data.phone),
+        secret: this.getTotpSecret(data.phone),
         encoding: 'base32',
         token: data.params.otp,
         step: this.configService.get<string>('SMS_TOTP_EXPIRY'),
