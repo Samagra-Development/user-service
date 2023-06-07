@@ -500,11 +500,20 @@ export class UserService {
   }
 
   private static isOldSchoolUser(fusionAuthUser: User) {
-    return (
-      fusionAuthUser.registrations[0].roles === undefined ||
-      (fusionAuthUser.registrations.length > 0 &&
-        fusionAuthUser.registrations[0].roles?.length === 1 &&
-        fusionAuthUser.registrations[0].roles.indexOf('school') > -1)
+    let registration = null;
+    for (const r of fusionAuthUser.registrations) {
+      // we'll check and only proceed if the user belongs to respective application
+      if (r.applicationId == process.env.FUSIONAUTH_APPLICATION_ID) {
+        registration = r
+        break;
+      }
+    }
+
+    return (registration &&
+      registration.roles === undefined ||
+      (registration &&
+        registration.roles?.length === 1 &&
+        registration.roles.indexOf('school') > -1)
     );
   }
 
