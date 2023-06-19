@@ -29,6 +29,7 @@ import { FusionAuthUserRegistration } from '../admin/admin.interface';
 const CryptoJS = require('crypto-js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AES = require('crypto-js/aes');
+import Flagsmith from 'flagsmith-nodejs';
 
 CryptoJS.lib.WordArray.words;
 
@@ -108,6 +109,15 @@ export class ApiService {
             user: fusionAuthUser,
           },
         };
+        if(
+          this.configService.get('USE_FLAGSMITH') === 'true' &&
+          this.configService.get('FLAGSMITH_ENVIRONMENT_KEY')
+        ){
+          let flagsmith = new Flagsmith({
+            environmentKey: this.configService.get("FLAGSMITH_ENVIRONMENT_KEY")
+          });
+          await flagsmith.getIdentityFlags(fusionAuthUser.user.username, ['role']);
+        }
         return response;
       })
       .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
@@ -532,10 +542,23 @@ export class ApiService {
         4. Send login response with the token
      */
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
-    const verifyOTPResult = await this.otpService.verifyOTP({
-      phone: loginDto.loginId,
-      otp: loginDto.password, // existing OTP
-    });
+    let verifyOTPResult;
+    if(
+      this.configService.get("ALLOW_DEFAULT_OTP") === 'true' &&
+      this.configService.get("DEFAULT_OTP_USERS")
+    ){
+      if(JSON.parse(this.configService.get("DEFAULT_OTP_USERS")).indexOf(loginDto.loginId)!=-1){
+        if(loginDto.password == this.configService.get("DEFAULT_OTP"))
+        verifyOTPResult = {status: SMSResponseStatus.success}
+        else
+        verifyOTPResult = {status: SMSResponseStatus.failure}
+      }
+    } else { 
+      verifyOTPResult = await this.otpService.verifyOTP({
+        phone: loginDto.loginId,
+        otp: loginDto.password, // existing OTP
+      });
+    }
     loginDto.password = salt + loginDto.password;  // mix OTP with salt
 
     if (verifyOTPResult.status === SMSResponseStatus.success) {
