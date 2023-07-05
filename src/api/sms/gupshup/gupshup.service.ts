@@ -13,6 +13,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { SmsService } from '../sms.service';
 import { Got } from 'got/dist/source';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class GupshupService extends SmsService implements SMS {
@@ -92,6 +93,9 @@ export class GupshupService extends SmsService implements SMS {
       .then((response): OTPResponse => {
         status.networkResponseCode = 200;
         const r = this.parseResponse(response.body);
+        if (r.error) {
+          Sentry.captureMessage(JSON.stringify(r));
+        }
         status.messageID = r.messageID;
         status.error = r.error;
         status.providerResponseCode = r.providerResponseCode;
@@ -100,6 +104,7 @@ export class GupshupService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
+        Sentry.captureException(e);
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',
@@ -136,6 +141,9 @@ export class GupshupService extends SmsService implements SMS {
       .then((response): OTPResponse => {
         status.networkResponseCode = 200;
         const r = this.parseResponse(response.body);
+        if (r.error) {
+          Sentry.captureMessage(JSON.stringify(r));
+        }
         status.messageID = r.messageID;
         status.error = r.error;
         status.providerResponseCode = r.providerResponseCode;
@@ -144,6 +152,7 @@ export class GupshupService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
+        Sentry.captureException(e);
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',
@@ -188,6 +197,7 @@ export class GupshupService extends SmsService implements SMS {
         };
       }
     } catch (e) {
+      Sentry.captureException(e);
       const error: SMSError = {
         errorText: `Gupshup response could not be parsed :: ${e.message}; Provider Response - ${response}`,
         errorCode: 'CUSTOM ERROR',

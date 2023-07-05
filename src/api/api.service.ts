@@ -121,7 +121,7 @@ export class ApiService {
         return response;
       })
       .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
-        console.log(errorResponse);
+        // console.log(errorResponse);
         const response: SignupResponse = new SignupResponse().init(uuidv4());
         if (errorResponse.statusCode === 404) {
           response.responseCode = ResponseCode.FAILURE;
