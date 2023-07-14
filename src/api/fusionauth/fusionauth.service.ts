@@ -87,7 +87,12 @@ export class FusionauthService {
         },
       )
       .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            username: username,
+            applicationId: applicationId,
+          }
+        });
         console.log(
           `Could not fetch user with username ${username}`,
           JSON.stringify(e),
@@ -140,7 +145,11 @@ export class FusionauthService {
         },
       )
       .catch((e): { total: number; users: Array<User> } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            applicationId: applicationId
+          }
+        });
         console.log(
           `Could not fetch users for applicationId ${applicationId}`,
           JSON.stringify(e),
@@ -196,7 +205,11 @@ export class FusionauthService {
         },
       )
       .catch((e): { total: number; users: Array<User> } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            applicationId: applicationId
+          }
+        });
         console.log(`Could not fetch users`, JSON.stringify(e));
         return {
           total: 0,
@@ -251,7 +264,12 @@ export class FusionauthService {
         },
       )
       .catch((e): { userId: UUID; user: User; err: Error } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            applicationId: applicationId,
+            user: user
+          }
+        });
         console.log(`Could not create user ${user}`, JSON.stringify(e));
         return {
           userId: null,
@@ -288,7 +306,13 @@ export class FusionauthService {
         },
       )
       .catch((e): { _userId: UUID; user: User; err: Error } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            id: userId,
+            applicationId: applicationId,
+            user: user
+          }
+        });
         console.log(`Could not update user ${user.user.id}`, JSON.stringify(e));
         return {
           _userId: null,
@@ -364,7 +388,11 @@ export class FusionauthService {
         };
       })
       .catch((e): RefreshTokenResult => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            applicationId: applicationId
+          }
+        });
         console.log(`Could not update token`, JSON.stringify(e));
         return {
           user: {
@@ -402,7 +430,12 @@ export class FusionauthService {
         },
       )
       .catch((e): { statusFA: FAStatus; userId: UUID; user: User } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            id: userId,
+            applicationId: applicationId
+          }
+        });
         this.logger.error(
           `Could not fetch user with user id ${userId}`,
           JSON.stringify(e),
@@ -437,7 +470,12 @@ export class FusionauthService {
           },
         )
         .catch((e): { userId: UUID; err: Error } => {
-          Sentry.captureException(e);
+          Sentry.captureException(e, {
+            user: {
+              id: userId,
+              applicationId: applicationId
+            }
+          });
           this.logger.error(
             `Could not update user ${userId}`,
             JSON.stringify(e),
@@ -455,7 +493,12 @@ export class FusionauthService {
         return { userId: userId, err: null };
       })
       .catch((e): { userId: UUID; err: Error } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            id: userId,
+            applicationId: applicationId
+          }
+        });
         this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
         return {
           userId: null,
@@ -486,7 +529,12 @@ export class FusionauthService {
         },
       )
       .catch((e): { userId: UUID; err: Error } => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            id: userId,
+            applicationId: applicationId
+          }
+        });
         this.logger.error(`Could not update user ${userId}`, JSON.stringify(e));
         return {
           userId: null,
@@ -514,7 +562,12 @@ export class FusionauthService {
         };
       })
       .catch((response) => {
-        Sentry.captureException(response);
+        Sentry.captureException(response, {
+          user: {
+            id: userId,
+            applicationId: applicationId
+          }
+        });
         console.log(JSON.stringify(response));
         return {
           statusFA: FAStatus.ERROR,
@@ -566,7 +619,13 @@ export class FusionauthService {
           registration: FusionAuthUserRegistration;
           err: Error;
         } => {
-          Sentry.captureException(e);
+          Sentry.captureException(e, {
+            user: {
+              id: userId,
+              applicationId: applicationId,
+              registration: registration
+            }
+          });
           this.logger.error(
             `Could not update user ${userId}`,
             JSON.stringify(e),

@@ -63,7 +63,11 @@ export class CdacService extends SmsService implements SMS {
         step: this.configService.get<string>('SMS_TOTP_EXPIRY'),
       });
     } catch (error) {
-      Sentry.captureException(error);
+      Sentry.captureException(error, {
+        user: {
+          phone: data.phone
+        }
+      });
       throw new HttpException('TOTP generation failed!', 500);
     }
 
@@ -95,7 +99,11 @@ export class CdacService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            phone: data.phone
+          }
+        });
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',

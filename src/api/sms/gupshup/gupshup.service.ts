@@ -94,7 +94,11 @@ export class GupshupService extends SmsService implements SMS {
         status.networkResponseCode = 200;
         const r = this.parseResponse(response.body);
         if (r.error) {
-          Sentry.captureMessage(JSON.stringify(r));
+          Sentry.captureMessage(JSON.stringify(r), {
+            user: {
+              phone: data.phone
+            }
+          });
         }
         status.messageID = r.messageID;
         status.error = r.error;
@@ -104,7 +108,11 @@ export class GupshupService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            phone: data.phone
+          }
+        });
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',
@@ -142,7 +150,11 @@ export class GupshupService extends SmsService implements SMS {
         status.networkResponseCode = 200;
         const r = this.parseResponse(response.body);
         if (r.error) {
-          Sentry.captureMessage(JSON.stringify(r));
+          Sentry.captureMessage(JSON.stringify(r), {
+            user: {
+              phone: data.phone
+            }
+          });
         }
         status.messageID = r.messageID;
         status.error = r.error;
@@ -152,7 +164,11 @@ export class GupshupService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
-        Sentry.captureException(e);
+        Sentry.captureException(e, {
+          user: {
+            phone: data.phone
+          }
+        });
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',
