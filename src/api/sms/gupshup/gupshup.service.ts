@@ -128,6 +128,28 @@ export class GupshupService extends SmsService implements SMS {
   }
 
   verifyOTP(data: SMSData): Promise<TrackResponse> {
+    if(
+      process.env.ALLOW_DEFAULT_OTP === 'true' &&
+      process.env.DEFAULT_OTP_USERS
+    ){
+      if(JSON.parse(process.env.DEFAULT_OTP_USERS).indexOf(data.phone)!=-1){
+        if(data.params.otp == process.env.DEFAULT_OTP) {
+          return new Promise(resolve => {
+            const status: TrackResponse = {} as TrackResponse;
+            status.provider = SMSProvider.gupshup;
+            status.phone = data.phone;
+            status.networkResponseCode = 200;
+            status.messageID = Date.now() + '';
+            status.error = null;
+            status.providerResponseCode = null;
+            status.providerSuccessResponse = 'OTP matched.';
+            status.status = SMSResponseStatus.success;
+            resolve(status);
+          });
+        }
+      }
+    }
+
     console.log({ data });
     const options = {
       searchParams: {

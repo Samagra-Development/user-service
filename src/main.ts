@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/node';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+  app.getHttpAdapter().getInstance().set('etag', false);
 
   const config = new DocumentBuilder()
     .setTitle('e-Samwad User Service')
