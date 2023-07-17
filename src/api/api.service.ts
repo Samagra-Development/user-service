@@ -45,20 +45,6 @@ export class ApiService {
   ) {}
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
-    const encStatus = this.configResolverService.getEncryptionStatus(
-      user.applicationId,
-    );
-    if (encStatus) {
-      this.encodedBase64Key = this.configResolverService.getEncryptionKey(
-        user.applicationId,
-      );
-      this.parsedBase64Key =
-        this.encodedBase64Key === undefined
-          ? CryptoJS.enc.Base64.parse('bla')
-          : CryptoJS.enc.Base64.parse(this.encodedBase64Key);
-      user.loginId = this.encrypt(user.loginId, this.parsedBase64Key);
-      user.password = this.encrypt(user.password, this.parsedBase64Key);
-    }
     return this.fusionAuthService
       .login(user, authHeader)
       .then(async (resp: ClientResponse<LoginResponse>) => {
@@ -121,7 +107,7 @@ export class ApiService {
         return response;
       })
       .catch((errorResponse: ClientResponse<LoginResponse>): SignupResponse => {
-        console.log(errorResponse);
+        // console.log(errorResponse);
         const response: SignupResponse = new SignupResponse().init(uuidv4());
         if (errorResponse.statusCode === 404) {
           response.responseCode = ResponseCode.FAILURE;

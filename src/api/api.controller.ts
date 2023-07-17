@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query, UnprocessableEntityException,
+  Query, UnprocessableEntityException, UseInterceptors,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -22,12 +22,14 @@ import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
 import { LoginDto } from '../user/dto/login.dto';
+import { SentryInterceptor } from '../interceptors/sentry.interceptor';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
 CryptoJS.lib.WordArray.words;
 
 @Controller('api')
+@UseInterceptors(SentryInterceptor)
 export class ApiController {
   constructor(
     private readonly fusionAuthService: FusionauthService,

@@ -15,6 +15,7 @@ import { SmsService } from '../sms.service';
 import { ConfigService } from '@nestjs/config';
 import got, {Got} from 'got';
 import * as speakeasy from 'speakeasy';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class CdacService extends SmsService implements SMS {
@@ -62,7 +63,11 @@ export class CdacService extends SmsService implements SMS {
         step: this.configService.get<string>('SMS_TOTP_EXPIRY'),
       });
     } catch (error) {
-      console.log(error);
+      Sentry.captureException(error, {
+        user: {
+          phone: data.phone
+        }
+      });
       throw new HttpException('TOTP generation failed!', 500);
     }
 
@@ -94,6 +99,11 @@ export class CdacService extends SmsService implements SMS {
         return status;
       })
       .catch((e: Error): OTPResponse => {
+        Sentry.captureException(e, {
+          user: {
+            phone: data.phone
+          }
+        });
         const error: SMSError = {
           errorText: `Uncaught Exception :: ${e.message}`,
           errorCode: 'CUSTOM ERROR',
@@ -137,6 +147,7 @@ export class CdacService extends SmsService implements SMS {
         };
       }
     } catch (e) {
+      Sentry.captureException(e);
       const error: SMSError = {
         errorText: `CDAC response could not be parsed :: ${e.message}; Provider Response - ${response}`,
         errorCode: 'CUSTOM ERROR',

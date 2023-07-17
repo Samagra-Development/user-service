@@ -2,6 +2,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
+import * as Sentry from '@sentry/node';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -19,6 +20,16 @@ async function bootstrap() {
   //   methods: 'GET, PUT, POST, DELETE, PATCH, OPTIONS',
   //   allowedHeaders: 'Content-Type, Authorization',
   // });
+
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+
   await app.listen(3000);
 }
 bootstrap();

@@ -1,4 +1,4 @@
-FROM node:12 AS builder
+FROM node:16 AS builder
 
 # Create app directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 
 RUN yarn run build
 
-FROM node:12
+FROM node:16
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
