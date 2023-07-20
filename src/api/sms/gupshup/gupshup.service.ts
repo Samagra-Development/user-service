@@ -96,7 +96,7 @@ export class GupshupService extends SmsService implements SMS {
         if (r.error) {
           Sentry.captureMessage(JSON.stringify(r), {
             user: {
-              phone: data.phone
+              username: data.phone
             }
           });
         }
@@ -110,7 +110,7 @@ export class GupshupService extends SmsService implements SMS {
       .catch((e: Error): OTPResponse => {
         Sentry.captureException(e, {
           user: {
-            phone: data.phone
+            username: data.phone
           }
         });
         const error: SMSError = {
@@ -174,7 +174,7 @@ export class GupshupService extends SmsService implements SMS {
         if (r.error) {
           Sentry.captureMessage(JSON.stringify(r), {
             user: {
-              phone: data.phone
+              username: data.phone
             }
           });
         }
@@ -188,7 +188,7 @@ export class GupshupService extends SmsService implements SMS {
       .catch((e: Error): OTPResponse => {
         Sentry.captureException(e, {
           user: {
-            phone: data.phone
+            username: data.phone
           }
         });
         const error: SMSError = {

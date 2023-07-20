@@ -267,6 +267,7 @@ export class FusionauthService {
         Sentry.captureException(e, {
           user: {
             applicationId: applicationId,
+            username: user.user.username,
             user: user
           }
         });
@@ -310,7 +311,8 @@ export class FusionauthService {
           user: {
             id: userId,
             applicationId: applicationId,
-            user: user
+            user: user,
+            username: user.user.username,
           }
         });
         console.log(`Could not update user ${user.user.id}`, JSON.stringify(e));

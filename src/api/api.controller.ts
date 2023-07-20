@@ -65,7 +65,7 @@ export class ApiController {
       if (!total || total == 0) {
         Sentry.captureMessage('Phone number not registered', {
           user: {
-            phone: phone,
+            username: phone,
             applicationId: applicationId
           }
         });

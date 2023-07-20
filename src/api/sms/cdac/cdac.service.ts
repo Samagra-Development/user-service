@@ -65,7 +65,7 @@ export class CdacService extends SmsService implements SMS {
     } catch (error) {
       Sentry.captureException(error, {
         user: {
-          phone: data.phone
+          username: data.phone
         }
       });
       throw new HttpException('TOTP generation failed!', 500);
@@ -101,7 +101,7 @@ export class CdacService extends SmsService implements SMS {
       .catch((e: Error): OTPResponse => {
         Sentry.captureException(e, {
           user: {
-            phone: data.phone
+            username: data.phone
           }
         });
         const error: SMSError = {
