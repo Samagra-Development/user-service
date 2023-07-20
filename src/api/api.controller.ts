@@ -23,6 +23,7 @@ import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAu
 import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
 import { LoginDto } from '../user/dto/login.dto';
 import { SentryInterceptor } from '../interceptors/sentry.interceptor';
+import * as Sentry from '@sentry/node';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -62,6 +63,12 @@ export class ApiController {
           null,
         );
       if (!total || total == 0) {
+        Sentry.captureMessage('Phone number not registered', {
+          user: {
+            phone: phone,
+            applicationId: applicationId
+          }
+        });
         throw new UnprocessableEntityException(errorMessage);
       }
     }
