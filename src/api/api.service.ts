@@ -114,6 +114,11 @@ export class ApiService {
           response.params.err = 'INVALID_USERNAME_PASSWORD';
           response.params.errMsg = 'Invalid Username/Password';
           response.params.status = ResponseStatus.failure;
+        } else if (errorResponse.statusCode === 409) {
+          response.responseCode = ResponseCode.FAILURE;
+          response.params.err = 'ACCOUNT_LOCKED';
+          response.params.errMsg = 'Multiple failed login attempts. Please retry again later.';
+          response.params.status = ResponseStatus.failure;
         } else {
           response.responseCode = ResponseCode.FAILURE;
           response.params.err = 'UNCAUGHT_EXCEPTION';
