@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import * as Sentry from '@sentry/node';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
   app.getHttpAdapter().getInstance().set('etag', false);
 
   const config = new DocumentBuilder()
@@ -16,11 +16,12 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
-  // app.enableCors({
-  //   origin: '*',
-  //   methods: 'GET, PUT, POST, DELETE, PATCH, OPTIONS',
-  //   allowedHeaders: 'Content-Type, Authorization',
-  // });
+  app.enableCors({
+    origin: process.env.ALLOWED_ORIGINS?.split(/\s*,\s*/) ?? '*',
+    credentials: true,
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-application-id'],
+  });
 
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
