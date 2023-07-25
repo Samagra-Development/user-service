@@ -17,10 +17,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(/\s*,\s*/) ?? '*',
+    origin: process.env.CORS_ALLOWED_ORIGINS?.split(/\s*,\s*/) ?? '*',
     credentials: true,
-    methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-application-id'],
+    methods: process.env.CORS_ALLOWED_METHODS?.split(/\s*,\s*/) ?? ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: process.env.CORS_ALLOWED_HEADERS?.split(/\s*,\s*/) ?? ['Content-Type', 'Authorization', 'x-application-id'],
   });
 
   Sentry.init({
