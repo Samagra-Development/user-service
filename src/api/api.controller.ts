@@ -21,9 +21,11 @@ import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
 import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
-import { LoginDto } from '../user/dto/login.dto';
 import { SentryInterceptor } from '../interceptors/sentry.interceptor';
 import * as Sentry from '@sentry/node';
+import { LoginDto } from './dto/login.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -49,14 +51,13 @@ export class ApiController {
 
   @Get('sendOTP')
   async sendOTP(
-    @Query('phone') phone,
-    @Query('errorMessage') errorMessage = 'User not found.',
+    @Query() params: SendOtpDto,
     @Headers('x-application-id') applicationId?,
   ): Promise<any> {
     if (applicationId) {
       const { total }: { total: number; users: Array<User> } =
         await this.fusionAuthService.getUsersByString(
-          `(username: ${phone}, mobilePhone: ${phone})`,
+          `(username: ${params.phone}, mobilePhone: ${params.phone})`,
           0,
           1,
           applicationId,
@@ -65,26 +66,26 @@ export class ApiController {
       if (!total || total == 0) {
         Sentry.captureMessage('Phone number not registered', {
           user: {
-            username: phone,
+            username: params.phone,
             applicationId: applicationId
           }
         });
-        throw new UnprocessableEntityException(errorMessage);
+        throw new UnprocessableEntityException(params.errorMessage ?? 'User not found.');
       }
     }
-    const status: SMSResponse = await this.otpService.sendOTP(phone);
+    const status: SMSResponse = await this.otpService.sendOTP(params.phone);
     return { status };
   }
 
   @Get('verifyOTP')
-  async verifyOTP(@Query('phone') phone, @Query('otp') otp): Promise<any> {
-    const status: SMSResponse = await this.otpService.verifyOTP({ phone, otp });
+  async verifyOTP(@Query() params: VerifyOtpDto): Promise<any> {
+    const status: SMSResponse = await this.otpService.verifyOTP(params);
     return { status };
   }
 
   @Post('login')
   async login(
-    @Body() user: any,
+    @Body() user: LoginDto,
     @Headers('authorization') authHeader,
   ): Promise<any> {
     const encStatus = this.configResolverService.getEncryptionStatus(

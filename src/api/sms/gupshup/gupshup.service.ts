@@ -150,7 +150,6 @@ export class GupshupService extends SmsService implements SMS {
       }
     }
 
-    console.log({ data });
     const options = {
       searchParams: {
         ...this.otpApiConstants,
