@@ -56,7 +56,7 @@ const otpServiceFactory = {
     ConfigResolverService,
     {
       provide: APP_PIPE,
-      useValue: new ValidationPipe(),
+      useValue: new ValidationPipe({ transform: true }),
     },
   ],
 })

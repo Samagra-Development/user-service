@@ -20,7 +20,7 @@ import { FusionauthService } from './fusionauth/fusionauth.service';
 import { OtpService } from './otp/otp.service';
 import { SMSResponse } from './sms/sms.interface';
 import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAuthClient';
-import { ChangePasswordDTO } from '../user/dto/changePassword.dto';
+import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { SentryInterceptor } from '../interceptors/sentry.interceptor';
 import * as Sentry from '@sentry/node';
 import { LoginDto } from './dto/login.dto';
@@ -99,8 +99,12 @@ export class ApiController {
         encodedBase64Key === undefined
           ? CryptoJS.enc.Base64.parse('bla')
           : CryptoJS.enc.Base64.parse(encodedBase64Key);
-      user.loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
-      user.password = this.apiService.decrypt(user.password, parsedBase64Key);
+      const loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+      const password = this.apiService.decrypt(user.password, parsedBase64Key);
+
+      // if we are not able to decrypt, we'll try to authenticate with the original creds
+      user.loginId = loginId ? loginId : user.loginId;
+      user.password = password ? password : user.password;
     }
     return await this.apiService.login(user, authHeader);
   }
@@ -230,7 +234,6 @@ export class ApiController {
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
-    console.log(query.numberOfResults);
     return await this.apiService.fetchUsersByString(
       query.queryString,
       query.startRow,
