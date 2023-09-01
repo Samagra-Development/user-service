@@ -1,5 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
@@ -11,7 +11,6 @@ import { GupshupService } from './sms/gupshup/gupshup.service';
 import { SmsService } from './sms/sms.service';
 import got from 'got/dist/source';
 import { CdacService } from './sms/cdac/cdac.service';
-import { APP_PIPE } from '@nestjs/core';
 
 const otpServiceFactory = {
   provide: OtpService,
@@ -54,10 +53,6 @@ const otpServiceFactory = {
     otpServiceFactory,
     QueryGeneratorService,
     ConfigResolverService,
-    {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({ transform: true }),
-    },
   ],
 })
 export class ApiModule {
