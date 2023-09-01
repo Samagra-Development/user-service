@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Query, UnprocessableEntityException, UseInterceptors,
+  Query, UnprocessableEntityException, UseInterceptors, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -50,6 +50,7 @@ export class ApiController {
   }
 
   @Get('sendOTP')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async sendOTP(
     @Query() params: SendOtpDto,
     @Headers('x-application-id') applicationId?,
@@ -78,12 +79,14 @@ export class ApiController {
   }
 
   @Get('verifyOTP')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async verifyOTP(@Query() params: VerifyOtpDto): Promise<any> {
     const status: SMSResponse = await this.otpService.verifyOTP(params);
     return { status };
   }
 
   @Post('login')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async login(
     @Body() user: LoginDto,
     @Headers('authorization') authHeader,
@@ -314,6 +317,7 @@ export class ApiController {
   }
 
   @Patch('/changePassword/update')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async changePassword(
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
@@ -327,6 +331,7 @@ export class ApiController {
   }
 
   @Post('login/otp')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async loginWithOtp(
     @Body() user: LoginDto,
     @Headers('authorization') authHeader,
