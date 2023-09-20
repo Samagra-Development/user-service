@@ -54,7 +54,7 @@ export class ApiController {
     };
   }
 
-  @Throttle(5, 60)
+  @Throttle(10, 60)
   @Get('sendOTP')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendOTP(
