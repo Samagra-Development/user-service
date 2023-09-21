@@ -7,7 +7,11 @@ import {
   Param,
   Patch,
   Post,
-  Query, UnprocessableEntityException, UseInterceptors, UsePipes, ValidationPipe,
+  Query,
+  UnprocessableEntityException,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -26,6 +30,7 @@ import * as Sentry from '@sentry/node';
 import { LoginDto } from './dto/login.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { Throttle } from '@nestjs/throttler';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -49,6 +54,7 @@ export class ApiController {
     };
   }
 
+  @Throttle(10, 60)
   @Get('sendOTP')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendOTP(
@@ -68,10 +74,12 @@ export class ApiController {
         Sentry.captureMessage('Phone number not registered', {
           user: {
             username: params.phone,
-            applicationId: applicationId
-          }
+            applicationId: applicationId,
+          },
         });
-        throw new UnprocessableEntityException(params.errorMessage ?? 'User not found.');
+        throw new UnprocessableEntityException(
+          params.errorMessage ?? 'User not found.',
+        );
       }
     }
     const status: SMSResponse = await this.otpService.sendOTP(params.phone);
@@ -252,7 +260,7 @@ export class ApiController {
     @Headers('authorization') authHeader,
     @Headers('x-application-id') applicationId,
   ): Promise<UsersResponse> {
-    const queryString = `(id: ${userId})`;  // pass the strict user ID filter
+    const queryString = `(id: ${userId})`; // pass the strict user ID filter
     return await this.apiService.fetchUsersByString(
       queryString,
       undefined,
