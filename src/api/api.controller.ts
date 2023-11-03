@@ -1,8 +1,10 @@
 import { User } from '@fusionauth/typescript-client';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  GoneException,
   Headers,
   Param,
   Patch,
@@ -117,7 +119,36 @@ export class ApiController {
       user.loginId = loginId ? loginId : user.loginId;
       user.password = password ? password : user.password;
     }
-    return await this.apiService.login(user, authHeader);
+
+    // prevent from password replay attacks
+    const expiryStatus = this.configResolverService.getLoginExpiryStatus(
+      user.applicationId,
+    );
+
+    if (expiryStatus) {
+      const passwordBreakdown = user.password.split('||');
+      // if we have timestamp then only check expiry (Backward compatibility)
+      if (passwordBreakdown.length > 1) {
+        const requestTimestamp =
+          +passwordBreakdown[passwordBreakdown.length - 1]; // split password + timestamp
+
+        user.password = passwordBreakdown
+          .slice(0, passwordBreakdown.length - 1)
+          .join('||');
+
+        const threshold = this.configResolverService.getLoginExpiryThreshold(
+          user.applicationId,
+        );
+
+        if (Date.now() > requestTimestamp + threshold) {
+          throw new GoneException();
+        }
+      }
+    }
+
+    return 'hello';
+
+    // return await this.apiService.login(user, authHeader);
   }
 
   @Post('login/pin')
