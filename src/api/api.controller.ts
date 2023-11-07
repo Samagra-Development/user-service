@@ -126,11 +126,12 @@ export class ApiController {
     );
 
     if (expiryStatus) {
-      const SEPARATOR = '|*¦@@¦*|'
+      const SEPARATOR = '|*¦@@¦*|';
       const passwordBreakdown = user.password.split(SEPARATOR);
       // if we have timestamp then only check expiry (Backward compatibility)
       if (passwordBreakdown.length > 1) {
-        const requestTimestamp = +passwordBreakdown[passwordBreakdown.length - 1]; // split password + timestamp
+        const requestTimestamp =
+          +passwordBreakdown[passwordBreakdown.length - 1]; // split password + timestamp
 
         user.password = passwordBreakdown
           .slice(0, passwordBreakdown.length - 1)
