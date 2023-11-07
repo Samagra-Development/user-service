@@ -126,15 +126,15 @@ export class ApiController {
     );
 
     if (expiryStatus) {
-      const passwordBreakdown = user.password.split('||');
+      const SEPARATOR = '|*¦@@¦*|'
+      const passwordBreakdown = user.password.split(SEPARATOR);
       // if we have timestamp then only check expiry (Backward compatibility)
       if (passwordBreakdown.length > 1) {
-        const requestTimestamp =
-          +passwordBreakdown[passwordBreakdown.length - 1]; // split password + timestamp
+        const requestTimestamp = +passwordBreakdown[passwordBreakdown.length - 1]; // split password + timestamp
 
         user.password = passwordBreakdown
           .slice(0, passwordBreakdown.length - 1)
-          .join('||');
+          .join(SEPARATOR);
 
         const threshold = this.configResolverService.getLoginExpiryThreshold(
           user.applicationId,
@@ -145,10 +145,7 @@ export class ApiController {
         }
       }
     }
-
-    return 'hello';
-
-    // return await this.apiService.login(user, authHeader);
+    return await this.apiService.login(user, authHeader);
   }
 
   @Post('login/pin')
