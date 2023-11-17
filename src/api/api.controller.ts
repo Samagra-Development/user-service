@@ -110,8 +110,20 @@ export class ApiController {
         encodedBase64Key === undefined
           ? CryptoJS.enc.Base64.parse('bla')
           : CryptoJS.enc.Base64.parse(encodedBase64Key);
-      const loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
-      const password = this.apiService.decrypt(user.password, parsedBase64Key);
+
+      let loginId = '';
+      try {
+        loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
+      } catch (e) {
+        console.log(`Problem in decrypting loginId: ${user.loginId}`);
+      }
+
+      let password = '';
+      try {
+        password = this.apiService.decrypt(user.password, parsedBase64Key);
+      } catch (e) {
+        console.log(`Problem in decrypting password: ${user.password}`);
+      }
 
       // if we are not able to decrypt, we'll try to authenticate with the original creds
       user.loginId = loginId ? loginId : user.loginId;
