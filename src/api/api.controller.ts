@@ -115,14 +115,14 @@ export class ApiController {
       try {
         loginId = this.apiService.decrypt(user.loginId, parsedBase64Key);
       } catch (e) {
-        console.log(`Problem in decoding loginId: ${user.loginId}`);
+        console.log(`Problem in decrypting loginId: ${user.loginId}`);
       }
 
       let password = '';
       try {
         password = this.apiService.decrypt(user.password, parsedBase64Key);
       } catch (e) {
-        console.log(`Problem in decoding password: ${user.password}`);
+        console.log(`Problem in decrypting password: ${user.password}`);
       }
 
       // if we are not able to decrypt, we'll try to authenticate with the original creds
