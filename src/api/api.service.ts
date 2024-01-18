@@ -564,11 +564,12 @@ export class ApiService {
           authHeader,
         );
       if (statusFA === FAStatus.USER_EXISTS) {
-        let registrationId = null;
+        let registrationId = null, registeredRoles = [];
         if (user.registrations) {
           user.registrations.map((item) => {
             if (item.applicationId == loginDto.applicationId) {
               registrationId = item.id;
+              registeredRoles = item.roles;
             }
           });
         }
@@ -581,7 +582,7 @@ export class ApiService {
             registrations: [
               {
                 applicationId: loginDto.applicationId,
-                roles: loginDto.roles ?? [],
+                roles: registeredRoles,
                 id: registrationId,
               },
             ],
