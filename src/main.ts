@@ -19,7 +19,7 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
   // add security headers
   app.use(helmet());
-
+  app.set('trust proxy', 1);
   // enable cors
   app.enableCors({
     origin: process.env.CORS_ALLOWED_ORIGINS?.split(/\s*,\s*/) ?? '*',
