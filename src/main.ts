@@ -8,6 +8,7 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.getHttpAdapter().getInstance().set('etag', false);
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   const config = new DocumentBuilder()
     .setTitle('e-Samwad User Service')
@@ -19,7 +20,6 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
   // add security headers
   app.use(helmet());
-  app.set('trust proxy', 1);
 
   // enable cors
   app.enableCors({
