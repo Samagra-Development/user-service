@@ -30,7 +30,7 @@ import * as Sentry from '@sentry/node';
 import { LoginDto } from './dto/login.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { Throttle } from '@nestjs/throttler';
+import { Throttle, SkipThrottle} from '@nestjs/throttler';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -54,7 +54,7 @@ export class ApiController {
     };
   }
 
-  @Throttle(100, 60)
+  @SkipThrottle()
   @Get('sendOTP')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendOTP(
