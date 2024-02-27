@@ -30,7 +30,7 @@ const CryptoJS = require('crypto-js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AES = require('crypto-js/aes');
 import Flagsmith from 'flagsmith-nodejs';
-
+const jwksClient = require('jwks-rsa');;
 CryptoJS.lib.WordArray.words;
 
 @Injectable()
@@ -43,6 +43,13 @@ export class ApiService {
     private readonly otpService: OtpService,
     private readonly configResolverService: ConfigResolverService,
   ) {}
+
+  private readonly jwksClient = jwksClient({
+    jwksUri: this.configService.get('JWKS_URI'),
+    cache: true,
+    cacheMaxEntries: 5,
+    cacheMaxAge: 86400000,
+  });
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
     return this.fusionAuthService
@@ -645,5 +652,16 @@ export class ApiService {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
     return registration;
+  }
+
+  async verifyJwt(token: string): Promise<{ authenticated: boolean; user?: any }> {
+    try {
+      const decodedToken = await this.jwksClient.getSigningKey(token);
+      const signingKey = decodedToken.getPublicKey();
+      return { authenticated: true, user: decodedToken.payload };
+    } catch (error) {
+      console.error('JWT Verification Error:', error);
+      return { authenticated: false };
+    }
   }
 }
