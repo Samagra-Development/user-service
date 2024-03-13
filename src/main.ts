@@ -1,5 +1,4 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
 import * as Sentry from '@sentry/node';
@@ -20,6 +19,7 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
   // add security headers
   app.use(helmet());
+  app.set('trust proxy', 1);
 
   // enable cors
   app.enableCors({
