@@ -544,6 +544,12 @@ export class ApiService {
         else
         verifyOTPResult = {status: SMSResponseStatus.failure}
       }
+      else { 
+        verifyOTPResult = await this.otpService.verifyOTP({
+          phone: loginDto.loginId,
+          otp: loginDto.password, // existing OTP
+        });
+      }
     } else { 
       verifyOTPResult = await this.otpService.verifyOTP({
         phone: loginDto.loginId,
