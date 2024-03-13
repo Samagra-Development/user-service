@@ -525,7 +525,9 @@ export class ApiService {
 
   async loginWithOtp(loginDto: LoginDto, authHeader: null | string): Promise<SignupResponse> {
     /* Execution flow
-        1. Verify OTP
+        1. Check if ALLOW_DEFAULT_OTP is set to true.
+        2. If true check if user number is listed in DEFAULT_OTP_USERS, if yes send sucess if OTP matches.
+        3. else; Verify OTP via fusion auth.
         2. If invalid OTP, throw error; else continue with next steps
         3. Check if user exists for the given applicationId.
         3.1. If existing user, reset the password.
