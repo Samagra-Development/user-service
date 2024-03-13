@@ -525,7 +525,9 @@ export class ApiService {
 
   async loginWithOtp(loginDto: LoginDto, authHeader: null | string): Promise<SignupResponse> {
     /* Execution flow
-        1. Verify OTP
+        1. Check if ALLOW_DEFAULT_OTP is set to true.
+        2. If true check if user number is listed in DEFAULT_OTP_USERS, if yes send sucess if OTP matches.
+        3. else; Verify OTP via fusion auth.
         2. If invalid OTP, throw error; else continue with next steps
         3. Check if user exists for the given applicationId.
         3.1. If existing user, reset the password.
@@ -543,6 +545,12 @@ export class ApiService {
         verifyOTPResult = {status: SMSResponseStatus.success}
         else
         verifyOTPResult = {status: SMSResponseStatus.failure}
+      }
+      else { 
+        verifyOTPResult = await this.otpService.verifyOTP({
+          phone: loginDto.loginId,
+          otp: loginDto.password, // existing OTP
+        });
       }
     } else { 
       verifyOTPResult = await this.otpService.verifyOTP({
@@ -564,11 +572,12 @@ export class ApiService {
           authHeader,
         );
       if (statusFA === FAStatus.USER_EXISTS) {
-        let registrationId = null;
+        let registrationId = null, registeredRoles = [];
         if (user.registrations) {
           user.registrations.map((item) => {
             if (item.applicationId == loginDto.applicationId) {
               registrationId = item.id;
+              registeredRoles = item.roles;
             }
           });
         }
@@ -581,7 +590,7 @@ export class ApiService {
             registrations: [
               {
                 applicationId: loginDto.applicationId,
-                roles: loginDto.roles ?? [],
+                roles: registeredRoles,
                 id: registrationId,
               },
             ],
