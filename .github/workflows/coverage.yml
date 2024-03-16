@@ -1,0 +1,112 @@
+name: Code Coverage
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  base_branch_cov:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+      - name: Use Node.js v20.9.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.9.0'
+      - name: Install dependencies
+        run: yarn
+      - name: Run test coverage with jest
+        run: yarn jest --coverage
+      - name: Upload code coverage for ref branch
+        uses: actions/upload-artifact@v3
+        with:
+          name: ref-lcov.info
+          path: ./coverage/lcov.info
+
+  checks:
+    runs-on: ubuntu-latest
+    needs: base_branch_cov
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js v20.9.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.9.0'
+      - name: Download code coverage report from base branch
+        uses: actions/download-artifact@v3
+        with:
+          name: ref-lcov.info
+      - name: Install dependencies
+        run: yarn
+      - name: Run test coverage with jest
+        run: yarn jest --coverage
+      - name: Generate Code Coverage report
+        id: code-coverage
+        uses: barecheck/code-coverage-action@v1
+        with:
+          barecheck-github-app-token: ${{ secrets.BARECHECK_GITHUB_APP_TOKEN }}
+          lcov-file: "./coverage/lcov.info"
+          base-lcov-file: "./lcov.info"
+          minimum-ratio: 0
+          send-summary-comment: true
+          show-annotations: "warning"
+      - name: Calculate Coverage Percentage
+        run: |
+            # Extract total executable lines (LF) and total lines covered (LH) from lcov.info
+            TOTAL_LINES=$(awk -F':' '/LF:/ {total += $2} END {print total}' ./coverage/lcov.info)
+            COVERED_LINES=$(awk -F':' '/LH:/ {covered += $2} END {print covered}' ./coverage/lcov.info)
+
+
+            echo "TOTAL_LINES: $TOTAL_LINES"
+            echo "COVERED_LINES: $COVERED_LINES"
+
+            # Check if TOTAL_LINES is zero to avoid division by zero error
+            if [ "$TOTAL_LINES" -eq 0 ]; then
+                COVERAGE_PERCENTAGE=0
+            else
+                COVERAGE_PERCENTAGE=$(echo "scale=2; $COVERED_LINES * 100 / $TOTAL_LINES" | bc)
+            fi
+
+            echo "Coverage percentage is $COVERAGE_PERCENTAGE%"
+            # Create a file to persist the coverage percentage
+            echo "COVERAGE_PERCENTAGE=$COVERAGE_PERCENTAGE" > coverage_percentage.env
+
+      - name: Upload coverage percentage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-percentage
+          path: coverage_percentage.env
+
+
+
+  update_readme:
+    runs-on: ubuntu-latest
+    needs: [base_branch_cov, checks]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensures history is available for commits
+      - name: Download coverage percentage
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-percentage
+      - name: Update README with Coverage Percentage
+        run: |
+          . coverage_percentage.env # Source the coverage percentage
+          echo "Updating README with coverage percentage: $COVERAGE_PERCENTAGE%"
+          sed -i "/<!-- coverage-start -->/,/<!-- coverage-end -->/s/Code Coverage: .*%/Code Coverage: $COVERAGE_PERCENTAGE%/" README.md
+          grep 'Code Coverage' README.md || echo "README update failed"
+          cat README.md # For debugging; remove this line once confirmed working
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add README.md
+          git commit -m "Update README with code coverage percentage" -a || echo "No changes to commit"
+          git push
+    
+
+      
