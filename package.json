@@ -47,6 +47,7 @@
     "flagsmith-nodejs": "^2.5.2",
     "got": "^11.8.2",
     "helmet": "^7.0.0",
+    "jwks-rsa": "^3.1.0",
     "passport": "^0.5.2",
     "passport-http": "^0.3.0",
     "passport-jwt": "^4.0.1",

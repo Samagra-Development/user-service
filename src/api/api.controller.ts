@@ -358,4 +358,11 @@ export class ApiController {
   ): Promise<any> {
     return await this.apiService.loginWithOtp(user, authHeader);
   }
+  
+  @Get('verify-jwt')
+  async verifyJwt(
+    @Headers('authorization') token: string,
+  ): Promise<{ authenticated: boolean; user?: any }> {
+    return this.apiService.verifyJwt(token);
+  }
 }
