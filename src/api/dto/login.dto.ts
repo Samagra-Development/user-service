@@ -17,3 +17,15 @@ export class LoginDto {
   @IsNotEmpty()
   applicationId: string;
 }
+
+
+export class LoginWithUniqueIdDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(80)
+  loginId: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  applicationId: string;
+}

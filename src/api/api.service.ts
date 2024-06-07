@@ -30,6 +30,7 @@ const CryptoJS = require('crypto-js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AES = require('crypto-js/aes');
 import Flagsmith from 'flagsmith-nodejs';
+import { LoginWithUniqueIdDto } from './dto/login.dto';
 
 CryptoJS.lib.WordArray.words;
 
@@ -634,6 +635,56 @@ export class ApiService {
       response.params.errMsg = 'OTP verification failed.';
       response.params.status = ResponseStatus.failure;
       return response;
+    }
+  }
+
+  async loginWithUniqueId(loginDto: LoginWithUniqueIdDto, authHeader: null | string): Promise<SignupResponse> {
+    /* Execution flow
+        1. Check if user exists for the given applicationId and loginId.
+        3.1. If existing user, login user with default password.
+        3.2. If new user, register to this application.
+        4. Send login response with the token
+     */
+    const salt = this.configResolverService.getSalt(loginDto.applicationId);
+    let password = salt + this.configService.get("DEFAULT_USER_PASSWORD");  // mix OTP with salt
+    console.log(password)
+
+    const {
+      statusFA
+    }: { statusFA: FAStatus} =
+      await this.fusionAuthService.getUser(
+        loginDto.loginId,
+        loginDto.applicationId,
+        authHeader,
+      );
+    if (statusFA === FAStatus.USER_EXISTS) {
+      return this.login({...loginDto,password}, authHeader);
+    } else {
+      // create a new user
+      const createUserPayload: UserRegistration = {
+        user: {
+          timezone: "Asia/Kolkata",
+          username: loginDto.loginId,
+          password: password
+        },
+        registration: {
+          applicationId: loginDto.applicationId,
+          preferredLanguages: [
+            "en"
+          ],
+          roles: [],
+        }
+      }
+      const { userId, user, err }: { userId: UUID; user: User; err: Error } =
+        await this.fusionAuthService.createAndRegisterUser(
+          createUserPayload,
+          loginDto.applicationId,
+          authHeader,
+        );
+      if (userId == null || user == null) {
+        throw new HttpException(err, HttpStatus.BAD_REQUEST);
+      }
+      return this.login({...loginDto,password}, authHeader);
     }
   }
 

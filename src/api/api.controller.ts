@@ -17,6 +17,8 @@ import {
   SignupResponse,
   UserRegistration,
   UsersResponse,
+  ResponseCode,
+  ResponseStatus
 } from './api.interface';
 import { ApiService } from './api.service';
 import { ConfigResolverService } from './config.resolver.service';
@@ -27,10 +29,12 @@ import { RefreshRequest } from '@fusionauth/typescript-client/build/src/FusionAu
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { SentryInterceptor } from '../interceptors/sentry.interceptor';
 import * as Sentry from '@sentry/node';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto, LoginWithUniqueIdDto } from './dto/login.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { Throttle, SkipThrottle} from '@nestjs/throttler';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -40,6 +44,7 @@ CryptoJS.lib.WordArray.words;
 @UseInterceptors(SentryInterceptor)
 export class ApiController {
   constructor(
+    private configService: ConfigService,
     private readonly fusionAuthService: FusionauthService,
     private readonly otpService: OtpService,
     private readonly apiService: ApiService,
@@ -357,5 +362,23 @@ export class ApiController {
     @Headers('authorization') authHeader,
   ): Promise<any> {
     return await this.apiService.loginWithOtp(user, authHeader);
+  }
+
+  @Post('login-with-unique-id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async loginWithUniqueId(
+    @Body() user: LoginWithUniqueIdDto,
+    @Headers('authorization') authHeader,
+    @Headers('ADMIN-API-KEY') adminApiKey
+  ): Promise<any> {
+    if(adminApiKey!=this.configService.get('ADMIN_API_KEY')){
+      const response: SignupResponse = new SignupResponse().init(uuidv4());
+      response.responseCode = ResponseCode.FAILURE;
+      response.params.err = 'UNAUTHORIZED';
+      response.params.errMsg = 'Invalid admin api key';
+      response.params.status = ResponseStatus.failure;
+      return response;
+    }
+    return await this.apiService.loginWithUniqueId(user, authHeader);
   }
 }
