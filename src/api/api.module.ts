@@ -11,6 +11,7 @@ import { GupshupService } from './sms/gupshup/gupshup.service';
 import { SmsService } from './sms/sms.service';
 import got from 'got/dist/source';
 import { CdacService } from './sms/cdac/cdac.service';
+import { RajaiOtpService } from '../user/sms/rajaiOtpService/rajaiOtpService.service';
 
 const otpServiceFactory = {
   provide: OtpService,
@@ -24,7 +25,21 @@ const otpServiceFactory = {
         },
         inject: [],
       }.useFactory();
-    } else {
+    } else if(config.get<string>('SMS_ADAPTER_TYPE') == 'RAJAI'){
+      factory = {
+        provide: 'OtpService',
+        useFactory: (username, password, baseUrl)=>{
+          return new RajaiOtpService(
+            username,
+            password,
+            baseUrl,
+            got
+          );
+        },
+        inject: [],
+      }.useFactory(config.get('RAJAI_USERNAME'), config.get('RAJAI_PASSWORD'), config.get('RAJAI_BASEURL'));
+    } 
+    else {
       factory = {
         provide: 'OtpService',
         useFactory: (username, password, baseUrl) => {

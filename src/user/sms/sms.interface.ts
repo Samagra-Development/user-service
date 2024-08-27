@@ -18,6 +18,7 @@ export enum SMSResponseStatus {
 export enum SMSProvider {
   gupshup = 'Gupshup',
   cdac = 'CDAC',
+  rajai = 'Rajai'
 }
 
 export type SMSError = {
