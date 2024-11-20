@@ -40,6 +40,8 @@ CryptoJS.lib.WordArray.words;
 
 @Injectable()
 export class ApiService {
+  private client: any
+  private getKey: any;
   encodedBase64Key;
   parsedBase64Key;
   constructor(
@@ -48,7 +50,25 @@ export class ApiService {
     private readonly otpService: OtpService,
     private readonly configResolverService: ConfigResolverService,
     @InjectRedis() private readonly redis: Redis
-  ) {}
+  ) {
+     this.client = jwksClient({
+      jwksUri: this.configService.get("JWKS_URI"),
+      requestHeaders: {}, // Optional
+      timeout: 30000, // Defaults to 30s
+    });
+
+    this.getKey = (header: jwt.JwtHeader, callback: any) => {
+      this.client.getSigningKey(header.kid, (err, key: any) => {
+        if (err) {
+          console.error(`Error fetching signing key: ${err}`);
+          callback(err);
+        } else {
+          const signingKey = key.publicKey || key.rsaPublicKey;
+          callback(null, signingKey);
+        }
+      });
+    };
+  }
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
     return this.fusionAuthService
@@ -736,26 +756,8 @@ export class ApiService {
   }
 
   async verifyFusionAuthJWT(token: string): Promise<any> {
-    let client = jwksClient({
-      jwksUri: this.configService.get("JWKS_URI"),
-      requestHeaders: {}, // Optional
-      timeout: 30000, // Defaults to 30s
-    });
-
-    let getKey = (header: jwt.JwtHeader, callback: any) => {
-      client.getSigningKey(header.kid, (err, key: any) => {
-        if (err) {
-          console.error(`Error fetching signing key: ${err}`);
-          callback(err);
-        } else {
-          const signingKey = key.publicKey || key.rsaPublicKey;
-          callback(null, signingKey);
-        }
-      });
-    };
-
     return new Promise<any>((resolve, reject) => {
-     jwt.verify(token, getKey, async (err, decoded) => {
+     jwt.verify(token, this.getKey, async (err, decoded) => {
       if (err) {
         console.error('APP JWT verification error:', err);
         resolve({
