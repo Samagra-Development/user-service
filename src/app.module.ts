@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { ApiModule } from './api/api.module';
 import got from 'got/dist/source';
 import { TerminusModule } from '@nestjs/terminus';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 const gupshupFactory = {
   provide: 'GupshupService',
@@ -46,6 +47,10 @@ const otpServiceFactory = {
     ThrottlerModule.forRoot({
       ttl: parseInt(process.env.RATE_LIMIT_TTL), //Seconds
       limit: parseInt(process.env.RATE_LIMIT), //Number of requests per TTL from a single IP
+    }),
+    RedisModule.forRoot({
+      type: 'single',
+      url: process.env.REDIS_URL,
     }),
     AdminModule,
     DstModule,

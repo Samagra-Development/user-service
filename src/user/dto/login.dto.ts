@@ -5,4 +5,6 @@ export class LoginDto {
   password: string;
   applicationId: UUID;
   roles?: Array<string>;
+  fingerprint?: string;
+  timestamp?: string;
 }

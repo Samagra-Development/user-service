@@ -31,11 +31,17 @@ const CryptoJS = require('crypto-js');
 const AES = require('crypto-js/aes');
 import Flagsmith from 'flagsmith-nodejs';
 import { LoginWithUniqueIdDto } from './dto/login.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+const jwksClient = require('jwks-rsa');
+import * as jwt from 'jsonwebtoken';
 
 CryptoJS.lib.WordArray.words;
 
 @Injectable()
 export class ApiService {
+  private client: any
+  private getKey: any;
   encodedBase64Key;
   parsedBase64Key;
   constructor(
@@ -43,7 +49,26 @@ export class ApiService {
     private readonly fusionAuthService: FusionauthService,
     private readonly otpService: OtpService,
     private readonly configResolverService: ConfigResolverService,
-  ) {}
+    @InjectRedis() private readonly redis: Redis
+  ) {
+     this.client = jwksClient({
+      jwksUri: this.configService.get("JWKS_URI"),
+      requestHeaders: {}, // Optional
+      timeout: 30000, // Defaults to 30s
+    });
+
+    this.getKey = (header: jwt.JwtHeader, callback: any) => {
+      this.client.getSigningKey(header.kid, (err, key: any) => {
+        if (err) {
+          console.error(`Error fetching signing key: ${err}`);
+          callback(err);
+        } else {
+          const signingKey = key.publicKey || key.rsaPublicKey;
+          callback(null, signingKey);
+        }
+      });
+    };
+  }
 
   login(user: any, authHeader: string): Promise<SignupResponse> {
     return this.fusionAuthService
@@ -535,6 +560,7 @@ export class ApiService {
         3.2. If new user, register to this application.
         4. Send login response with the token
      */
+    let otp = loginDto.password;
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
     let verifyOTPResult;
     if(
@@ -562,6 +588,7 @@ export class ApiService {
     loginDto.password = salt + loginDto.password;  // mix OTP with salt
 
     if (verifyOTPResult.status === SMSResponseStatus.success) {
+      let response;
       const {
         statusFA,
         userId,
@@ -595,11 +622,17 @@ export class ApiService {
                 id: registrationId,
               },
             ],
+            data: {
+              loginId: loginDto.loginId,
+              fingerprint: loginDto?.fingerprint,
+              timestamp: loginDto?.timestamp,
+              otp
+            }
           },
           loginDto.applicationId,
           authHeader,
         );
-        return this.login(loginDto, authHeader);
+        response = await this.login(loginDto, authHeader);
       } else {
         // create a new user
         const createUserPayload: UserRegistration = {
@@ -607,7 +640,13 @@ export class ApiService {
             timezone: "Asia/Kolkata",
             username: loginDto.loginId,
             mobilePhone: loginDto.loginId,
-            password: loginDto.password
+            password: loginDto.password,
+            data: {
+              loginId: loginDto.loginId,
+              fingerprint: loginDto?.fingerprint,
+              timestamp: loginDto?.timestamp,
+              otp
+            }
           },
           registration: {
             applicationId: loginDto.applicationId,
@@ -626,8 +665,17 @@ export class ApiService {
         if (userId == null || user == null) {
           throw new HttpException(err, HttpStatus.BAD_REQUEST);
         }
-        return this.login(loginDto, authHeader);
+        response = await this.login(loginDto, authHeader);
       }
+      let existingJWTS:any = await this.redis.get(response?.result?.data?.user?.user?.id);
+      if(existingJWTS) {
+        existingJWTS = JSON.parse(existingJWTS);
+      } else {
+        existingJWTS = []
+      }
+      existingJWTS.push(response?.result?.data?.user?.token);
+      await this.redis.set(response?.result?.data?.user?.user?.id, JSON.stringify(existingJWTS));
+      return response;
     } else {
       const response: SignupResponse = new SignupResponse().init(uuidv4());
       response.responseCode = ResponseCode.FAILURE;
@@ -706,4 +754,71 @@ export class ApiService {
     }
     return registration;
   }
+
+  async verifyFusionAuthJWT(token: string): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+     jwt.verify(token, this.getKey, async (err, decoded) => {
+      if (err) {
+        console.error('APP JWT verification error:', err);
+        resolve({
+          isValidFusionAuthToken: false,
+          claims: null
+        })
+      } else {
+        resolve({
+          isValidFusionAuthToken: true,
+          claims: decoded
+        })
+      }
+    });
+   });
+  }
+
+  async verifyJWT(token:string): Promise<any> {
+    const { isValidFusionAuthToken, claims} = await this.verifyFusionAuthJWT(token);
+
+    let existingUserJWTS:any = JSON.parse(await this.redis.get(claims.sub));
+
+    if(!isValidFusionAuthToken){
+      if(existingUserJWTS.indexOf(token)!=-1){
+        existingUserJWTS.splice(existingUserJWTS.indexOf(token), 1);
+        await this.redis.set(claims.sub, JSON.stringify(existingUserJWTS));
+      }
+      return {
+        "isValid": false,
+        "message": "Invalid/Expired token."
+      }
+    }
+
+    if(existingUserJWTS.indexOf(token)==-1){
+      return {
+        "isValid": false,    
+        "message": "Token is not authorized."
+      }
+    }
+
+    return {
+      "isValid": true,
+      "message": "Token is valid."
+    }
+  }
+
+  async logout(token:string): Promise<any> {
+    const { isValidFusionAuthToken, claims} = await this.verifyFusionAuthJWT(token);
+    if(isValidFusionAuthToken){
+      let existingUserJWTS:any = JSON.parse(await this.redis.get(claims.sub));
+      if(existingUserJWTS.indexOf(token)!=-1){
+        existingUserJWTS.splice(existingUserJWTS.indexOf(token), 1);
+        await this.redis.set(claims.sub, JSON.stringify(existingUserJWTS));
+      }
+      return {
+        "message": "Logout successful. Token invalidated."
+      }
+    } else {
+      return {
+        "message": "Invalid or expired token."
+      }
+    }
+  }
+
 }
