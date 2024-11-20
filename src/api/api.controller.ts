@@ -35,6 +35,7 @@ import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { Throttle, SkipThrottle} from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { VerifyJWTDto } from './dto/verify-jwt.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -380,5 +381,21 @@ export class ApiController {
       return response;
     }
     return await this.apiService.loginWithUniqueId(user, authHeader);
+  }
+  
+  @Post('jwt/verify')
+  @UsePipes(new ValidationPipe({transform: true}))
+  async jwtVerify(
+    @Body() body: VerifyJWTDto
+  ): Promise<any> {
+    return await this.apiService.verifyJWT(body.token);
+  }
+
+  @Post('logout')
+  @UsePipes(new ValidationPipe({transform: true}))
+  async logout(
+    @Body() body: VerifyJWTDto
+  ): Promise<any> {
+    return await this.apiService.logout(body.token);
   }
 }
