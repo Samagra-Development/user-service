@@ -776,9 +776,12 @@ export class ApiService {
 
   async verifyJWT(token:string): Promise<any> {
     const { isValidFusionAuthToken, claims} = await this.verifyFusionAuthJWT(token);
+    let existingUserJWTS:any="[]"
 
-    let existingUserJWTS:any = JSON.parse(await this.redis.get(claims.sub));
-
+    if(claims?.sub) {
+      existingUserJWTS = JSON.parse(await this.redis.get(claims.sub));
+    }
+    
     if(!isValidFusionAuthToken){
       if(existingUserJWTS.indexOf(token)!=-1){
         existingUserJWTS.splice(existingUserJWTS.indexOf(token), 1);
