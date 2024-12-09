@@ -35,6 +35,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 const jwksClient = require('jwks-rsa');
 import * as jwt from 'jsonwebtoken';
+import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.service';
 
 CryptoJS.lib.WordArray.words;
 
@@ -49,7 +50,8 @@ export class ApiService {
     private readonly fusionAuthService: FusionauthService,
     private readonly otpService: OtpService,
     private readonly configResolverService: ConfigResolverService,
-    @InjectRedis() private readonly redis: Redis
+    @InjectRedis() private readonly redis: Redis,
+    private readonly gupshupWhatsappService: GupshupWhatsappService
   ) {
      this.client = jwksClient({
       jwksUri: this.configService.get("JWKS_URI"),
@@ -561,6 +563,7 @@ export class ApiService {
         4. Send login response with the token
      */
     let otp = loginDto.password;
+    let phone = loginDto.loginId;
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
     let verifyOTPResult;
     if(
@@ -572,8 +575,16 @@ export class ApiService {
         verifyOTPResult = {status: SMSResponseStatus.success}
         else
         verifyOTPResult = {status: SMSResponseStatus.failure}
-      }
-      else { 
+      } else if (phone.includes('-')) {
+        const [countryCode, number] = phone.split('-');
+        loginDto.loginId = number;
+        const status: any = await this.gupshupWhatsappService.verifyWhatsappOTP(loginDto.loginId, loginDto.password);
+        if(status.status == 'success') {
+          verifyOTPResult = {status: SMSResponseStatus.success}
+        } else {
+          verifyOTPResult = {status: SMSResponseStatus.failure}
+        }
+      } else { 
         verifyOTPResult = await this.otpService.verifyOTP({
           phone: loginDto.loginId,
           otp: loginDto.password, // existing OTP
