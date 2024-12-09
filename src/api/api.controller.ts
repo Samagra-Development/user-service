@@ -39,6 +39,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { VerifyJWTDto } from './dto/verify-jwt.dto';
 import { Request } from 'express';
+import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -53,6 +54,7 @@ export class ApiController {
     private readonly otpService: OtpService,
     private readonly apiService: ApiService,
     private readonly configResolverService: ConfigResolverService,
+    private readonly gupshupWhatsappService: GupshupWhatsappService
   ) {}
 
   @Get()
@@ -91,8 +93,21 @@ export class ApiController {
         );
       }
     }
-    const status: SMSResponse = await this.otpService.sendOTP(params.phone);
-    return { status };
+     // Check if phone number contains country code (e.g. 91-1234567890)
+     if (params.phone.includes('-')) {
+      const [countryCode, number] = params.phone.split('-');
+      params.phone = number;
+      const status: any = await this.gupshupWhatsappService.sendWhatsappOTP({
+        phone: number,
+        template: null,
+        type: null,
+        params: null
+      });
+      return { status };
+    } else {
+      const status: any = await this.otpService.sendOTP(params.phone);
+      return { status };
+    }
   }
 
   @Get('verifyOTP')
