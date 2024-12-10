@@ -13,6 +13,7 @@ import got from 'got/dist/source';
 import { CdacService } from './sms/cdac/cdac.service';
 import { RajaiOtpService } from '../user/sms/rajaiOtpService/rajaiOtpService.service';
 import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.service';
+import { TelemetryService } from 'src/telemetry/telemetry.service';
 
 const otpServiceFactory = {
   provide: OtpService,
@@ -69,7 +70,8 @@ const otpServiceFactory = {
     otpServiceFactory,
     QueryGeneratorService,
     ConfigResolverService,
-    GupshupWhatsappService
+    GupshupWhatsappService,
+    TelemetryService
   ],
 })
 export class ApiModule {

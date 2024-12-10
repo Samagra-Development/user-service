@@ -40,6 +40,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { VerifyJWTDto } from './dto/verify-jwt.dto';
 import { Request } from 'express';
 import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.service';
+import { TelemetryService } from 'src/telemetry/telemetry.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
 
@@ -54,7 +55,8 @@ export class ApiController {
     private readonly otpService: OtpService,
     private readonly apiService: ApiService,
     private readonly configResolverService: ConfigResolverService,
-    private readonly gupshupWhatsappService: GupshupWhatsappService
+    private readonly gupshupWhatsappService: GupshupWhatsappService,
+    private readonly telemetryService: TelemetryService
   ) {}
 
   @Get()
@@ -72,6 +74,7 @@ export class ApiController {
     @Query() params: SendOtpDto,
     @Headers('x-application-id') applicationId?,
   ): Promise<any> {
+    let startTime = Date.now();
     if (applicationId) {
       const { total }: { total: number; users: Array<User> } =
         await this.fusionAuthService.getUsersByString(
@@ -93,21 +96,39 @@ export class ApiController {
         );
       }
     }
+
+    let status: any, isWhatsApp = false;
      // Check if phone number contains country code (e.g. 91-1234567890)
      if (params.phone.includes('-')) {
+      isWhatsApp = true;
       const [countryCode, number] = params.phone.split('-');
       params.phone = number;
-      const status: any = await this.gupshupWhatsappService.sendWhatsappOTP({
+      status = await this.gupshupWhatsappService.sendWhatsappOTP({
         phone: number,
         template: null,
         type: null,
         params: null
       });
-      return { status };
     } else {
-      const status: any = await this.otpService.sendOTP(params.phone);
-      return { status };
+      status = await this.otpService.sendOTP(params.phone);
     }
+
+    if(this.configService.get('TELEMETRY_INTERNAL_BASE_URL')) {
+      this.telemetryService.sendEvent(
+        {
+          botId: params.botId,
+          orgId: params.orgId,
+          timeTaken: Date.now() - startTime,  
+          createdAt: Math.floor(new Date().getTime() / 1000),
+          phoneNumber: params.phone
+        },
+        'E117',
+        'Send OTP',
+        'sendOTP',
+        isWhatsApp ? 'Whatsapp' : 'PWA'
+      )
+    }
+    return { status };
   }
 
   @Get('verifyOTP')
