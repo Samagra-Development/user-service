@@ -11,4 +11,12 @@ export class SendOtpDto {
   @IsString()
   @IsOptional()
   errorMessage?: string;
+
+  @IsString()
+  @IsOptional()
+  botId?: string;
+
+  @IsString()
+  @IsOptional()
+  orgId?: string;
 }
