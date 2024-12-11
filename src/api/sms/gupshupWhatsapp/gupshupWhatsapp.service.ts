@@ -2,7 +2,7 @@ import { SMSData, SMSProvider, SMSResponse, SMSResponseStatus } from "../sms.int
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { Injectable } from "@nestjs/common";
-
+import axios from 'axios';
 
 @Injectable()
 export class GupshupWhatsappService {
@@ -41,8 +41,7 @@ export class GupshupWhatsappService {
 
             let optinURL = process.env.GUPSHUP_WHATSAPP_BASEURL + '?' + optInParams.toString();
 
-            await fetch(optinURL, {
-                method: 'GET',
+            await axios.get(optinURL, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -65,8 +64,7 @@ export class GupshupWhatsappService {
 
             let sendOtpURL = process.env.GUPSHUP_WHATSAPP_BASEURL + '?' + sendOtpParams.toString();
 
-            const response = await fetch(sendOtpURL, {
-                method: 'GET',
+            const response = await axios.get(sendOtpURL, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -76,7 +74,7 @@ export class GupshupWhatsappService {
                 // Store OTP in Redis with 30 minute expiry
                 await this.redis.set(`whatsapp_otp:${smsData.phone}`, otp.toString(), 'EX', 1800);
                 
-                status.providerSuccessResponse = await response.text();
+                status.providerSuccessResponse = JSON.stringify(response.data);
                 status.status = SMSResponseStatus.success;
                 status.messageID = otp.toString();
             }
@@ -107,7 +105,6 @@ export class GupshupWhatsappService {
         try {
             // Get stored OTP from Redis
             const storedOTP = await this.redis.get(`whatsapp_otp:${phone}`);
-            console.log("storedOTP",storedOTP)
 
             if (!storedOTP) {
                 status.error = {
