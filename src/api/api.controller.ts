@@ -14,6 +14,8 @@ import {
   ValidationPipe,
   All,
   Req,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   SignupResponse,
@@ -43,6 +45,8 @@ import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.se
 import { TelemetryService } from 'src/telemetry/telemetry.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CryptoJS = require('crypto-js');
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
 CryptoJS.lib.WordArray.words;
 
@@ -56,7 +60,8 @@ export class ApiController {
     private readonly apiService: ApiService,
     private readonly configResolverService: ConfigResolverService,
     private readonly gupshupWhatsappService: GupshupWhatsappService,
-    private readonly telemetryService: TelemetryService
+    private readonly telemetryService: TelemetryService,
+    @InjectRedis() private readonly redis: Redis
   ) {}
 
   @Get()
@@ -436,6 +441,122 @@ export class ApiController {
     @Body() body: VerifyJWTDto
   ): Promise<any> {
     return await this.apiService.logout(body.token);
+  }
+
+  @Get('user/search')
+  async searchUserFA(
+    @Headers('Authorization') authorization: string,
+    @Headers('X-FusionAuth-Application-Id') appId: string,
+    @Query() query: any,
+    @Param() params: any,
+  ) {
+    if (!authorization || !appId) {
+      throw new HttpException(
+        'Authorization and X-FusionAuth-Application-Id headers are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const fusionAuthBaseUrl = this.configService.get('FUSIONAUTH_BASE_URL');
+    const url = new URL(`${fusionAuthBaseUrl}/api/user/search`);
+    // Add query params to URL
+    if (query) {
+      Object.keys(query).forEach(key => {
+        url.searchParams.append(key, query[key]);
+      });
+    }
+
+    // Add params to URL
+    if (params) {
+      Object.keys(params).forEach(key => {
+        url.searchParams.append(key, params[key]);
+      });
+    }
+
+    const cacheKey = `search_${url}`;
+    const cachedData = await this.redis.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+
+    const searchData = await this.searchUserData(url, authorization, appId);
+
+    await this.redis.set(cacheKey, JSON.stringify(searchData));
+    return searchData;
+  }
+
+  @Get('user/:id')
+  async getUserById(
+    @Param('id') id: string,
+    @Headers('Authorization') authorization: string,
+    @Headers('X-FusionAuth-Application-Id') appId: string,
+  ) {
+    if (!authorization || !appId) {
+      throw new HttpException(
+        'Authorization and X-FusionAuth-Application-Id headers are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const cacheKey = `user_${id}`;
+    const cachedData = await this.redis.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+
+    const userData = await this.fetchUserDataFromService(id, authorization, appId);
+
+    await this.redis.set(cacheKey, JSON.stringify(userData));
+    return userData;
+  }
+
+  private async fetchUserDataFromService(id: string, authorization: string, appId: string) {
+    try {
+      const fusionAuthBaseUrl = this.configService.get('FUSIONAUTH_BASE_URL');
+      const url = new URL(`${fusionAuthBaseUrl}/api/user/${id}`);
+      const response = await fetch(
+        url,
+        {
+          method: "GET",
+          headers: {
+            Authorization: authorization,
+            'Content-Type': 'application/json',
+            'X-FusionAuth-Application-Id': appId,
+          },
+        },
+      );
+      return response.json();
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch user data: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  private async searchUserData(
+    url: URL,
+    authorization: string,
+    appId: string,
+  ) {
+    try {
+      const response = await fetch(
+        url,
+        {
+          headers: {
+            Authorization: authorization,
+            'Content-Type': 'application/json',
+            'X-FusionAuth-Application-Id': appId,
+          }
+        },
+      );
+      return response.json();
+    } catch (error) {
+      throw new HttpException(
+        `Failed to search user data: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @All('*')
