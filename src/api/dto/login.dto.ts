@@ -1,5 +1,5 @@
 import {
-  IsNotEmpty, IsString, IsUUID, MaxLength,
+  IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength,
 } from 'class-validator';
 
 export class LoginDto {
@@ -16,6 +16,10 @@ export class LoginDto {
   @IsUUID()
   @IsNotEmpty()
   applicationId: string;
+
+  @IsString()
+  @IsOptional()
+  deliveryType?: string;
 }
 
 
