@@ -12,7 +12,7 @@ export class GupshupWhatsappService {
     ) {
     }
 
-    async sendWhatsappOTP(smsData: SMSData): Promise<SMSResponse> {
+    async sendWhatsappOTP(smsData: SMSData, countryCode: string): Promise<SMSResponse> {
         const status: SMSResponse = {
             providerResponseCode: null,
             status: SMSResponseStatus.failure,
@@ -26,7 +26,6 @@ export class GupshupWhatsappService {
 
         // Generate 4 digit OTP
         const otp = Math.floor(1000 + Math.random() * 9000);
-
         try {
             // First opt-in the user
             const optInParams = new URLSearchParams();
@@ -34,7 +33,7 @@ export class GupshupWhatsappService {
             optInParams.append("format", "text");
             optInParams.append("userid", process.env.GUPSHUP_WHATSAPP_USERID);
             optInParams.append("password", process.env.GUPSHUP_WHATSAPP_PASSWORD);
-            optInParams.append("phone_number", `91${smsData.phone}`);
+            optInParams.append("phone_number", `${countryCode}${smsData.phone}`);
             optInParams.append("v", "1.1");
             optInParams.append("auth_scheme", "plain");
             optInParams.append("channel", "WHATSAPP");
@@ -48,19 +47,19 @@ export class GupshupWhatsappService {
             });
 
             // Then send OTP message
-            const otpMessage = `${otp} is your verification code. For your security, do not share this code.`;
+            const otpMessage = process.env.GUPSHUP_WHATSAPP_OTP_TEMPLATE.replace('%otp%',`${otp}`);
             
             const sendOtpParams = new URLSearchParams();
             sendOtpParams.append("method", "SENDMESSAGE");
             sendOtpParams.append("userid", process.env.GUPSHUP_WHATSAPP_USERID);
             sendOtpParams.append("password", process.env.GUPSHUP_WHATSAPP_PASSWORD);
-            sendOtpParams.append("send_to", smsData.phone);
+            sendOtpParams.append("send_to", `${countryCode}${smsData.phone}`);
             sendOtpParams.append("v", "1.1");
             sendOtpParams.append("format", "json");
             sendOtpParams.append("msg_type", "TEXT");
             sendOtpParams.append("msg", otpMessage);
             sendOtpParams.append("isTemplate", "true");
-            sendOtpParams.append("footer", "This code expires in 30 minute.");
+            sendOtpParams.append("footer", process.env.GUPSHUP_WHATSAPP_OTP_TEMPLATE_FOOTER);
 
             let sendOtpURL = process.env.GUPSHUP_WHATSAPP_BASEURL + '?' + sendOtpParams.toString();
 
@@ -76,7 +75,6 @@ export class GupshupWhatsappService {
                 
                 status.providerSuccessResponse = JSON.stringify(response.data);
                 status.status = SMSResponseStatus.success;
-                status.messageID = otp.toString();
             }
 
             return status;

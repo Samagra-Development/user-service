@@ -120,7 +120,7 @@ export class ApiController {
         template: null,
         type: null,
         params: null
-      });
+      },countryCode);
     } else {
       status = await this.otpService.sendOTP(params.phone);
     }
