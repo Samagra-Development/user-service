@@ -565,6 +565,10 @@ export class ApiService {
     let otp = loginDto.password;
     let phone = loginDto.loginId;
     let countryCode, number;
+    if (phone.includes('-')) {
+      [countryCode, number] = phone.split('-');
+      phone = number;
+    } 
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
     let verifyOTPResult;
     if(
@@ -577,12 +581,7 @@ export class ApiService {
         else
         verifyOTPResult = {status: SMSResponseStatus.failure}
       } else if (loginDto.deliveryType=='WA') {
-        if(phone.includes('-')){
-          [countryCode, number] = phone.split('-');
-        } else {
-          number = phone
-        }
-        loginDto.loginId = number;
+        loginDto.loginId = phone;
         const status: any = await this.gupshupWhatsappService.verifyWhatsappOTP(loginDto.loginId, loginDto.password);
         if(status.status == 'success') {
           verifyOTPResult = {status: SMSResponseStatus.success}

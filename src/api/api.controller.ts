@@ -80,6 +80,15 @@ export class ApiController {
     @Headers('x-application-id') applicationId?,
   ): Promise<any> {
     let startTime = Date.now();
+
+    let status: any, isWhatsApp = false, countryCode, number;
+
+    if (params.phone.includes('-')) {
+      [countryCode, number] = params.phone.split('-');
+      params.phone = number;
+    } else {
+      number = params.phone;
+    }
     if (applicationId) {
       const { total }: { total: number; users: Array<User> } =
         await this.fusionAuthService.getUsersByString(
@@ -102,16 +111,10 @@ export class ApiController {
       }
     }
 
-    let status: any, isWhatsApp = false, countryCode, number;
      // Check if phone number contains country code (e.g. 91-1234567890)
      if (params.deliveryType=='WA') {
       isWhatsApp = true;
-      if (params.phone.includes('-')) {
-        [countryCode, number] = params.phone.split('-');
-      } else {
-        number = params.phone;
-      }
-      params.phone = number;
+      
       status = await this.gupshupWhatsappService.sendWhatsappOTP({
         phone: number,
         template: null,
