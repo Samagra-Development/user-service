@@ -7,4 +7,5 @@ export class LoginDto {
   roles?: Array<string>;
   fingerprint?: string;
   timestamp?: string;
+  deliveryType?: string;
 }

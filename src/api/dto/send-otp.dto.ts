@@ -19,4 +19,8 @@ export class SendOtpDto {
   @IsString()
   @IsOptional()
   orgId?: string;
+
+  @IsString()
+  @IsOptional()
+  deliveryType?: string;
 }

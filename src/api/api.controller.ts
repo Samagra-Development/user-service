@@ -102,11 +102,15 @@ export class ApiController {
       }
     }
 
-    let status: any, isWhatsApp = false;
+    let status: any, isWhatsApp = false, countryCode, number;
      // Check if phone number contains country code (e.g. 91-1234567890)
-     if (params.phone.includes('-')) {
+     if (params.deliveryType=='WA') {
       isWhatsApp = true;
-      const [countryCode, number] = params.phone.split('-');
+      if (params.phone.includes('-')) {
+        [countryCode, number] = params.phone.split('-');
+      } else {
+        number = params.phone;
+      }
       params.phone = number;
       status = await this.gupshupWhatsappService.sendWhatsappOTP({
         phone: number,
@@ -134,6 +138,15 @@ export class ApiController {
       )
     }
     return { status };
+  }
+
+  @Post('login/otp')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async loginWithOtp(
+    @Body() user: LoginDto,
+    @Headers('authorization') authHeader,
+  ): Promise<any> {
+    return await this.apiService.loginWithOtp(user, authHeader);
   }
 
   @Get('verifyOTP')
@@ -398,15 +411,6 @@ export class ApiController {
       applicationId,
       authHeader,
     );
-  }
-
-  @Post('login/otp')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async loginWithOtp(
-    @Body() user: LoginDto,
-    @Headers('authorization') authHeader,
-  ): Promise<any> {
-    return await this.apiService.loginWithOtp(user, authHeader);
   }
 
   @Post('login-with-unique-id')
