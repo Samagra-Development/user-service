@@ -132,7 +132,8 @@ export class ApiController {
           orgId: params.orgId,
           timeTaken: Date.now() - startTime,  
           createdAt: Math.floor(new Date().getTime() / 1000),
-          phoneNumber: params.phone
+          phoneNumber: params.phone,
+          eventLog: `Response from OTP provider - ${status.providerSuccessResponse}`
         },
         'E117',
         'Send OTP',
