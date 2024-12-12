@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import fetch, { Headers } from 'node-fetch';
 
 @Injectable()
 export class TelemetryService {
