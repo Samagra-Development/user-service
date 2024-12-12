@@ -41,7 +41,7 @@ CryptoJS.lib.WordArray.words;
 
 @Injectable()
 export class ApiService {
-  private client: any
+  private client: any;
   private getKey: any;
   encodedBase64Key;
   parsedBase64Key;
@@ -51,10 +51,10 @@ export class ApiService {
     private readonly otpService: OtpService,
     private readonly configResolverService: ConfigResolverService,
     @InjectRedis() private readonly redis: Redis,
-    private readonly gupshupWhatsappService: GupshupWhatsappService
+    private readonly gupshupWhatsappService: GupshupWhatsappService,
   ) {
-     this.client = jwksClient({
-      jwksUri: this.configService.get("JWKS_URI"),
+    this.client = jwksClient({
+      jwksUri: this.configService.get('JWKS_URI'),
       requestHeaders: {}, // Optional
       timeout: 30000, // Defaults to 30s
     });
@@ -123,14 +123,16 @@ export class ApiService {
             user: fusionAuthUser,
           },
         };
-        if(
+        if (
           this.configService.get('USE_FLAGSMITH') === 'true' &&
           this.configService.get('FLAGSMITH_ENVIRONMENT_KEY')
-        ){
-          let flagsmith = new Flagsmith({
-            environmentKey: this.configService.get("FLAGSMITH_ENVIRONMENT_KEY")
+        ) {
+          const flagsmith = new Flagsmith({
+            environmentKey: this.configService.get('FLAGSMITH_ENVIRONMENT_KEY'),
           });
-          await flagsmith.getIdentityFlags(fusionAuthUser.user.username, ['role']);
+          await flagsmith.getIdentityFlags(fusionAuthUser.user.username, [
+            'role',
+          ]);
         }
         return response;
       })
@@ -145,7 +147,8 @@ export class ApiService {
         } else if (errorResponse.statusCode === 409) {
           response.responseCode = ResponseCode.FAILURE;
           response.params.err = 'ACCOUNT_LOCKED';
-          response.params.errMsg = 'Multiple failed login attempts. Please retry again later.';
+          response.params.errMsg =
+            'Multiple failed login attempts. Please retry again later.';
           response.params.status = ResponseStatus.failure;
         } else {
           response.responseCode = ResponseCode.FAILURE;
@@ -304,7 +307,8 @@ export class ApiService {
     userId: string,
     data: User,
     applicationId: string,
-    authHeader?: string,): Promise<any> {
+    authHeader?: string,
+  ): Promise<any> {
     const registrations: Array<FusionAuthUserRegistration> = data?.registrations
       ? data.registrations
       : [];
@@ -324,7 +328,12 @@ export class ApiService {
     // if there are registrations Array, we'll update the registrations too
     for (const registration of registrations) {
       console.log(`Updating registration: ${JSON.stringify(registration)}`);
-      await this.updateUserRegistration(applicationId, authHeader, userId, registration); // calling patch registration API
+      await this.updateUserRegistration(
+        applicationId,
+        authHeader,
+        userId,
+        registration,
+      ); // calling patch registration API
     }
 
     const response: SignupResponse = new SignupResponse().init(uuidv4());
@@ -551,7 +560,10 @@ export class ApiService {
     return response;
   }
 
-  async loginWithOtp(loginDto: LoginDto, authHeader: null | string): Promise<SignupResponse> {
+  async loginWithOtp(
+    loginDto: LoginDto,
+    authHeader: null | string,
+  ): Promise<SignupResponse> {
     /* Execution flow
         1. Check if ALLOW_DEFAULT_OTP is set to true.
         2. If true check if user number is listed in DEFAULT_OTP_USERS, if yes send sucess if OTP matches.
@@ -562,45 +574,64 @@ export class ApiService {
         3.2. If new user, register to this application.
         4. Send login response with the token
      */
-    let otp = loginDto.password;
+    const otp = loginDto.password;
     let phone = loginDto.loginId;
     let countryCode, number;
     if (phone.includes('-')) {
       [countryCode, number] = phone.split('-');
       phone = number;
-    } 
+    }
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
     let verifyOTPResult;
-    if(
-      this.configService.get("ALLOW_DEFAULT_OTP") === 'true' &&
-      this.configService.get("DEFAULT_OTP_USERS")
-    ){
-      if(JSON.parse(this.configService.get("DEFAULT_OTP_USERS")).indexOf(loginDto.loginId)!=-1){
-        if(loginDto.password == this.configService.get("DEFAULT_OTP"))
-        verifyOTPResult = {status: SMSResponseStatus.success}
-        else
-        verifyOTPResult = {status: SMSResponseStatus.failure}
-      } else if (loginDto.deliveryType=='WA') {
-        loginDto.loginId = phone;
-        const status: any = await this.gupshupWhatsappService.verifyWhatsappOTP(loginDto.loginId, loginDto.password);
-        if(status.status == 'success') {
-          verifyOTPResult = {status: SMSResponseStatus.success}
+    if (
+      this.configService.get('ALLOW_DEFAULT_OTP') === 'true' &&
+      this.configService.get('DEFAULT_OTP_USERS')
+    ) {
+      if (
+        JSON.parse(this.configService.get('DEFAULT_OTP_USERS')).indexOf(
+          loginDto.loginId,
+        ) != -1
+      ) {
+        if (loginDto.password == this.configService.get('DEFAULT_OTP'))
+          verifyOTPResult = { status: SMSResponseStatus.success };
+        else verifyOTPResult = { status: SMSResponseStatus.failure };
+      } else if (loginDto.deliveryType == 'WA') {
+        loginDto.loginId = loginDto.loginId;
+        const status: any = await this.gupshupWhatsappService.verifyWhatsappOTP(
+          loginDto.loginId,
+          loginDto.password,
+        );
+        if (status.status == 'success') {
+          verifyOTPResult = { status: SMSResponseStatus.success };
         } else {
-          verifyOTPResult = {status: SMSResponseStatus.failure}
+          verifyOTPResult = { status: SMSResponseStatus.failure };
         }
-      } else { 
+      } else {
         verifyOTPResult = await this.otpService.verifyOTP({
           phone: loginDto.loginId,
           otp: loginDto.password, // existing OTP
         });
       }
-    } else { 
-      verifyOTPResult = await this.otpService.verifyOTP({
-        phone: loginDto.loginId,
-        otp: loginDto.password, // existing OTP
-      });
+    } else {
+      if (loginDto.deliveryType == 'WA') {
+        loginDto.loginId = loginDto.loginId;
+        const status: any = await this.gupshupWhatsappService.verifyWhatsappOTP(
+          loginDto.loginId,
+          loginDto.password,
+        );
+        if (status.status == 'success') {
+          verifyOTPResult = { status: SMSResponseStatus.success };
+        } else {
+          verifyOTPResult = { status: SMSResponseStatus.failure };
+        }
+      } else {
+        verifyOTPResult = await this.otpService.verifyOTP({
+          phone: loginDto.loginId,
+          otp: loginDto.password, // existing OTP
+        });
+      }
     }
-    loginDto.password = salt + loginDto.password;  // mix OTP with salt
+    loginDto.password = salt + loginDto.password; // mix OTP with salt
 
     if (verifyOTPResult.status === SMSResponseStatus.success) {
       let response;
@@ -615,7 +646,8 @@ export class ApiService {
           authHeader,
         );
       if (statusFA === FAStatus.USER_EXISTS) {
-        let registrationId = null, registeredRoles = [];
+        let registrationId = null,
+          registeredRoles = [];
         if (user.registrations) {
           user.registrations.map((item) => {
             if (item.applicationId == loginDto.applicationId) {
@@ -641,8 +673,8 @@ export class ApiService {
               loginId: loginDto.loginId,
               fingerprint: loginDto?.fingerprint,
               timestamp: loginDto?.timestamp,
-              otp
-            }
+              otp,
+            },
           },
           loginDto.applicationId,
           authHeader,
@@ -652,7 +684,7 @@ export class ApiService {
         // create a new user
         const createUserPayload: UserRegistration = {
           user: {
-            timezone: "Asia/Kolkata",
+            timezone: 'Asia/Kolkata',
             username: loginDto.loginId,
             mobilePhone: loginDto.loginId,
             password: loginDto.password,
@@ -660,17 +692,15 @@ export class ApiService {
               loginId: loginDto.loginId,
               fingerprint: loginDto?.fingerprint,
               timestamp: loginDto?.timestamp,
-              otp
-            }
+              otp,
+            },
           },
           registration: {
             applicationId: loginDto.applicationId,
-            preferredLanguages: [
-              "en"
-            ],
-            roles: loginDto.roles ?? [],  // pass from request body if present, else empty list
-          }
-        }
+            preferredLanguages: ['en'],
+            roles: loginDto.roles ?? [], // pass from request body if present, else empty list
+          },
+        };
         const { userId, user, err }: { userId: UUID; user: User; err: Error } =
           await this.fusionAuthService.createAndRegisterUser(
             createUserPayload,
@@ -682,14 +712,19 @@ export class ApiService {
         }
         response = await this.login(loginDto, authHeader);
       }
-      let existingJWTS:any = await this.redis.get(response?.result?.data?.user?.user?.id);
-      if(existingJWTS) {
+      let existingJWTS: any = await this.redis.get(
+        response?.result?.data?.user?.user?.id,
+      );
+      if (existingJWTS) {
         existingJWTS = JSON.parse(existingJWTS);
       } else {
-        existingJWTS = []
+        existingJWTS = [];
       }
       existingJWTS.push(response?.result?.data?.user?.token);
-      await this.redis.set(response?.result?.data?.user?.user?.id, JSON.stringify(existingJWTS));
+      await this.redis.set(
+        response?.result?.data?.user?.user?.id,
+        JSON.stringify(existingJWTS),
+      );
       return response;
     } else {
       const response: SignupResponse = new SignupResponse().init(uuidv4());
@@ -701,7 +736,10 @@ export class ApiService {
     }
   }
 
-  async loginWithUniqueId(loginDto: LoginWithUniqueIdDto, authHeader: null | string): Promise<SignupResponse> {
+  async loginWithUniqueId(
+    loginDto: LoginWithUniqueIdDto,
+    authHeader: null | string,
+  ): Promise<SignupResponse> {
     /* Execution flow
         1. Check if user exists for the given applicationId and loginId.
         3.1. If existing user, login user with default password.
@@ -709,35 +747,31 @@ export class ApiService {
         4. Send login response with the token
      */
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
-    let password = salt + this.configService.get("DEFAULT_USER_PASSWORD");  // mix OTP with salt
-    console.log(password)
+    const password = salt + this.configService.get('DEFAULT_USER_PASSWORD'); // mix OTP with salt
+    console.log(password);
 
-    const {
-      statusFA
-    }: { statusFA: FAStatus} =
+    const { statusFA }: { statusFA: FAStatus } =
       await this.fusionAuthService.getUser(
         loginDto.loginId,
         loginDto.applicationId,
         authHeader,
       );
     if (statusFA === FAStatus.USER_EXISTS) {
-      return this.login({...loginDto,password}, authHeader);
+      return this.login({ ...loginDto, password }, authHeader);
     } else {
       // create a new user
       const createUserPayload: UserRegistration = {
         user: {
-          timezone: "Asia/Kolkata",
+          timezone: 'Asia/Kolkata',
           username: loginDto.loginId,
-          password: password
+          password: password,
         },
         registration: {
           applicationId: loginDto.applicationId,
-          preferredLanguages: [
-            "en"
-          ],
+          preferredLanguages: ['en'],
           roles: [],
-        }
-      }
+        },
+      };
       const { userId, user, err }: { userId: UUID; user: User; err: Error } =
         await this.fusionAuthService.createAndRegisterUser(
           createUserPayload,
@@ -747,7 +781,7 @@ export class ApiService {
       if (userId == null || user == null) {
         throw new HttpException(err, HttpStatus.BAD_REQUEST);
       }
-      return this.login({...loginDto,password}, authHeader);
+      return this.login({ ...loginDto, password }, authHeader);
     }
   }
 
@@ -762,7 +796,12 @@ export class ApiService {
       registration,
       err,
     }: { _userId: UUID; registration: FusionAuthUserRegistration; err: Error } =
-      await this.fusionAuthService.updateUserRegistration(applicationId, authHeader, userId, data);
+      await this.fusionAuthService.updateUserRegistration(
+        applicationId,
+        authHeader,
+        userId,
+        data,
+      );
 
     if (_userId == null || registration == null) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
@@ -772,71 +811,76 @@ export class ApiService {
 
   async verifyFusionAuthJWT(token: string): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-     jwt.verify(token, this.getKey, async (err, decoded) => {
-      if (err) {
-        console.error('APP JWT verification error:', err);
-        resolve({
-          isValidFusionAuthToken: false,
-          claims: null
-        })
-      } else {
-        resolve({
-          isValidFusionAuthToken: true,
-          claims: decoded
-        })
-      }
+      jwt.verify(token, this.getKey, async (err, decoded) => {
+        if (err) {
+          console.error('APP JWT verification error:', err);
+          resolve({
+            isValidFusionAuthToken: false,
+            claims: null,
+          });
+        } else {
+          resolve({
+            isValidFusionAuthToken: true,
+            claims: decoded,
+          });
+        }
+      });
     });
-   });
   }
 
-  async verifyJWT(token:string): Promise<any> {
-    const { isValidFusionAuthToken, claims} = await this.verifyFusionAuthJWT(token);
-    let existingUserJWTS:any="[]"
+  async verifyJWT(token: string): Promise<any> {
+    const { isValidFusionAuthToken, claims } = await this.verifyFusionAuthJWT(
+      token,
+    );
+    let existingUserJWTS: any = '[]';
 
-    if(claims?.sub) {
+    if (claims?.sub) {
       existingUserJWTS = JSON.parse(await this.redis.get(claims.sub));
     }
-    
-    if(!isValidFusionAuthToken){
-      if(existingUserJWTS.indexOf(token)!=-1){
+
+    if (!isValidFusionAuthToken) {
+      if (existingUserJWTS.indexOf(token) != -1) {
         existingUserJWTS.splice(existingUserJWTS.indexOf(token), 1);
         await this.redis.set(claims.sub, JSON.stringify(existingUserJWTS));
       }
       return {
-        "isValid": false,
-        "message": "Invalid/Expired token."
-      }
+        isValid: false,
+        message: 'Invalid/Expired token.',
+      };
     }
 
-    if(existingUserJWTS.indexOf(token)==-1){
+    if (existingUserJWTS.indexOf(token) == -1) {
       return {
-        "isValid": false,    
-        "message": "Token is not authorized."
-      }
+        isValid: false,
+        message: 'Token is not authorized.',
+      };
     }
 
     return {
-      "isValid": true,
-      "message": "Token is valid."
-    }
+      isValid: true,
+      message: 'Token is valid.',
+    };
   }
 
-  async logout(token:string): Promise<any> {
-    const { isValidFusionAuthToken, claims} = await this.verifyFusionAuthJWT(token);
-    if(isValidFusionAuthToken){
-      let existingUserJWTS:any = JSON.parse(await this.redis.get(claims.sub));
-      if(existingUserJWTS.indexOf(token)!=-1){
+  async logout(token: string): Promise<any> {
+    const { isValidFusionAuthToken, claims } = await this.verifyFusionAuthJWT(
+      token,
+    );
+    if (isValidFusionAuthToken) {
+      const existingUserJWTS: any = JSON.parse(
+        await this.redis.get(claims.sub),
+      );
+      if (existingUserJWTS.indexOf(token) != -1) {
         existingUserJWTS.splice(existingUserJWTS.indexOf(token), 1);
         await this.redis.set(claims.sub, JSON.stringify(existingUserJWTS));
       }
       return {
-        "message": "Logout successful. Token invalidated."
-      }
+        message: 'Logout successful. Token invalidated.',
+      };
     } else {
       return {
-        "message": "Invalid or expired token."
-      }
+        message: 'Invalid or expired token.',
+      };
     }
   }
-
 }

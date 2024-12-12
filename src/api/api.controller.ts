@@ -22,7 +22,7 @@ import {
   UserRegistration,
   UsersResponse,
   ResponseCode,
-  ResponseStatus
+  ResponseStatus,
 } from './api.interface';
 import { ApiService } from './api.service';
 import { ConfigResolverService } from './config.resolver.service';
@@ -36,7 +36,7 @@ import * as Sentry from '@sentry/node';
 import { LoginDto, LoginWithUniqueIdDto } from './dto/login.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { Throttle, SkipThrottle} from '@nestjs/throttler';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { VerifyJWTDto } from './dto/verify-jwt.dto';
@@ -61,7 +61,7 @@ export class ApiController {
     private readonly configResolverService: ConfigResolverService,
     private readonly gupshupWhatsappService: GupshupWhatsappService,
     private readonly telemetryService: TelemetryService,
-    @InjectRedis() private readonly redis: Redis
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Get()
@@ -79,9 +79,12 @@ export class ApiController {
     @Query() params: SendOtpDto,
     @Headers('x-application-id') applicationId?,
   ): Promise<any> {
-    let startTime = Date.now();
+    const startTime = Date.now();
 
-    let status: any, isWhatsApp = false, countryCode, number;
+    let status: any,
+      isWhatsApp = false,
+      countryCode,
+      number;
 
     if (params.phone.includes('-')) {
       [countryCode, number] = params.phone.split('-');
@@ -111,35 +114,38 @@ export class ApiController {
       }
     }
 
-     // Check if phone number contains country code (e.g. 91-1234567890)
-     if (params.deliveryType=='WA') {
+    // Check if phone number contains country code (e.g. 91-1234567890)
+    if (params.deliveryType == 'WA') {
       isWhatsApp = true;
-      
-      status = await this.gupshupWhatsappService.sendWhatsappOTP({
-        phone: number,
-        template: null,
-        type: null,
-        params: null
-      },countryCode);
+
+      status = await this.gupshupWhatsappService.sendWhatsappOTP(
+        {
+          phone: number,
+          template: null,
+          type: null,
+          params: null,
+        },
+        countryCode,
+      );
     } else {
       status = await this.otpService.sendOTP(params.phone);
     }
 
-    if(this.configService.get('TELEMETRY_INTERNAL_BASE_URL')) {
+    if (this.configService.get('TELEMETRY_INTERNAL_BASE_URL')) {
       this.telemetryService.sendEvent(
         {
           botId: params.botId,
           orgId: params.orgId,
-          timeTaken: Date.now() - startTime,  
+          timeTaken: Date.now() - startTime,
           createdAt: Math.floor(new Date().getTime() / 1000),
           phoneNumber: params.phone,
-          eventLog: `Response from OTP provider - ${status.providerSuccessResponse}`
+          eventLog: `Response from OTP provider - ${status.providerSuccessResponse}`,
         },
         'E117',
         'Send OTP',
         'sendOTP',
-        isWhatsApp ? 'Whatsapp' : 'PWA'
-      )
+        isWhatsApp ? 'Whatsapp' : 'PWA',
+      );
     }
     return { status };
   }
@@ -422,9 +428,9 @@ export class ApiController {
   async loginWithUniqueId(
     @Body() user: LoginWithUniqueIdDto,
     @Headers('authorization') authHeader,
-    @Headers('ADMIN-API-KEY') adminApiKey
+    @Headers('ADMIN-API-KEY') adminApiKey,
   ): Promise<any> {
-    if(adminApiKey!=this.configService.get('ADMIN_API_KEY')){
+    if (adminApiKey != this.configService.get('ADMIN_API_KEY')) {
       const response: SignupResponse = new SignupResponse().init(uuidv4());
       response.responseCode = ResponseCode.FAILURE;
       response.params.err = 'UNAUTHORIZED';
@@ -434,20 +440,16 @@ export class ApiController {
     }
     return await this.apiService.loginWithUniqueId(user, authHeader);
   }
-  
+
   @Post('jwt/verify')
-  @UsePipes(new ValidationPipe({transform: true}))
-  async jwtVerify(
-    @Body() body: VerifyJWTDto
-  ): Promise<any> {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async jwtVerify(@Body() body: VerifyJWTDto): Promise<any> {
     return await this.apiService.verifyJWT(body.token);
   }
 
   @Post('logout')
-  @UsePipes(new ValidationPipe({transform: true}))
-  async logout(
-    @Body() body: VerifyJWTDto
-  ): Promise<any> {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async logout(@Body() body: VerifyJWTDto): Promise<any> {
     return await this.apiService.logout(body.token);
   }
 
@@ -469,14 +471,14 @@ export class ApiController {
     const url = new URL(`${fusionAuthBaseUrl}/api/user/search`);
     // Add query params to URL
     if (query) {
-      Object.keys(query).forEach(key => {
+      Object.keys(query).forEach((key) => {
         url.searchParams.append(key, query[key]);
       });
     }
 
     // Add params to URL
     if (params) {
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         url.searchParams.append(key, params[key]);
       });
     }
@@ -512,27 +514,32 @@ export class ApiController {
       return JSON.parse(cachedData);
     }
 
-    const userData = await this.fetchUserDataFromService(id, authorization, appId);
+    const userData = await this.fetchUserDataFromService(
+      id,
+      authorization,
+      appId,
+    );
 
     await this.redis.set(cacheKey, JSON.stringify(userData));
     return userData;
   }
 
-  private async fetchUserDataFromService(id: string, authorization: string, appId: string) {
+  private async fetchUserDataFromService(
+    id: string,
+    authorization: string,
+    appId: string,
+  ) {
     try {
       const fusionAuthBaseUrl = this.configService.get('FUSIONAUTH_BASE_URL');
       const url = new URL(`${fusionAuthBaseUrl}/api/user/${id}`);
-      const response = await fetch(
-        url,
-        {
-          method: "GET",
-          headers: {
-            Authorization: authorization,
-            'Content-Type': 'application/json',
-            'X-FusionAuth-Application-Id': appId,
-          },
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: authorization,
+          'Content-Type': 'application/json',
+          'X-FusionAuth-Application-Id': appId,
         },
-      );
+      });
       return response.json();
     } catch (error) {
       throw new HttpException(
@@ -542,22 +549,15 @@ export class ApiController {
     }
   }
 
-  private async searchUserData(
-    url: URL,
-    authorization: string,
-    appId: string,
-  ) {
+  private async searchUserData(url: URL, authorization: string, appId: string) {
     try {
-      const response = await fetch(
-        url,
-        {
-          headers: {
-            Authorization: authorization,
-            'Content-Type': 'application/json',
-            'X-FusionAuth-Application-Id': appId,
-          }
+      const response = await fetch(url, {
+        headers: {
+          Authorization: authorization,
+          'Content-Type': 'application/json',
+          'X-FusionAuth-Application-Id': appId,
         },
-      );
+      });
       return response.json();
     } catch (error) {
       throw new HttpException(
@@ -578,17 +578,17 @@ export class ApiController {
   ): Promise<any> {
     const fusionAuthBaseUrl = this.configService.get('FUSIONAUTH_BASE_URL');
     const url = new URL(`${fusionAuthBaseUrl}${request.url}`);
-    
+
     // Add query params to URL
     if (query) {
-      Object.keys(query).forEach(key => {
+      Object.keys(query).forEach((key) => {
         url.searchParams.append(key, query[key]);
       });
     }
 
     // Add params to URL
     if (params) {
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         url.searchParams.append(key, params[key]);
       });
     }
@@ -597,10 +597,10 @@ export class ApiController {
       method: request.method,
       body: Object.keys(body).length ? JSON.stringify(body) : undefined,
       headers: {
-        'Authorization': authHeader,
+        Authorization: authHeader,
         'x-application-id': applicationId,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     return await response.json();
