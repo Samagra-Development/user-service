@@ -13,6 +13,7 @@ import { UserDBService } from './user/user-db/user-db.service';
 import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { DstModule } from './dst/dst.module';
+import { UCIModule } from './uci/uci.module';
 import { AuthModule } from './auth/auth.module';
 import { ApiModule } from './api/api.module';
 import got from 'got/dist/source';
@@ -54,6 +55,7 @@ const otpServiceFactory = {
     }),
     AdminModule,
     DstModule,
+    UCIModule,
     AuthModule,
     ApiModule,
     TerminusModule,
