@@ -449,7 +449,7 @@ export class ApiController {
           createdAt: Math.floor(new Date().getTime() / 1000),
           userId: response.result.data.user.id,
           eventLog: `Status from Fusionauth - ${response.responseCode}`,
-          fingerPrint: user.loginId
+          fingerprint: user.loginId
         },
         'E119',
         'Guest Login',
