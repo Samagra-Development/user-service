@@ -71,6 +71,12 @@ $ yarn test:cov
 $ yarn run test:watch ./src/user/sms/gupshup/gupshup.service.spec.ts
 ```
 
+## Code Coverage
+
+<!-- coverage-start -->
+Code Coverage: %
+<!-- coverage-end -->
+
 ## Add a sample service (Generic Config)
 ```bash
 # open .env file
