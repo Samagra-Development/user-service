@@ -79,7 +79,7 @@ export class ApiController {
     @Query() params: SendOtpDto,
     @Headers('x-application-id') applicationId?,
   ): Promise<any> {
-    const startTime = Date.now();
+    const startTime = ((performance.timeOrigin + performance.now()) * 1000);
 
     let status: any,
       isWhatsApp = false,
@@ -136,7 +136,7 @@ export class ApiController {
         {
           botId: params.botId,
           orgId: params.orgId,
-          timeTaken: Date.now() - startTime,
+          timeTaken: ((performance.timeOrigin + performance.now()) * 1000) - startTime,
           createdAt: Math.floor(new Date().getTime() / 1000),
           phoneNumber: params.phone,
           eventLog: `Response from OTP provider - ${status.providerSuccessResponse}`,
@@ -430,6 +430,7 @@ export class ApiController {
     @Headers('authorization') authHeader,
     @Headers('ADMIN-API-KEY') adminApiKey,
   ): Promise<any> {
+    const startTime = ((performance.timeOrigin + performance.now()) * 1000);
     if (adminApiKey != this.configService.get('ADMIN_API_KEY')) {
       const response: SignupResponse = new SignupResponse().init(uuidv4());
       response.responseCode = ResponseCode.FAILURE;
@@ -438,7 +439,25 @@ export class ApiController {
       response.params.status = ResponseStatus.failure;
       return response;
     }
-    return await this.apiService.loginWithUniqueId(user, authHeader);
+    let response = await this.apiService.loginWithUniqueId(user, authHeader);
+    if (this.configService.get('TELEMETRY_INTERNAL_BASE_URL')) {
+      this.telemetryService.sendEvent(
+        {
+          botId: user.botId,
+          orgId: null,
+          timeTaken: ((performance.timeOrigin + performance.now()) * 1000) - startTime,
+          createdAt: Math.floor(new Date().getTime() / 1000),
+          userId: response.result.data.user.id,
+          eventLog: `Status from Fusionauth - ${response.responseCode}`,
+          fingerprint: user.loginId
+        },
+        'E119',
+        'Guest Login',
+        'GuestLogin',
+        'PWA'
+      );
+    }
+    return response;
   }
 
   @Post('jwt/verify')

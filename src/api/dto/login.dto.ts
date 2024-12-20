@@ -32,4 +32,8 @@ export class LoginWithUniqueIdDto {
   @IsUUID()
   @IsNotEmpty()
   applicationId: string;
+
+  @IsOptional()
+  @IsUUID()
+  botId: string;
 }
