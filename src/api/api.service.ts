@@ -749,6 +749,7 @@ export class ApiService {
     const salt = this.configResolverService.getSalt(loginDto.applicationId);
     const password = salt + this.configService.get('DEFAULT_USER_PASSWORD'); // mix OTP with salt
     console.log(password);
+    let response;
 
     const { statusFA }: { statusFA: FAStatus } =
       await this.fusionAuthService.getUser(
@@ -757,7 +758,7 @@ export class ApiService {
         authHeader,
       );
     if (statusFA === FAStatus.USER_EXISTS) {
-      return this.login({ ...loginDto, password }, authHeader);
+      response = await this.login({ ...loginDto, password }, authHeader);
     } else {
       // create a new user
       const createUserPayload: UserRegistration = {
@@ -781,8 +782,22 @@ export class ApiService {
       if (userId == null || user == null) {
         throw new HttpException(err, HttpStatus.BAD_REQUEST);
       }
-      return this.login({ ...loginDto, password }, authHeader);
+      response = await this.login({ ...loginDto, password }, authHeader);
     }
+    let existingJWTS: any = await this.redis.get(
+      response?.result?.data?.user?.user?.id,
+    );
+    if (existingJWTS) {
+      existingJWTS = JSON.parse(existingJWTS);
+    } else {
+      existingJWTS = [];
+    }
+    existingJWTS.push(response?.result?.data?.user?.token);
+    await this.redis.set(
+      response?.result?.data?.user?.user?.id,
+      JSON.stringify(existingJWTS),
+    );
+    return response;
   }
 
   async updateUserRegistration(
