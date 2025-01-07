@@ -47,6 +47,7 @@ import { TelemetryService } from 'src/telemetry/telemetry.service';
 const CryptoJS = require('crypto-js');
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import fetch from 'node-fetch';
 
 CryptoJS.lib.WordArray.words;
 
