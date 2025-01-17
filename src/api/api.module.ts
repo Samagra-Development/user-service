@@ -14,6 +14,7 @@ import { CdacService } from './sms/cdac/cdac.service';
 import { RajaiOtpService } from '../user/sms/rajaiOtpService/rajaiOtpService.service';
 import { GupshupWhatsappService } from './sms/gupshupWhatsapp/gupshupWhatsapp.service';
 import { TelemetryService } from 'src/telemetry/telemetry.service';
+import { FonadaService } from './sms/fonada/fonada.service';
 
 const otpServiceFactory = {
   provide: OtpService,
@@ -40,7 +41,17 @@ const otpServiceFactory = {
         },
         inject: [],
       }.useFactory(config.get('RAJAI_USERNAME'), config.get('RAJAI_PASSWORD'), config.get('RAJAI_BASEURL'));
-    } 
+    } else if (config.get<string>('SMS_ADAPTER_TYPE') == 'FONADA') {
+      factory = {
+        provide: 'OtpService',
+        useFactory: () => {
+          return new FonadaService(
+            config
+          );
+        },
+        inject: [],
+      }.useFactory();
+    }
     else {
       factory = {
         provide: 'OtpService',
